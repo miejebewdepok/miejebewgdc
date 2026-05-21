@@ -190,7 +190,11 @@ export async function getRequestUser() {
     headers: await headers(),
   });
 
-  const userId = session?.user?.id || "local_single_user";
+  if (!session) {
+    throw new Error("UNAUTHORIZED");
+  }
+
+  const userId = session.user.id;
 
   await ensureWorkspace(userId, session);
   return { userId, session };

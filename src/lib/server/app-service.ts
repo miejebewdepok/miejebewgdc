@@ -305,6 +305,7 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
       stock: product.stock,
       minimumStock: product.minimumStock,
       description: product.description,
+      imageUrl: product.imageUrl,
     })),
     cart: [],
     paymentMethod: (profile.enabledPayments[0] ?? "Tunai") as PaymentMethod,
@@ -350,6 +351,7 @@ export async function createProduct(userId: string, draft: ProductDraft) {
       stock: draft.stock,
       minimumStock: draft.minimumStock,
       description: draft.description,
+      imageUrl: draft.imageUrl || null,
       createdAt: timestamp,
       updatedAt: timestamp,
     })
@@ -364,6 +366,7 @@ export async function createProduct(userId: string, draft: ProductDraft) {
     stock: product.stock,
     minimumStock: product.minimumStock,
     description: product.description,
+    imageUrl: product.imageUrl,
   };
 }
 
@@ -378,6 +381,7 @@ export async function updateProduct(userId: string, productId: string, draft: Pr
       stock: draft.stock,
       minimumStock: draft.minimumStock,
       description: draft.description,
+      imageUrl: draft.imageUrl || null,
       updatedAt: nowIso(),
     })
     .where(and(eq(products.id, productId), eq(products.userId, userId)))
@@ -396,6 +400,7 @@ export async function updateProduct(userId: string, productId: string, draft: Pr
     stock: updated.stock,
     minimumStock: updated.minimumStock,
     description: updated.description,
+    imageUrl: updated.imageUrl,
   };
 }
 
@@ -428,6 +433,7 @@ export async function restockProduct(userId: string, productId: string, quantity
     stock: updated.stock,
     minimumStock: updated.minimumStock,
     description: updated.description,
+    imageUrl: updated.imageUrl,
   };
 }
 

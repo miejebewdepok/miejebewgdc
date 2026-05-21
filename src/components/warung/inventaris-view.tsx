@@ -37,8 +37,8 @@ const emptyDraft: ProductDraft = {
   buyPrice: 0,
   sellPrice: 0,
   stock: 0,
-  minimumStock: 0,
   description: "",
+  imageUrl: "",
 };
 
 function ProductForm({
@@ -136,6 +136,17 @@ function ProductForm({
           value={draft.description}
           onChange={(event) => onChange({ ...draft, description: event.target.value })}
           placeholder="Penempatan rak, paket laris, atau info kasir"
+          className="h-11 rounded-2xl"
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="product-image">URL Foto (Opsional)</Label>
+        <Input
+          id="product-image"
+          value={draft.imageUrl || ""}
+          onChange={(event) => onChange({ ...draft, imageUrl: event.target.value })}
+          placeholder="https://contoh.com/foto.jpg"
           className="h-11 rounded-2xl"
         />
       </div>
@@ -349,6 +360,7 @@ export function InventarisView() {
                               stock: product.stock,
                               minimumStock: product.minimumStock,
                               description: product.description,
+                              imageUrl: product.imageUrl || "",
                             });
                           }}
                         >

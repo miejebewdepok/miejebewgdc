@@ -63,8 +63,13 @@ function ProductCard({
       )}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="flex size-12 items-center justify-center rounded-2xl bg-foreground text-background">
-          <ProductCategoryIcon category={product.category} />
+        <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-foreground text-background">
+          {product.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={product.imageUrl} alt={product.name} className="size-full object-cover" />
+          ) : (
+            <ProductCategoryIcon category={product.category} />
+          )}
         </div>
         <Badge
           className={cn(

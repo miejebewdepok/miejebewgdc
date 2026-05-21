@@ -26,6 +26,7 @@ export const products = pgTable("products", {
   stock: integer("stock").notNull(),
   minimumStock: integer("minimum_stock").notNull(),
   description: text("description").notNull(),
+  imageUrl: text("image_url"),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).notNull(),
 });

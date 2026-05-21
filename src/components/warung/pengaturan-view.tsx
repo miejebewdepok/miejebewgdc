@@ -83,7 +83,8 @@ export function PengaturanView() {
   }
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
+    <div className="relative pb-24">
+      <div className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
       <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -373,6 +374,37 @@ export function PengaturanView() {
           </CardContent>
         </Card>
       </div>
+      </div>
+
+      {hasUnsavedChanges && (
+        <div className="sticky bottom-6 z-50 mx-auto mt-8 flex max-w-3xl items-center justify-between rounded-[24px] border border-primary/30 bg-card/95 p-4 px-6 shadow-[0_30px_60px_-20px_rgba(220,38,38,0.35)] backdrop-blur-md supports-[backdrop-filter]:bg-card/85">
+          <div className="flex flex-col">
+            <p className="font-semibold tracking-tight text-primary">Perubahan belum disimpan!</p>
+            <p className="text-xs text-muted-foreground">Klik simpan agar nama warung diperbarui di semua halaman.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant="ghost"
+              className="rounded-xl hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => setForm(settings)}
+              disabled={isSaving}
+            >
+              Batal
+            </Button>
+            <Button
+              type="button"
+              size="lg"
+              className="rounded-xl shadow-lg"
+              onClick={() => void handleSave()}
+              disabled={isSaving}
+            >
+              <BadgeCheck className="mr-2 size-4" />
+              {isSaving ? "Menyimpan..." : "Simpan Pengaturan"}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

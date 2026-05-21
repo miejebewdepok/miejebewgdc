@@ -15,6 +15,7 @@ export interface Product {
   stock: number;
   minimumStock: number;
   description: string;
+  imageUrl?: string | null;
 }
 
 export interface CartItem {
@@ -87,6 +88,7 @@ export interface ProductDraft {
   stock: number;
   minimumStock: number;
   description: string;
+  imageUrl?: string | null;
 }
 
 export interface DebtDraft {

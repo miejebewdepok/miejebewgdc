@@ -19,8 +19,20 @@ const AUTH_INTENTS = {
 
 type Intent = keyof typeof AUTH_INTENTS;
 
+function getBaseUrl(request: NextRequest) {
+  if (process.env.BETTER_AUTH_URL) {
+    return process.env.BETTER_AUTH_URL;
+  }
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  const protocol = request.headers.get("x-forwarded-proto") ?? "https";
+  if (host) {
+    return `${protocol}://${host}`;
+  }
+  return request.nextUrl.origin;
+}
+
 function redirectToAuth(request: NextRequest, mode: string, error: string) {
-  const url = new URL("/auth", request.url);
+  const url = new URL("/auth", getBaseUrl(request));
   url.searchParams.set("mode", mode);
   url.searchParams.set("error", error);
   return NextResponse.redirect(url, { status: 303 });
@@ -99,7 +111,7 @@ export async function POST(
       );
     }
 
-    const redirectTarget = new URL(authResult?.url ?? callbackURL, request.url);
+    const redirectTarget = new URL(authResult?.url ?? callbackURL, getBaseUrl(request));
     const response = NextResponse.redirect(redirectTarget, { status: 303 });
     appendSetCookieHeaders(authResponse, response);
     return response;

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
@@ -86,18 +87,19 @@ export async function POST(
     return redirectToAuth(request, config.mode, "Lengkapi dulu data akun yang wajib diisi.");
   }
 
-  const authURL = new URL(config.authPath, request.url);
+  const authURL = new URL(config.authPath, getBaseUrl(request));
 
   try {
-    const authResponse = await fetch(authURL, {
+    const authRequest = new Request(authURL, {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        origin: request.nextUrl.origin,
+        origin: getBaseUrl(request),
       },
       body: JSON.stringify(payload),
-      cache: "no-store",
     });
+
+    const authResponse = await auth.handler(authRequest);
 
     const authResult = (await authResponse.json().catch(() => null)) as
       | { message?: string; url?: string | null }

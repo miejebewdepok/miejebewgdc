@@ -85,7 +85,7 @@ export function PengaturanView() {
   return (
     <div className="relative pb-24">
       <div className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
-      <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
+      <Card className="glass-morphism rounded-[32px] overflow-hidden shadow-[0_32px_80px_-40px_rgba(220,38,38,0.25)]">
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -292,7 +292,7 @@ export function PengaturanView() {
       </Card>
 
       <div className="space-y-4">
-        <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
+        <Card className="glass-morphism rounded-[32px] overflow-hidden shadow-[0_32px_80px_-40px_rgba(220,38,38,0.25)]">
           <CardHeader>
             <CardTitle className="font-heading text-2xl">Preview identitas warung</CardTitle>
             <CardDescription>
@@ -354,7 +354,7 @@ export function PengaturanView() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
+        <Card className="glass-morphism rounded-[32px] overflow-hidden shadow-[0_32px_80px_-40px_rgba(220,38,38,0.25)]">
           <CardHeader>
             <CardTitle className="font-heading text-2xl">Acuan bisnis</CardTitle>
             <CardDescription>Contoh kasar valuasi stok aktif untuk kebutuhan diskusi internal.</CardDescription>

@@ -93,8 +93,8 @@ export function AppShell({
   }, [aiOpen]);
 
   return (
-    <div className="h-screen overflow-hidden bg-background">
-      <div className="mx-auto flex h-full w-full max-w-[1600px] gap-3 p-3 lg:gap-4 lg:p-5">
+    <div className="relative h-screen overflow-hidden bg-background">
+      <div className="relative z-10 mx-auto flex h-full w-full max-w-[1600px] gap-3 p-3 lg:gap-4 lg:p-5">
         <aside
           className={cn(
             "glass-panel hidden h-full shrink-0 flex-col overflow-hidden rounded-[32px] border border-border/40 shadow-[0_32px_80px_-40px_rgba(220,38,38,0.25)] transition-all duration-300 ease-out lg:flex",

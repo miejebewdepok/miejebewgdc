@@ -37,6 +37,7 @@ const emptyDraft: ProductDraft = {
   buyPrice: 0,
   sellPrice: 0,
   stock: 0,
+  minimumStock: 0,
   description: "",
   imageUrl: "",
 };
@@ -257,7 +258,7 @@ export function InventarisView() {
         />
       </section>
 
-      <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
+      <Card className="glass-morphism rounded-[32px] overflow-hidden shadow-[0_32px_80px_-40px_rgba(220,38,38,0.25)]">
         <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <CardTitle className="font-heading text-2xl">Inventaris barang jadi</CardTitle>

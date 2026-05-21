@@ -54,7 +54,7 @@ export async function callOpenRouter(input: {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "OPENROUTER_API_KEY belum diatur di environment. Tambahkan key dari https://openrouter.ai untuk mengaktifkan WarungOS AI."
+      "OPENROUTER_API_KEY belum diatur di environment. Tambahkan key dari https://openrouter.ai untuk mengaktifkan MIE JEBEW GDC AI."
     );
   }
 
@@ -64,7 +64,7 @@ export async function callOpenRouter(input: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
       "HTTP-Referer": process.env.OPENROUTER_REFERER ?? "https://warungos.local",
-      "X-Title": "WarungOS",
+      "X-Title": "MIE JEBEW GDC",
     },
     body: JSON.stringify({
       model: input.model ?? DEFAULT_MODEL,

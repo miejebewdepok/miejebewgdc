@@ -78,13 +78,18 @@ export function AppShell({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const { settings, transactions } = useAppState();
+  const { settings } = useAppState();
   const activePage = pageTitles[pathname] ?? pageTitles["/kasir"];
   const [aiOpen, setAiOpen] = useState(false);
   const [leftCollapsed, setLeftCollapsed] = useState(false);
 
   useEffect(() => {
-    if (aiOpen) setLeftCollapsed(true);
+    if (aiOpen) {
+      const timer = setTimeout(() => {
+        setLeftCollapsed(true);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
   }, [aiOpen]);
 
   return (
@@ -92,7 +97,7 @@ export function AppShell({
       <div className="mx-auto flex h-full w-full max-w-[1600px] gap-3 p-3 lg:gap-4 lg:p-5">
         <aside
           className={cn(
-            "glass-panel hidden h-full shrink-0 flex-col overflow-hidden rounded-[30px] border border-border/60 shadow-[0_32px_80px_-50px_rgba(68,39,20,0.65)] transition-[width] duration-200 ease-out lg:flex",
+            "glass-panel hidden h-full shrink-0 flex-col overflow-hidden rounded-[32px] border border-border/40 shadow-[0_32px_80px_-40px_rgba(220,38,38,0.25)] transition-all duration-300 ease-out lg:flex",
             leftCollapsed ? "w-[88px] items-center px-5 py-4" : "w-[292px] p-5",
           )}
         >
@@ -157,11 +162,11 @@ export function AppShell({
                   href={item.href}
                   title={leftCollapsed ? item.label : undefined}
                   className={cn(
-                    "flex items-center gap-3 rounded-2xl text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-2xl text-sm font-medium transition-all duration-200",
                     leftCollapsed ? "size-12 justify-center" : "px-4 py-3",
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-[0_20px_45px_-28px_rgba(186,92,35,0.75)]"
-                      : "text-foreground/70 hover:bg-card/50 hover:text-foreground",
+                      ? "bg-gradient-to-r from-primary to-orange-600 text-white shadow-[0_12px_24px_-10px_rgba(220,38,38,0.6)] scale-[1.02]"
+                      : "text-foreground/70 hover:bg-red-50 hover:text-red-900 dark:hover:bg-red-950/50 dark:hover:text-red-50 active:scale-95",
                   )}
                 >
                   <Icon className={cn("shrink-0", leftCollapsed ? "size-5" : "size-4")} />

@@ -18,9 +18,6 @@ function uid(prefix: string) {
   return `${prefix}_${crypto.randomUUID().slice(0, 8)}`;
 }
 
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
 
 function pickWeighted<T>(items: Array<{ value: T; weight: number }>): T {
   const total = items.reduce((s, i) => s + i.weight, 0);

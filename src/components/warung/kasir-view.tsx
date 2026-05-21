@@ -58,7 +58,7 @@ function ProductCard({
       onClick={onAdd}
       disabled={product.stock <= 0}
       className={cn(
-        "group flex min-h-[164px] flex-col justify-between rounded-[26px] border border-border/65 bg-card/80 p-4 text-left shadow-[0_24px_50px_-36px_rgba(66,38,20,0.48)] transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_26px_60px_-34px_rgba(186,92,35,0.4)] disabled:cursor-not-allowed disabled:opacity-55",
+        "group flex min-h-[164px] flex-col justify-between rounded-[26px] border border-border/65 bg-card/80 p-4 text-left shadow-[0_24px_50px_-36px_rgba(220,38,38,0.15)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_26px_60px_-34px_rgba(220,38,38,0.5)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55 disabled:active:scale-100 disabled:hover:-translate-y-0 disabled:hover:shadow-none",
         lowStock && "border-primary/45 bg-primary/8"
       )}
     >
@@ -223,7 +223,7 @@ export function KasirView() {
       </div>
 
       <div>
-        <Card className="glass-panel sticky top-4 border-border/60 shadow-[0_28px_70px_-48px_rgba(66,38,20,0.6)]">
+        <Card className="glass-panel sticky top-4 border-border/60 shadow-[0_32px_80px_-40px_rgba(220,38,38,0.25)]">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
@@ -306,8 +306,8 @@ export function KasirView() {
                     type="button"
                     variant={paymentMethod === method ? "default" : "outline"}
                     className={cn(
-                      "h-12 rounded-2xl",
-                      paymentMethod === method && "shadow-[0_20px_40px_-22px_rgba(186,92,35,0.75)]"
+                      "h-12 rounded-2xl transition-all duration-200 active:scale-95",
+                      paymentMethod === method && "shadow-[0_20px_40px_-22px_rgba(220,38,38,0.7)]"
                     )}
                     onClick={() => setPaymentMethod(method)}
                   >
@@ -329,7 +329,7 @@ export function KasirView() {
               <Button
                 type="button"
                 size="lg"
-                className="mt-4 h-13 w-full rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90"
+                className="mt-4 h-13 w-full rounded-2xl bg-gradient-to-r from-primary to-orange-600 text-white shadow-[0_12px_24px_-10px_rgba(220,38,38,0.6)] hover:brightness-110 active:scale-95 transition-all duration-200"
                 onClick={() => void handleCheckout()}
               >
                 Selesaikan transaksi

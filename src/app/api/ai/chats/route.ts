@@ -9,7 +9,7 @@ export async function GET() {
   try {
     const { userId } = await getRequestUser();
     const chats = await listChats(userId);
-    return NextResponse.json({ chats });
+    return NextResponse.json({ chats, isAiConfigured: !!process.env.OPENROUTER_API_KEY });
   } catch (error) {
     return handleRouteError(error, "Gagal memuat daftar chat AI.");
   }

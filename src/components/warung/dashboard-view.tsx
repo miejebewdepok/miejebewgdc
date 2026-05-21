@@ -54,7 +54,7 @@ export function DashboardView() {
       </section>
 
       <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-        <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
+        <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(220,38,38,0.25)]">
           <CardHeader>
             <CardTitle className="font-heading text-2xl">Aktivitas terbaru</CardTitle>
             <CardDescription>
@@ -127,7 +127,7 @@ export function DashboardView() {
         </Card>
 
         <div className="space-y-4">
-          <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
+          <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(220,38,38,0.25)]">
             <CardHeader>
               <CardTitle className="font-heading text-2xl">Stok perlu perhatian</CardTitle>
               <CardDescription>
@@ -163,7 +163,7 @@ export function DashboardView() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
+          <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(220,38,38,0.25)]">
             <CardHeader>
               <CardTitle className="font-heading text-2xl">Kasbon terbaru</CardTitle>
               <CardDescription>
@@ -194,7 +194,7 @@ export function DashboardView() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
+          <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(220,38,38,0.25)]">
             <CardContent className="flex items-center justify-between gap-4 p-5">
               <div>
                 <p className="text-sm text-muted-foreground">SKU aktif</p>

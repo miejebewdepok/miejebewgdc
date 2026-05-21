@@ -22,8 +22,8 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Warung OS",
-  description: "Aplikasi kasir tablet-first untuk operasional warung modern.",
+  title: "MIE JEBEW GDC",
+  description: "Aplikasi kasir tablet-first untuk operasional modern.",
 };
 
 export default function RootLayout({

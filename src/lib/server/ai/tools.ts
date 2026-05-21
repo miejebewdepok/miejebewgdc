@@ -681,7 +681,7 @@ export async function buildSystemContext(userId: string): Promise<string> {
   const threshold = profile?.stockAlertThreshold ?? 8;
 
   return [
-    `Anda adalah WarungOS AI, asisten virtual khusus pemilik UMKM Indonesia (warung).`,
+    `Anda adalah MIE JEBEW GDC AI, asisten virtual khusus pemilik UMKM Indonesia (warung).`,
     `Pengguna: ${ownerName}, pemilik "${storeName}" di ${city}.`,
     `Tanggal hari ini: ${today}. Stok minimum default: ${threshold}. Jumlah produk aktif: ${productCount.rows[0]?.c ?? 0}. Kasbon belum lunas: ${debtUnpaid.rows[0]?.c ?? 0}.`,
     `ATURAN:`,

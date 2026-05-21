@@ -54,7 +54,7 @@ export function AuthScreen() {
                   <Store className="size-5" />
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.22em] text-white/70">Warung OS</p>
+                  <p className="text-xs uppercase tracking-[0.22em] text-white/70">MIE JEBEW GDC</p>
                   <p className="mt-1 text-sm text-white/80">Masuk untuk sinkronisasi warung kamu</p>
                 </div>
               </div>

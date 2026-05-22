@@ -93,25 +93,32 @@ export function KasirView() {
       else if (line.spicyLevel === 1) spicyNote = "Sedang";
       else if (line.spicyLevel === 2) spicyNote = "Pedas";
     }
-    
-    let customNote = spicyNote;
+    let notesArr: string[] = [];
+    if (line.size) {
+      notesArr.push(`Ukuran: ${line.size}`);
+    }
+    if (line.filling) {
+      notesArr.push(`Varian Isi: ${line.filling}`);
+    }
+    if (line.spicyLevel !== undefined) {
+      if (['Kebab', 'Lumpia Beef'].includes(line.product.category)) {
+        if (line.spicyLevel === 0) notesArr.push("Tidak Pedas");
+        else if (line.spicyLevel === 2 || line.spicyLevel === 3) notesArr.push("Sedang");
+        else if (line.spicyLevel === 4 || line.spicyLevel === 5) notesArr.push("Pedas");
+      } else {
+        notesArr.push(`Level ${line.spicyLevel}`);
+      }
+    }
     if (line.toppings && line.toppings.length > 0) {
       const counts: Record<string, number> = {};
-      for (const t of line.toppings) {
-        counts[t] = (counts[t] || 0) + 1;
-      }
-      const formattedToppings = Object.entries(counts)
-        .map(([topping, count]) => (count > 1 ? `${topping} (${count}x)` : topping))
-        .join(", ");
-      customNote += ` • Topping: ${formattedToppings}`;
+      line.toppings.forEach(t => counts[t] = (counts[t] || 0) + 1);
+      const toppingStr = Object.entries(counts)
+        .map(([name, count]) => count > 1 ? `${name} (x${count})` : name)
+        .join(', ');
+      notesArr.push(`Top: ${toppingStr}`);
     }
     
-    if (line.filling) {
-      customNote += ` • Varian Isi: ${line.filling}`;
-    }
-    if (line.size) {
-      customNote = `Ukuran: ${line.size} • ` + customNote;
-    }
+    const customNote = notesArr.join('\n');   
     
     return {
       id: line.id,

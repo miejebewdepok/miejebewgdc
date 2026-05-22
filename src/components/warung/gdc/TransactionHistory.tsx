@@ -413,12 +413,15 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                   <tbody>
                     {selectedTx.items.map((item, idx) => {
                       const finalSellPrice = item.sellPrice || item.unitPrice || 0;
+                      const productName = item.productName || item.product?.name || 'Menu';
                       return (
                         <tr key={idx} className="align-top">
                           <td className="py-1">
-                            <span className="block font-bold text-slate-700 break-words whitespace-normal pr-1 leading-tight">
-                              {item.productName || item.product?.name || 'Menu'}
-                            </span>
+                            {productName.split('\n').map((line, idx) => (
+                              <span key={idx} className={idx === 0 ? "block font-bold text-slate-700 break-words whitespace-normal pr-1 leading-tight" : "block text-[8.5px] text-red-600 font-extrabold uppercase tracking-tight mt-0.5"}>
+                                {idx === 0 ? line : `» ${line}`}
+                              </span>
+                            ))}
                             {item.notes && (
                               <span className="block text-[8.5px] text-red-600 font-extrabold uppercase tracking-tight mt-0.5">
                                 » {item.notes}

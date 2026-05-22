@@ -575,15 +575,21 @@ export async function createTransaction(
     const unitPrice = product.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge;
 
     // Construct a beautiful name incorporating spicy level and toppings
-    let suffix = "";
+    const extras: string[] = [];
     if (item.size) {
-      suffix += `Ukuran: ${item.size}`;
+      extras.push(`Ukuran: ${item.size}`);
     }
     if (item.filling) {
-      suffix += (suffix ? " • Varian Isi: " : "Varian Isi: ") + item.filling;
+      extras.push(`Varian Isi: ${item.filling}`);
     }
     if (item.spicyLevel !== undefined) {
-      suffix += (suffix ? ` • Lvl ${item.spicyLevel}` : `Lvl ${item.spicyLevel}`);
+      if (product.category === 'Kebab' || product.category === 'Lumpia Beef') {
+         if (item.spicyLevel === 0) extras.push("Tidak Pedas");
+         else if (item.spicyLevel === 2 || item.spicyLevel === 3) extras.push("Sedang");
+         else if (item.spicyLevel === 4 || item.spicyLevel === 5) extras.push("Pedas");
+      } else {
+         extras.push(`Level ${item.spicyLevel}`);
+      }
     }
     if (item.toppings && item.toppings.length > 0) {
       const counts: Record<string, number> = {};
@@ -591,11 +597,11 @@ export async function createTransaction(
         counts[t] = (counts[t] || 0) + 1;
       }
       const formattedToppings = Object.entries(counts)
-        .map(([topping, count]) => (count > 1 ? `${topping} (${count}x)` : topping))
+        .map(([topping, count]) => (count > 1 ? `${topping} (x${count})` : topping))
         .join(", ");
-      suffix += (suffix ? " • Topping: " : "Topping: ") + formattedToppings;
+      extras.push(`Top: ${formattedToppings}`);
     }
-    const finalName = suffix ? `${product.name} (${suffix})` : product.name;
+    const finalName = extras.length > 0 ? `${product.name}\n${extras.join('\n')}` : product.name;
 
     return {
       product,

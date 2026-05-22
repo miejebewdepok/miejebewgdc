@@ -142,7 +142,9 @@ export default function CheckoutModal({
                 <tr key={idx} className="align-top">
                   <td className="py-1">
                     <span className="block font-bold text-slate-700 break-words whitespace-normal pr-1 leading-tight">{item.product?.name || 'Menu'}</span>
-                    {item.notes && <span className="block text-[8.5px] text-red-600 font-extrabold uppercase tracking-tight mt-0.5">» {item.notes}</span>}
+                    {item.notes && item.notes.split('\n').map((note: string, i: number) => (
+                      <span key={i} className="block text-[8.5px] text-red-600 font-extrabold uppercase tracking-tight mt-0.5">» {note}</span>
+                    ))}
                   </td>
                   <td className="text-center py-1 text-slate-800 font-bold">{item.quantity}</td>
                   <td className="text-right py-1 font-bold text-slate-800">{(item.sellPrice * item.quantity).toLocaleString('id-ID')}</td>

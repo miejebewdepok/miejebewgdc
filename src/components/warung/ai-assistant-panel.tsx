@@ -784,8 +784,8 @@ export function AIAssistantPanel({
                       <AssistantTextBubble
                         text={
                           isOfflineSimMode
-                            ? "Halo Pak/Bu! Saya MIE JEBEW GDC AI (Mode Simulasi Offline). Saya bisa memperagakan cek stok, hitung untung, kasbon, atau saran restok.\n\nCoba tanya dengan menekan tombol cepat di bawah atau ketik kata kunci seperti: 'stok', 'untung', 'kasbon', atau 'rekomendasi'!"
-                            : "Halo Pak/Bu! Saya MIE JEBEW GDC AI. Saya bisa cek stok, hitung untung, kasih saran restok, atau langsung jalankan aksi (catat hutang, restok, catat pengeluaran). Coba tanya: 'untung minggu ini berapa?' atau 'rekomendasi restok untuk untung'."
+                            ? "Halo Bos! 🔥 Saya MIE JEBEW GDC AI (Mode Simulasi Offline). Di mode ini, Anda bisa tes kelancaran respon saya untuk cek stok, hitung untung, kasbon, atau saran restok.\n\nCobain ketik kata kunci di bawah atau masukkan pertanyaan seperti:\n👉 'stok' (Cek sisa stok)\n👉 'untung' (Laba minggu ini)\n👉 'kasbon' (Buku hutang)\n👉 'rekomendasi' (Saran restok cuan)"
+                            : "Halo Bos! 🔥 Saya MIE JEBEW GDC AI, asisten pintar warung Anda yang paling 'jebew'! 😎\n\nSaya siap bantu kelola warung Anda jadi makin sat-set dan gampang. Ini beberapa hal seru yang bisa saya bantu:\n📦 Cek sisa stok bahan & produk\n💰 Pantau laba bersih & profit mingguan\n📝 Catat transaksi kasbon/hutang pelanggan biar gak lupa\n🚀 Beri saran restok paling cuan\n💸 Catat pengeluaran instan lewat chat!\n\nCobain tanya ke saya:\n👉 'Untung minggu ini berapa?'\n👉 'Siapa saja yang belum lunas kasbon?'\n👉 'Saran restok biar makin untung'\n\nYuk, ada yang mau dicek hari ini? 👇"
                         }
                       />
                     </MessageBubble>

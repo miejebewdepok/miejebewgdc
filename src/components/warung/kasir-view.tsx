@@ -733,8 +733,8 @@ export function KasirView() {
                     "Scallop",
                     "Cireng",
                     "Beef Slice",
-                    "Telur",
                     "Keju Slice",
+                    "Telur",
                   ].map((topping) => {
                     const count = selectedToppings.filter((t) => t === topping).length;
                     return (
@@ -749,9 +749,9 @@ export function KasirView() {
                       >
                         <div className="flex flex-col text-left leading-tight min-w-0">
                           <span className="truncate block font-extrabold text-[10px]">{topping}</span>
-                          {["Beef Slice", "Telur", "Keju Slice"].includes(topping) && (
+                          {["Beef Slice", "Keju Slice", "Telur"].includes(topping) && (
                             <span className="text-[8px] font-black text-amber-600 dark:text-amber-500 leading-none mt-0.5">
-                              +Rp {topping === "Beef Slice" ? "2.5k" : topping === "Telur" ? "4k" : "3k"}
+                              +Rp {topping === "Beef Slice" ? "2.5k" : topping === "Keju Slice" ? "3k" : "4k"}
                             </span>
                           )}
                         </div>
@@ -843,8 +843,8 @@ export function KasirView() {
                 </div>
               )}
               {selectedToppings.length > 0 && (() => {
-                const specialToppings = selectedToppings.filter((t) => ["Beef Slice", "Telur", "Keju Slice"].includes(t));
-                const standardToppings = selectedToppings.filter((t) => !["Beef Slice", "Telur", "Keju Slice"].includes(t));
+                const specialToppings = selectedToppings.filter((t) => ["Beef Slice", "Keju Slice", "Telur"].includes(t));
+                const standardToppings = selectedToppings.filter((t) => !["Beef Slice", "Keju Slice", "Telur"].includes(t));
                 const stdCount = standardToppings.length;
                 const stdSurcharge = stdCount === 3 
                   ? 5000 
@@ -884,8 +884,8 @@ export function KasirView() {
                         (customizingProduct.category === 'Lumpia Beef' && ['Beef Patty', 'Chicken Katsu'].includes(selectedFilling) ? 5000 : 0) +
                         (customizingProduct.category === 'Lumpia Beef' && selectedFilling === 'Special' ? 10000 : 0) +
                         (!['Kebab', 'Lumpia Beef', 'Snack'].includes(customizingProduct.category) ? (() => {
-                          const specialToppings = selectedToppings.filter((t) => ["Beef Slice", "Telur", "Keju Slice"].includes(t));
-                          const standardToppings = selectedToppings.filter((t) => !["Beef Slice", "Telur", "Keju Slice"].includes(t));
+                          const specialToppings = selectedToppings.filter((t) => ["Beef Slice", "Keju Slice", "Telur"].includes(t));
+                          const standardToppings = selectedToppings.filter((t) => !["Beef Slice", "Keju Slice", "Telur"].includes(t));
                           const stdCount = standardToppings.length;
                           const stdSurcharge = stdCount === 3 
                             ? 5000 

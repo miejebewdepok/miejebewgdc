@@ -14,13 +14,14 @@ type CartLine = {
   spicyLevel: number;
   toppings: string[];
   filling?: string;
+  size?: string;
 };
 
 type AppStateContextValue = AppState & {
   cartLines: CartLine[];
   cartTotal: number;
   lowStockProducts: Product[];
-  addToCart: (productId: string, spicyLevel?: number, toppings?: string[], filling?: string) => void;
+  addToCart: (productId: string, spicyLevel?: number, toppings?: string[], filling?: string, size?: string) => void;
   updateCartQuantity: (id: string, quantity: number) => void;
   removeFromCart: (id: string) => void;
   setPaymentMethod: (method: PaymentMethod) => void;
@@ -143,6 +144,7 @@ export function AppStateProvider({
     const level = line.spicyLevel ?? 0;
     const toppings = line.toppings ?? [];
     const filling = line.filling;
+    const size = line.size;
     const spicySurcharge = (level === 4 || level === 5) ? 2000 : 0;
     
     // Promo: 3 toppings = 5,000, 7 toppings = 10,000, otherwise 2,000 each
@@ -154,14 +156,23 @@ export function AppStateProvider({
       : toppingsCount * 2000;
 
     let fillingSurcharge = 0;
-    if (filling === 'Beef Patty' || filling === 'Chicken Katsu') fillingSurcharge = 5000;
-    else if (filling === 'Special') fillingSurcharge = 10000;
+    if (product.category === 'Kebab') {
+      if (size === 'REGULER') {
+        if (filling === 'Beef') fillingSurcharge = 2000;
+      } else if (size === 'LARGE') {
+        if (filling === 'Beef Slice' || filling === 'Beef' || filling === 'Chicken Katsu') fillingSurcharge = 5000;
+        else if (filling === 'Special') fillingSurcharge = 10000;
+      }
+    } else {
+      if (filling === 'Beef Patty' || filling === 'Chicken Katsu') fillingSurcharge = 5000;
+      else if (filling === 'Special') fillingSurcharge = 10000;
+    }
 
     const sellPrice = product.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge;
 
     return [
       {
-        id: line.id || `${line.productId}-lvl${level}-${[...toppings].sort().join(",")}${filling ? `-${filling}` : ""}`,
+        id: line.id || `${line.productId}-lvl${level}-${[...toppings].sort().join(",")}${filling ? `-${filling}` : ""}${size ? `-${size}` : ""}`,
         product: {
           ...product,
           sellPrice,
@@ -171,6 +182,7 @@ export function AppStateProvider({
         spicyLevel: level,
         toppings,
         filling,
+        size,
       },
     ];
   });
@@ -181,7 +193,7 @@ export function AppStateProvider({
     (product) => product.stock <= Math.max(product.minimumStock, state.settings.stockAlertThreshold)
   );
 
-  function addToCart(productId: string, spicyLevel: number = 0, toppings: string[] = [], filling?: string) {
+  function addToCart(productId: string, spicyLevel: number = 0, toppings: string[] = [], filling?: string, size?: string) {
     setState((current) => {
       const product = current.products.find((item) => item.id === productId);
       if (!product || product.stock <= 0) {
@@ -190,7 +202,7 @@ export function AppStateProvider({
 
       const level = spicyLevel;
       const sortedToppings = [...toppings].sort();
-      const cartItemId = `${productId}-lvl${level}-${sortedToppings.join(",")}${filling ? `-${filling}` : ""}`;
+      const cartItemId = `${productId}-lvl${level}-${sortedToppings.join(",")}${filling ? `-${filling}` : ""}${size ? `-${size}` : ""}`;
 
       const existing = current.cart.find((item) => item.id === cartItemId);
       const nextCart = existing
@@ -211,6 +223,7 @@ export function AppStateProvider({
               spicyLevel: level,
               toppings: sortedToppings,
               filling,
+              size,
             },
           ];
 

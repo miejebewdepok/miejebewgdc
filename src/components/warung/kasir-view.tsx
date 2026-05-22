@@ -49,6 +49,7 @@ export function KasirView() {
   const [selectedSpicyLevel, setSelectedSpicyLevel] = useState<number>(0);
   const [selectedToppings, setSelectedToppings] = useState<string[]>([]);
   const [isToppingsExpanded, setIsToppingsExpanded] = useState<boolean>(false);
+  const [selectedFilling, setSelectedFilling] = useState<string>("Beef Slice");
 
   // Local categories from localStorage — shared key with Kelola Menu
   const [localCategories] = useState<string[]>(() => {
@@ -104,6 +105,10 @@ export function KasirView() {
       customNote += ` • Topping: ${formattedToppings}`;
     }
     
+    if (line.filling) {
+      customNote += ` • Isian: ${line.filling}`;
+    }
+    
     return {
       id: line.id,
       product: line.product,
@@ -112,7 +117,8 @@ export function KasirView() {
       notes: customNote,
       sellPrice: line.product.sellPrice,
       spicyLevel: line.spicyLevel,
-      toppings: line.toppings
+      toppings: line.toppings,
+      filling: line.filling
     };
   });
 
@@ -222,6 +228,7 @@ export function KasirView() {
                       setSelectedSpicyLevel(0);
                       setSelectedToppings([]);
                       setIsToppingsExpanded(false);
+                      setSelectedFilling("Beef Slice");
                     }}
                   />
                 ))}
@@ -315,6 +322,49 @@ export function KasirView() {
                 })()}
               </div>
             </div>
+
+            {/* Filling Selection (Only for Lumpia Beef) */}
+            {customizingProduct.category === 'Lumpia Beef' && (
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                  Pilihan Isian
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: "Beef Slice", surcharge: 0 },
+                    { label: "Kornet", surcharge: 0 },
+                    { label: "Beef Patty", surcharge: 5000 },
+                    { label: "Chicken Katsu", surcharge: 5000 },
+                    { label: "Special", surcharge: 10000 },
+                  ].map((filling) => {
+                    const isSelected = selectedFilling === filling.label;
+                    return (
+                      <button
+                        key={filling.label}
+                        type="button"
+                        onClick={() => setSelectedFilling(filling.label)}
+                        className={cn(
+                          "py-2.5 px-3 rounded-2xl text-xs font-bold font-sans cursor-pointer transition-all duration-200 flex flex-col items-center justify-center border",
+                          isSelected
+                            ? "bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/35"
+                            : "bg-sidebar-accent/50 dark:bg-white/5 border-sidebar-border dark:border-white/5 text-foreground/80 dark:text-slate-200 hover:bg-sidebar-accent dark:hover:bg-white/10"
+                        )}
+                      >
+                        <span className="text-center leading-tight">{filling.label}</span>
+                        {filling.surcharge > 0 && (
+                          <span className={cn(
+                            "text-[8px] mt-0.5 font-bold",
+                            isSelected ? "text-yellow-300" : "text-yellow-600 dark:text-yellow-400"
+                          )}>
+                            +Rp {(filling.surcharge / 1000)}k
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Toppings Selection Accordion Header */}
             {!['Kebab', 'Lumpia Beef'].includes(customizingProduct.category) && (
@@ -446,6 +496,12 @@ export function KasirView() {
                   <span className="font-mono">+ Rp 2.000</span>
                 </div>
               )}
+              {customizingProduct.category === 'Lumpia Beef' && !['Beef Slice', 'Kornet'].includes(selectedFilling) && (
+                <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
+                  <span>Isian {selectedFilling}</span>
+                  <span className="font-mono">+ Rp {(selectedFilling === 'Special' ? 10000 : 5000).toLocaleString('id-ID')}</span>
+                </div>
+              )}
               {selectedToppings.length > 0 && (
                 <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
                   <span>
@@ -470,6 +526,8 @@ export function KasirView() {
                 <span className="text-red-650 dark:text-red-400 font-mono font-extrabold">
                   Rp {((customizingProduct.sellPrice + 
                         ((!['Kebab', 'Lumpia Beef'].includes(customizingProduct.category) && (selectedSpicyLevel === 4 || selectedSpicyLevel === 5)) ? 2000 : 0) + 
+                        (customizingProduct.category === 'Lumpia Beef' && ['Beef Patty', 'Chicken Katsu'].includes(selectedFilling) ? 5000 : 0) +
+                        (customizingProduct.category === 'Lumpia Beef' && selectedFilling === 'Special' ? 10000 : 0) +
                         (selectedToppings.length === 3 
                           ? 5000 
                           : selectedToppings.length === 7 
@@ -491,7 +549,8 @@ export function KasirView() {
               <button
                 type="button"
                 onClick={() => {
-                  addToCart(customizingProduct.id, selectedSpicyLevel, selectedToppings);
+                  const fillingToPass = customizingProduct.category === 'Lumpia Beef' ? selectedFilling : undefined;
+                  addToCart(customizingProduct.id, selectedSpicyLevel, selectedToppings, fillingToPass);
                   toast.success(`${customizingProduct.name} ditambah.`);
                   setCustomizingProduct(null);
                 }}

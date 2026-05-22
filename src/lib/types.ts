@@ -24,6 +24,7 @@ export interface CartItem {
   quantity: number;
   spicyLevel?: number;
   toppings?: string[];
+  filling?: string;
   product?: Product;
   notes?: string;
   sellPrice?: number;
@@ -37,6 +38,7 @@ export interface TransactionItem {
   costPrice: number;
   spicyLevel?: number;
   toppings?: string[];
+  filling?: string;
   product?: Product;
   notes?: string;
   sellPrice?: number;

@@ -10,9 +10,11 @@ import {
   ExternalLink,
   Mic,
   PackageSearch,
+  Plus,
   RefreshCw,
   Send,
   Sparkles,
+  Trash2,
   TrendingUp,
   Wallet,
   X,
@@ -687,6 +689,39 @@ export function AIAssistantPanel({
     }
   }
 
+  async function handleDeleteChat() {
+    if (isOfflineSimMode) {
+      setMessages([]);
+      toast.success("Riwayat percakapan simulasi dibersihkan!");
+      return;
+    }
+    if (!chat) return;
+
+    const confirmDelete = window.confirm(
+      "Apakah Anda yakin ingin menghapus seluruh riwayat percakapan asisten AI ini secara permanen?"
+    );
+    if (!confirmDelete) return;
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      await api(`/api/ai/chats/${chat.id}`, { method: "DELETE" });
+      toast.success("Riwayat percakapan berhasil dihapus secara permanen!");
+      
+      // Reset state and fetch a fresh chat session
+      setChat(null);
+      setMessages([]);
+      hasBootstrappedRef.current = false;
+      await bootstrap();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Gagal menghapus percakapan.";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   const visibleMessages = messages.filter((m) => m.role !== "system");
 
   return (
@@ -749,12 +784,23 @@ export function AIAssistantPanel({
             <Button
               variant="ghost"
               size="icon-sm"
+              className="text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
+              onClick={handleDeleteChat}
+              disabled={isLoading || isThinking || (!chat && !isOfflineSimMode)}
+              aria-label="Hapus riwayat chat"
+              title="Hapus riwayat chat"
+            >
+              <Trash2 className="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={handleNewChat}
               disabled={isLoading || isThinking}
               aria-label="Mulai chat baru"
               title="Mulai chat baru"
             >
-              <ArrowRight className="size-4" />
+              <Plus className="size-4" />
             </Button>
             <Button
               variant="ghost"

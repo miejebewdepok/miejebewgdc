@@ -131,3 +131,13 @@ export async function appendMessage(input: {
     createdAt: row.createdAt,
   };
 }
+
+export async function deleteChat(userId: string, chatId: string): Promise<void> {
+  await db
+    .delete(aiMessages)
+    .where(and(eq(aiMessages.chatId, chatId), eq(aiMessages.userId, userId)));
+
+  await db
+    .delete(aiChats)
+    .where(and(eq(aiChats.id, chatId), eq(aiChats.userId, userId)));
+}

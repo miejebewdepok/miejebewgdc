@@ -145,27 +145,33 @@ export function AppStateProvider({
     const toppings = line.toppings ?? [];
     const filling = line.filling;
     const size = line.size;
-    const spicySurcharge = (level === 4 || level === 5) ? 2000 : 0;
+    const isSnack = product.category === 'Snack';
+    
+    const spicySurcharge = isSnack ? 0 : ((level === 4 || level === 5) ? 2000 : 0);
     
     // Promo: 3 toppings = 5,000, 7 toppings = 10,000, otherwise 2,000 each
     const toppingsCount = toppings.length;
-    const toppingsSurcharge = toppingsCount === 3 
-      ? 5000 
-      : toppingsCount === 7 
-      ? 10000 
-      : toppingsCount * 2000;
+    const toppingsSurcharge = isSnack 
+      ? 0 
+      : (toppingsCount === 3 
+        ? 5000 
+        : toppingsCount === 7 
+        ? 10000 
+        : toppingsCount * 2000);
 
     let fillingSurcharge = 0;
-    if (product.category === 'Kebab') {
-      if (size === 'REGULER') {
-        if (filling === 'Beef') fillingSurcharge = 2000;
-      } else if (size === 'LARGE') {
-        if (filling === 'Beef Slice' || filling === 'Beef' || filling === 'Chicken Katsu') fillingSurcharge = 5000;
+    if (!isSnack) {
+      if (product.category === 'Kebab') {
+        if (size === 'REGULER') {
+          if (filling === 'Beef') fillingSurcharge = 2000;
+        } else if (size === 'LARGE') {
+          if (filling === 'Beef Slice' || filling === 'Beef' || filling === 'Chicken Katsu') fillingSurcharge = 5000;
+          else if (filling === 'Special') fillingSurcharge = 10000;
+        }
+      } else {
+        if (filling === 'Beef Patty' || filling === 'Chicken Katsu') fillingSurcharge = 5000;
         else if (filling === 'Special') fillingSurcharge = 10000;
       }
-    } else {
-      if (filling === 'Beef Patty' || filling === 'Chicken Katsu') fillingSurcharge = 5000;
-      else if (filling === 'Special') fillingSurcharge = 10000;
     }
 
     const sellPrice = product.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge;

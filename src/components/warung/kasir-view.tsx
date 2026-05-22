@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
 import { Product, ProductCategory, Transaction } from "@/lib/types";
@@ -32,6 +32,7 @@ export function KasirView() {
     removeFromCart,
     checkout,
     settings,
+    updateSettings,
     saveBill,
     savedBills,
     loadBill,
@@ -55,12 +56,33 @@ export function KasirView() {
   // Reorder mode states
   const [isArrangeMode, setIsArrangeMode] = useState(false);
   const [productOrder, setProductOrder] = useState<string[]>(() => {
+    if (settings?.productOrder && settings.productOrder.length > 0) {
+      return settings.productOrder;
+    }
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("miejebew_product_order_v4");
       return saved ? JSON.parse(saved) : [];
     }
     return [];
   });
+
+  // Sync state with settings.productOrder, with localStorage as fallback
+  useEffect(() => {
+    if (settings?.productOrder && settings.productOrder.length > 0) {
+      setProductOrder(settings.productOrder);
+    } else {
+      if (typeof window !== "undefined") {
+        const saved = localStorage.getItem("miejebew_product_order_v4");
+        if (saved) {
+          try {
+            setProductOrder(JSON.parse(saved));
+          } catch (e) {
+            console.error("Failed to parse saved product order", e);
+          }
+        }
+      }
+    }
+  }, [settings?.productOrder]);
   
   // Drag and Drop States for catalog sorting
   const [draggedId, setDraggedId] = useState<string | null>(null);
@@ -153,7 +175,17 @@ export function KasirView() {
     
     setProductOrder(newOverallOrder);
     localStorage.setItem("miejebew_product_order_v4", JSON.stringify(newOverallOrder));
-    toast.success("Posisi menu berhasil diperbarui.");
+    
+    // Sinkronkan ke database untuk sinkronisasi antar perangkat!
+    updateSettings({
+      ...settings,
+      productOrder: newOverallOrder
+    }).then(() => {
+      toast.success("Posisi menu berhasil diperbarui dan disinkronkan.");
+    }).catch(err => {
+      console.error("Gagal menyinkronkan urutan menu ke server:", err);
+      toast.error("Urutan menu disimpan lokal, gagal sinkronisasi ke server.");
+    });
   };
 
   // Drag and Drop Event Handlers

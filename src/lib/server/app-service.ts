@@ -244,6 +244,7 @@ function mapSettings(profile: typeof storeProfiles.$inferSelect): Settings {
     printerName: extra.printerName ?? "",
     printerPaperSize: extra.printerPaperSize ?? "58mm",
     userProfileImage: extra.userProfileImage ?? "",
+    productOrder: extra.productOrder ?? [],
   };
 }
 
@@ -271,6 +272,7 @@ function normalizeSettings(settings: Settings): Settings {
     printerName: settings.printerName ?? "",
     printerPaperSize: settings.printerPaperSize ?? "58mm",
     userProfileImage: settings.userProfileImage ?? "",
+    productOrder: settings.productOrder ?? [],
   };
 
   return {

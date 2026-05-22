@@ -117,6 +117,7 @@ export interface Settings {
   merchantPhone?: string;
   userProfileName?: string;
   userProfileImage?: string;
+  productOrder?: string[];
 }
 
 export interface AppState {

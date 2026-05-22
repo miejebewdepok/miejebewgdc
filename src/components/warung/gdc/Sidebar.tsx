@@ -91,8 +91,8 @@ export default function Sidebar({
       {/* Brand & Cashier Title */}
       <div className="flex flex-col gap-8">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-500/30">
-            <Store className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 border border-sidebar-border/30 dark:border-white/10 bg-white shadow-md shadow-red-500/10">
+            <img src="/logo.png" alt="Mie Jebew Logo" className="w-full h-full object-cover" />
           </div>
           <div>
             <span className="text-[10px] font-extrabold text-sidebar-foreground/60 dark:text-slate-400 block tracking-widest uppercase">RESTO SYSTEM</span>

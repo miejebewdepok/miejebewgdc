@@ -51,7 +51,7 @@ export async function callOpenRouter(input: {
   model?: string;
   temperature?: number;
 }): Promise<OpenRouterResponse> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY?.trim();
   if (!apiKey) {
     throw new Error(
       "OPENROUTER_API_KEY belum diatur di environment. Tambahkan key dari https://openrouter.ai untuk mengaktifkan MIE JEBEW GDC AI."

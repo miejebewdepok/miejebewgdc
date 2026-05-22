@@ -72,8 +72,12 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
   const salesByCategory = useMemo(() => {
     // Seed default categories so they always appear in the report
     const categories: Record<string, number> = {
+      'Mie Pedas': 0,
+      'Lumpia Beef': 0,
+      'Kebab': 0,
       'Qalla Coffe': 0,
-      'Tea Series': 0
+      'Tea Series': 0,
+      'Snack': 0
     };
 
     filteredTransactions.forEach(tx => {
@@ -88,19 +92,16 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       });
     });
 
-    // Convert to array, always include Qalla Coffe and Tea Series even if 0, filter others if 0
+    const alwaysShow = ['Mie Pedas', 'Lumpia Beef', 'Kebab', 'Qalla Coffe', 'Tea Series', 'Snack'];
+
+    // Convert to array, always include standard categories even if 0, filter others if 0
     const result = Object.entries(categories)
       .map(([name, value]) => ({ name, value }))
-      .filter(item => item.value > 0 || ['Qalla Coffe', 'Tea Series'].includes(item.name));
+      .filter(item => item.value > 0 || alwaysShow.includes(item.name));
 
-    // Fallback if no sales yet and empty
+    // Fallback if empty
     if (result.length === 0) {
-      return [
-        { name: 'Mie Pedas', value: 0 },
-        { name: 'Qalla Coffe', value: 0 },
-        { name: 'Tea Series', value: 0 },
-        { name: 'Snack', value: 0 }
-      ];
+      return alwaysShow.map(name => ({ name, value: 0 }));
     }
 
     return result.sort((a, b) => b.value - a.value);

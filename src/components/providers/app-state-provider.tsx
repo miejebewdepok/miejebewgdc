@@ -7,28 +7,34 @@ import { emptyAppState } from "@/lib/empty-state";
 import { AppState, Debt, DebtDraft, PaymentMethod, Product, ProductDraft, Settings, Transaction } from "@/lib/types";
 
 type CartLine = {
+  id: string;
   product: Product;
   quantity: number;
   lineTotal: number;
+  spicyLevel: number;
+  toppings: string[];
 };
 
 type AppStateContextValue = AppState & {
   cartLines: CartLine[];
   cartTotal: number;
   lowStockProducts: Product[];
-  addToCart: (productId: string) => void;
-  updateCartQuantity: (productId: string, quantity: number) => void;
-  removeFromCart: (productId: string) => void;
+  addToCart: (productId: string, spicyLevel?: number, toppings?: string[]) => void;
+  updateCartQuantity: (id: string, quantity: number) => void;
+  removeFromCart: (id: string) => void;
   setPaymentMethod: (method: PaymentMethod) => void;
-  checkout: () => Promise<Transaction | null>;
+  checkout: (customerName?: string) => Promise<Transaction | null>;
   addProduct: (draft: ProductDraft) => Promise<void>;
   updateProduct: (productId: string, draft: ProductDraft) => Promise<void>;
+  deleteProduct: (productId: string) => Promise<void>;
   restockProduct: (productId: string, quantity: number) => Promise<void>;
   addDebt: (draft: DebtDraft) => Promise<void>;
   markDebtPaid: (debtId: string) => Promise<void>;
   sendDebtReminder: (debtId: string) => Promise<Debt | null>;
   updateSettings: (settings: Settings) => Promise<void>;
   resetWorkspace: () => Promise<void>;
+  deleteTransaction: (transactionId: string) => Promise<void>;
+  updateTransaction: (transactionId: string, payload: { paymentMethod?: PaymentMethod; createdAt?: string }) => Promise<void>;
 };
 
 const AppStateContext = createContext<AppStateContextValue | null>(null);
@@ -112,11 +118,31 @@ export function AppStateProvider({
       return [];
     }
 
+    const level = line.spicyLevel ?? 0;
+    const toppings = line.toppings ?? [];
+    const spicySurcharge = (level === 4 || level === 5) ? 2000 : 0;
+    
+    // Promo: 3 toppings = 5,000, 7 toppings = 10,000, otherwise 2,000 each
+    const toppingsCount = toppings.length;
+    const toppingsSurcharge = toppingsCount === 3 
+      ? 5000 
+      : toppingsCount === 7 
+      ? 10000 
+      : toppingsCount * 2000;
+
+    const sellPrice = product.sellPrice + spicySurcharge + toppingsSurcharge;
+
     return [
       {
-        product,
+        id: line.id || `${line.productId}-lvl${level}-${[...toppings].sort().join(",")}`,
+        product: {
+          ...product,
+          sellPrice,
+        },
         quantity: line.quantity,
-        lineTotal: product.sellPrice * line.quantity,
+        lineTotal: sellPrice * line.quantity,
+        spicyLevel: level,
+        toppings,
       },
     ];
   });
@@ -127,24 +153,37 @@ export function AppStateProvider({
     (product) => product.stock <= Math.max(product.minimumStock, state.settings.stockAlertThreshold)
   );
 
-  function addToCart(productId: string) {
+  function addToCart(productId: string, spicyLevel: number = 0, toppings: string[] = []) {
     setState((current) => {
       const product = current.products.find((item) => item.id === productId);
       if (!product || product.stock <= 0) {
         return current;
       }
 
-      const existing = current.cart.find((item) => item.productId === productId);
+      const level = spicyLevel;
+      const sortedToppings = [...toppings].sort();
+      const cartItemId = `${productId}-lvl${level}-${sortedToppings.join(",")}`;
+
+      const existing = current.cart.find((item) => item.id === cartItemId);
       const nextCart = existing
         ? current.cart.map((item) =>
-            item.productId === productId
+            item.id === cartItemId
               ? {
                   ...item,
                   quantity: Math.min(item.quantity + 1, product.stock),
                 }
               : item
           )
-        : [...current.cart, { productId, quantity: 1 }];
+        : [
+            ...current.cart,
+            {
+              id: cartItemId,
+              productId,
+              quantity: 1,
+              spicyLevel: level,
+              toppings: sortedToppings,
+            },
+          ];
 
       return {
         ...current,
@@ -153,9 +192,13 @@ export function AppStateProvider({
     });
   }
 
-  function updateCartQuantity(productId: string, quantity: number) {
+  function updateCartQuantity(id: string, quantity: number) {
     setState((current) => {
-      const product = current.products.find((item) => item.id === productId);
+      const cartItem = current.cart.find((item) => item.id === id);
+      if (!cartItem) {
+        return current;
+      }
+      const product = current.products.find((item) => item.id === cartItem.productId);
       if (!product) {
         return current;
       }
@@ -165,18 +208,18 @@ export function AppStateProvider({
         ...current,
         cart:
           nextQuantity === 0
-            ? current.cart.filter((item) => item.productId !== productId)
+            ? current.cart.filter((item) => item.id !== id)
             : current.cart.map((item) =>
-                item.productId === productId ? { ...item, quantity: nextQuantity } : item
+                item.id === id ? { ...item, quantity: nextQuantity } : item
               ),
       };
     });
   }
 
-  function removeFromCart(productId: string) {
+  function removeFromCart(id: string) {
     setState((current) => ({
       ...current,
-      cart: current.cart.filter((item) => item.productId !== productId),
+      cart: current.cart.filter((item) => item.id !== id),
     }));
   }
 
@@ -187,7 +230,7 @@ export function AppStateProvider({
     }));
   }
 
-  async function checkout() {
+  async function checkout(customerName?: string) {
     if (state.cart.length === 0) {
       return null;
     }
@@ -199,9 +242,12 @@ export function AppStateProvider({
       method: "POST",
       body: JSON.stringify({
         paymentMethod: state.paymentMethod,
+        customerName: customerName || "Umum",
         items: state.cart.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
+          spicyLevel: item.spicyLevel ?? 0,
+          toppings: item.toppings ?? [],
         })),
       }),
     });
@@ -240,6 +286,17 @@ export function AppStateProvider({
       products: current.products.map((product) =>
         product.id === productId ? response.product : product
       ),
+    }));
+  }
+
+  async function deleteProduct(productId: string) {
+    await requestJson(`/api/products/${productId}`, {
+      method: "DELETE",
+    });
+
+    setState((current) => ({
+      ...current,
+      products: current.products.filter((product) => product.id !== productId),
     }));
   }
 
@@ -329,6 +386,32 @@ export function AppStateProvider({
     }));
   }
 
+  async function deleteTransaction(transactionId: string) {
+    const response = await requestJson<{ products: Product[] }>(`/api/transactions/${transactionId}`, {
+      method: "DELETE",
+    });
+
+    setState((current) => ({
+      ...current,
+      transactions: current.transactions.filter((tx) => tx.id !== transactionId),
+      products: response.products,
+    }));
+  }
+
+  async function updateTransaction(transactionId: string, payload: { paymentMethod?: PaymentMethod; createdAt?: string }) {
+    const response = await requestJson<{ transaction: Transaction }>(`/api/transactions/${transactionId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    });
+
+    setState((current) => ({
+      ...current,
+      transactions: current.transactions.map((tx) =>
+        tx.id === transactionId ? { ...tx, ...response.transaction } : tx
+      ),
+    }));
+  }
+
   return (
     <AppStateContext.Provider
       value={{
@@ -343,12 +426,15 @@ export function AppStateProvider({
         checkout,
         addProduct,
         updateProduct,
+        deleteProduct,
         restockProduct,
         addDebt,
         markDebtPaid,
         sendDebtReminder,
         updateSettings,
         resetWorkspace,
+        deleteTransaction,
+        updateTransaction,
       }}
     >
       {children}

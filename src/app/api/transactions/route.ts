@@ -10,7 +10,13 @@ export async function POST(request: NextRequest) {
     const { userId } = await getRequestUser();
     const body = (await request.json()) as {
       paymentMethod: PaymentMethod;
-      items: Array<{ productId: string; quantity: number }>;
+      customerName?: string;
+      items: Array<{
+        productId: string;
+        quantity: number;
+        spicyLevel?: number;
+        toppings?: string[];
+      }>;
     };
     const result = await createTransaction(userId, body);
     return NextResponse.json(result);

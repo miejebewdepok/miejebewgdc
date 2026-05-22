@@ -144,6 +144,9 @@ async function ensureTables() {
     );
 
     CREATE INDEX IF NOT EXISTS ai_messages_chat_idx ON ai_messages(chat_id, created_at);
+
+    ALTER TABLE transactions
+      ADD COLUMN IF NOT EXISTS customer_name text NOT NULL DEFAULT 'Umum';
   `);
 }
 
@@ -201,6 +204,15 @@ export async function getRequestUser() {
 }
 
 function mapSettings(profile: typeof storeProfiles.$inferSelect): Settings {
+  let extra: any = {};
+  try {
+    if (profile.businessNotes && profile.businessNotes.startsWith("{")) {
+      extra = JSON.parse(profile.businessNotes);
+    }
+  } catch (e) {
+    console.error("Failed to parse extra settings from businessNotes", e);
+  }
+
   return {
     storeName: profile.storeName,
     storeTagline: profile.storeTagline,
@@ -211,26 +223,64 @@ function mapSettings(profile: typeof storeProfiles.$inferSelect): Settings {
     businessNotes: profile.businessNotes,
     stockAlertThreshold: profile.stockAlertThreshold,
     enabledPayments: profile.enabledPayments,
+    
+    // GDC-specific mappings
+    merchantName: profile.storeName,
+    merchantAddress: profile.storeAddress,
+    merchantPhone: profile.ownerWhatsapp,
+    userProfileName: profile.ownerName,
+
+    // GDC extra settings from serialized businessNotes JSON
+    taxRate: extra.taxRate ?? 0,
+    enableServiceCharge: extra.enableServiceCharge ?? false,
+    serviceChargeRate: extra.serviceChargeRate ?? 0,
+    qrisName: extra.qrisName ?? "",
+    qrisStaticCodeUrl: extra.qrisStaticCodeUrl ?? "",
+    qrisType: extra.qrisType ?? "static",
+    qrisUploadUrl: extra.qrisUploadUrl ?? "",
+    receiptHeader: extra.receiptHeader ?? "Mie Jebew GDC",
+    receiptFooter: extra.receiptFooter ?? "Terima Kasih Atas Kunjungan Anda",
+    printerConnected: extra.printerConnected ?? false,
+    printerName: extra.printerName ?? "",
+    printerPaperSize: extra.printerPaperSize ?? "58mm",
+    userProfileImage: extra.userProfileImage ?? "",
   };
 }
 
 function normalizeSettings(settings: Settings): Settings {
   const enabledPayments = Array.from(
     new Set(
-      settings.enabledPayments.filter((method): method is PaymentMethod =>
+      (settings.enabledPayments || []).filter((method): method is PaymentMethod =>
         supportedPaymentMethods.includes(method)
       )
     )
   );
 
+  // Serialize GDC extra settings into businessNotes text field!
+  const extra = {
+    taxRate: settings.taxRate ?? 0,
+    enableServiceCharge: settings.enableServiceCharge ?? false,
+    serviceChargeRate: settings.serviceChargeRate ?? 0,
+    qrisName: settings.qrisName ?? "",
+    qrisStaticCodeUrl: settings.qrisStaticCodeUrl ?? "",
+    qrisType: settings.qrisType ?? "static",
+    qrisUploadUrl: settings.qrisUploadUrl ?? "",
+    receiptHeader: settings.receiptHeader ?? "",
+    receiptFooter: settings.receiptFooter ?? "",
+    printerConnected: settings.printerConnected ?? false,
+    printerName: settings.printerName ?? "",
+    printerPaperSize: settings.printerPaperSize ?? "58mm",
+    userProfileImage: settings.userProfileImage ?? "",
+  };
+
   return {
-    storeName: settings.storeName.trim(),
-    storeTagline: settings.storeTagline.trim(),
-    storeAddress: settings.storeAddress.trim(),
-    ownerName: settings.ownerName.trim(),
-    ownerWhatsapp: settings.ownerWhatsapp.trim(),
-    city: settings.city.trim(),
-    businessNotes: settings.businessNotes.trim(),
+    storeName: (settings.storeName || settings.merchantName || "").trim(),
+    storeTagline: (settings.storeTagline || "").trim(),
+    storeAddress: (settings.storeAddress || settings.merchantAddress || "").trim(),
+    ownerName: (settings.ownerName || settings.userProfileName || "").trim(),
+    ownerWhatsapp: (settings.ownerWhatsapp || settings.merchantPhone || "").trim(),
+    city: (settings.city || "Depok").trim(),
+    businessNotes: JSON.stringify(extra),
     stockAlertThreshold: Math.max(1, Math.round(settings.stockAlertThreshold || 0)),
     enabledPayments,
   };
@@ -282,6 +332,11 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
     .where(eq(expenses.userId, userId))
     .orderBy(desc(expenses.createdAt));
 
+  const productCategoryMap = new Map<string, string>();
+  for (const product of productRows) {
+    productCategoryMap.set(product.id, product.category || 'Lainnya');
+  }
+
   const itemsByTransaction = new Map<string, Transaction["items"]>();
   for (const item of itemRows) {
     const existing = itemsByTransaction.get(item.transactionId) ?? [];
@@ -291,6 +346,9 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
       quantity: item.quantity,
       unitPrice: item.unitPrice,
       costPrice: item.costPrice,
+      sellPrice: item.unitPrice,
+      id: item.productId,
+      category: productCategoryMap.get(item.productId) || 'Lainnya',
     });
     itemsByTransaction.set(item.transactionId, existing);
   }
@@ -312,6 +370,7 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
     transactions: transactionRows.map((transaction) => ({
       id: transaction.id,
       paymentMethod: transaction.paymentMethod as PaymentMethod,
+      customerName: transaction.customerName,
       total: transaction.total,
       createdAt: transaction.createdAt,
       items: itemsByTransaction.get(transaction.id) ?? [],
@@ -404,6 +463,22 @@ export async function updateProduct(userId: string, productId: string, draft: Pr
   };
 }
 
+export async function deleteProduct(userId: string, productId: string) {
+  const [deleted] = await db
+    .delete(products)
+    .where(and(eq(products.id, productId), eq(products.userId, userId)))
+    .returning();
+
+  if (!deleted) {
+    throw new Error("Produk tidak ditemukan.");
+  }
+
+  return {
+    id: deleted.id,
+    name: deleted.name,
+  };
+}
+
 export async function restockProduct(userId: string, productId: string, quantity: number) {
   const [existing] = await db
     .select()
@@ -441,7 +516,13 @@ export async function createTransaction(
   userId: string,
   payload: {
     paymentMethod: PaymentMethod;
-    items: Array<{ productId: string; quantity: number }>;
+    customerName?: string;
+    items: Array<{
+      productId: string;
+      quantity: number;
+      spicyLevel?: number;
+      toppings?: string[];
+    }>;
   }
 ) {
   if (payload.items.length === 0) {
@@ -465,13 +546,45 @@ export async function createTransaction(
       throw new Error(`Stok ${product.name} tidak cukup.`);
     }
 
-    return { product, quantity: item.quantity };
+    // Calculate price with surcharge for levels 4-5 and toppings (+2000 each, promo: 3 toppings = 5000, 7 toppings = 10000)
+    const spicySurcharge = (item.spicyLevel === 4 || item.spicyLevel === 5) ? 2000 : 0;
+    const toppingsCount = item.toppings ? item.toppings.length : 0;
+    const toppingsSurcharge = toppingsCount === 3 
+      ? 5000 
+      : toppingsCount === 7 
+      ? 10000 
+      : toppingsCount * 2000;
+    const unitPrice = product.sellPrice + spicySurcharge + toppingsSurcharge;
+
+    // Construct a beautiful name incorporating spicy level and toppings
+    let suffix = "";
+    if (item.spicyLevel !== undefined) {
+      suffix += `Lvl ${item.spicyLevel}`;
+    }
+    if (item.toppings && item.toppings.length > 0) {
+      const counts: Record<string, number> = {};
+      for (const t of item.toppings) {
+        counts[t] = (counts[t] || 0) + 1;
+      }
+      const formattedToppings = Object.entries(counts)
+        .map(([topping, count]) => (count > 1 ? `${topping} (${count}x)` : topping))
+        .join(", ");
+      suffix += (suffix ? " • Topping: " : "Topping: ") + formattedToppings;
+    }
+    const finalName = suffix ? `${product.name} (${suffix})` : product.name;
+
+    return {
+      product,
+      quantity: item.quantity,
+      unitPrice,
+      productName: finalName,
+    };
   });
 
   const transactionId = createId("trx");
   const createdAt = nowIso();
   const total = lineItems.reduce(
-    (sum, item) => sum + item.product.sellPrice * item.quantity,
+    (sum, item) => sum + item.unitPrice * item.quantity,
     0
   );
 
@@ -481,6 +594,7 @@ export async function createTransaction(
       userId,
       total,
       paymentMethod: payload.paymentMethod,
+      customerName: payload.customerName || "Umum",
       createdAt,
     });
 
@@ -489,9 +603,9 @@ export async function createTransaction(
         id: createId("itm"),
         transactionId,
         productId: item.product.id,
-        productName: item.product.name,
+        productName: item.productName,
         quantity: item.quantity,
-        unitPrice: item.product.sellPrice,
+        unitPrice: item.unitPrice,
         costPrice: item.product.buyPrice,
       }))
     );
@@ -527,6 +641,84 @@ export async function createTransaction(
     transaction,
     products: nextState.products,
   };
+}
+
+export async function deleteTransaction(userId: string, transactionId: string) {
+  const [tx] = await db
+    .select()
+    .from(transactions)
+    .where(and(eq(transactions.id, transactionId), eq(transactions.userId, userId)))
+    .limit(1);
+
+  if (!tx) {
+    throw new Error("Transaksi tidak ditemukan.");
+  }
+
+  const items = await db
+    .select()
+    .from(transactionItems)
+    .where(eq(transactionItems.transactionId, transactionId));
+
+  await db.transaction(async (txDb) => {
+    // Restock products
+    for (const item of items) {
+      const [product] = await txDb
+        .select({ stock: products.stock })
+        .from(products)
+        .where(and(eq(products.id, item.productId), eq(products.userId, userId)))
+        .limit(1);
+
+      if (product) {
+        await txDb
+          .update(products)
+          .set({ stock: product.stock + item.quantity })
+          .where(and(eq(products.id, item.productId), eq(products.userId, userId)));
+      }
+    }
+
+    await txDb
+      .delete(transactionItems)
+      .where(eq(transactionItems.transactionId, transactionId));
+
+    await txDb
+      .delete(transactions)
+      .where(and(eq(transactions.id, transactionId), eq(transactions.userId, userId)));
+  });
+
+  const nextState = await getBootstrapState(userId);
+  return { products: nextState.products };
+}
+
+export async function updateTransaction(
+  userId: string,
+  transactionId: string,
+  payload: { paymentMethod?: PaymentMethod; createdAt?: string }
+) {
+  const [tx] = await db
+    .select()
+    .from(transactions)
+    .where(and(eq(transactions.id, transactionId), eq(transactions.userId, userId)))
+    .limit(1);
+
+  if (!tx) {
+    throw new Error("Transaksi tidak ditemukan.");
+  }
+
+  const updateData: any = {};
+  if (payload.paymentMethod) updateData.paymentMethod = payload.paymentMethod;
+  if (payload.createdAt) updateData.createdAt = payload.createdAt;
+
+  if (Object.keys(updateData).length > 0) {
+    await db
+      .update(transactions)
+      .set(updateData)
+      .where(and(eq(transactions.id, transactionId), eq(transactions.userId, userId)));
+  }
+
+  const nextState = await getBootstrapState(userId);
+  const updatedTransaction = nextState.transactions.find((item) => item.id === transactionId);
+
+  return { transaction: updatedTransaction };
 }
 
 export async function createDebt(userId: string, draft: DebtDraft) {
@@ -641,13 +833,22 @@ export async function createExpense(
 }
 
 export async function updateStoreSettings(userId: string, settings: Settings) {
-  const nextSettings = normalizeSettings(settings);
+  // Merge GDC UI inputs to database fields
+  const mergedSettings = {
+    ...settings,
+    storeName: settings.merchantName || settings.storeName || "Mie Jebew GDC",
+    storeAddress: settings.merchantAddress || settings.storeAddress || "GDC",
+    ownerWhatsapp: settings.merchantPhone || settings.ownerWhatsapp || "082244119900",
+    ownerName: settings.userProfileName || settings.ownerName || "Kasir",
+  };
+
+  const nextSettings = normalizeSettings(mergedSettings);
 
   if (
     nextSettings.storeName.length === 0 ||
     nextSettings.storeAddress.length === 0 ||
     nextSettings.ownerName.length === 0 ||
-    nextSettings.ownerWhatsapp.length < 10 ||
+    nextSettings.ownerWhatsapp.length === 0 ||
     nextSettings.city.length === 0 ||
     nextSettings.enabledPayments.length === 0
   ) {

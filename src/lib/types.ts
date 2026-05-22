@@ -1,10 +1,6 @@
 export type PaymentMethod = "Tunai" | "QRIS" | "Transfer";
 
-export type ProductCategory =
-  | "Makanan"
-  | "Minuman"
-  | "Sembako"
-  | "Kebutuhan Harian";
+export type ProductCategory = string;
 
 export interface Product {
   id: string;
@@ -16,11 +12,21 @@ export interface Product {
   minimumStock: number;
   description: string;
   imageUrl?: string | null;
+  image?: string;
+  price?: number;
+  isAvailable?: boolean;
+  bestSeller?: boolean;
 }
 
 export interface CartItem {
+  id?: string;
   productId: string;
   quantity: number;
+  spicyLevel?: number;
+  toppings?: string[];
+  product?: Product;
+  notes?: string;
+  sellPrice?: number;
 }
 
 export interface TransactionItem {
@@ -29,6 +35,13 @@ export interface TransactionItem {
   quantity: number;
   unitPrice: number;
   costPrice: number;
+  spicyLevel?: number;
+  toppings?: string[];
+  product?: Product;
+  notes?: string;
+  sellPrice?: number;
+  id?: string;
+  category?: string;
 }
 
 export interface Transaction {
@@ -37,6 +50,20 @@ export interface Transaction {
   total: number;
   createdAt: string;
   items: TransactionItem[];
+  invoiceNo?: string;
+  date?: string;
+  subtotal?: number;
+  tax?: number;
+  amountPaid?: number;
+  change?: number;
+  customerName?: string;
+}
+
+export interface SavedBill {
+  id: string;
+  name: string;
+  date: string;
+  items: any[];
 }
 
 export interface Debt {
@@ -68,6 +95,23 @@ export interface Settings {
   businessNotes: string;
   stockAlertThreshold: number;
   enabledPayments: PaymentMethod[];
+  qrisType?: 'static' | 'dynamic' | 'upload';
+  qrisName?: string;
+  qrisStaticCodeUrl?: string;
+  qrisUploadUrl?: string;
+  enableServiceCharge?: boolean;
+  serviceChargeRate?: number;
+  taxRate?: number;
+  receiptHeader?: string;
+  receiptFooter?: string;
+  printerConnected?: boolean;
+  printerName?: string;
+  printerPaperSize?: string;
+  merchantName?: string;
+  merchantAddress?: string;
+  merchantPhone?: string;
+  userProfileName?: string;
+  userProfileImage?: string;
 }
 
 export interface AppState {

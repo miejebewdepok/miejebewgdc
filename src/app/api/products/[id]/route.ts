@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRequestUser, updateProduct } from "@/lib/server/app-service";
+import { getRequestUser, updateProduct, deleteProduct } from "@/lib/server/app-service";
 import { handleRouteError } from "@/lib/server/route-error";
 import { ProductDraft } from "@/lib/types";
 
@@ -17,5 +17,19 @@ export async function PATCH(
     return NextResponse.json({ product });
   } catch (error) {
     return handleRouteError(error, "Gagal memperbarui produk.");
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { userId } = await getRequestUser();
+    const { id } = await context.params;
+    await deleteProduct(userId, id);
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return handleRouteError(error, "Gagal menghapus produk.");
   }
 }

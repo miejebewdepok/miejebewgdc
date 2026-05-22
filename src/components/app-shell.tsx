@@ -1,76 +1,16 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import {
-  ChevronsLeft,
-  ChevronsRight,
-  Gauge,
-  Menu,
-  Package2,
-  ScrollText,
-  Settings2,
-  ShoppingBasket,
-  Store,
-  Wallet,
-} from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { AccountPanel } from "@/components/auth/account-panel";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState, useMemo } from "react";
+import Sidebar from "./warung/gdc/Sidebar";
 import { AIAssistantPanel } from "@/components/warung/ai-assistant-panel";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { cn } from "@/lib/utils";
 import { useAppState } from "@/components/providers/app-state-provider";
-
-const navigation = [
-  { href: "/dashboard", label: "Dashboard", icon: Gauge },
-  { href: "/kasir", label: "Kasir", icon: ShoppingBasket },
-  { href: "/inventaris", label: "Inventaris", icon: Package2 },
-  { href: "/buku-hutang", label: "Buku Hutang", icon: Wallet },
-  { href: "/laporan", label: "Laporan", icon: ScrollText },
-  { href: "/pengaturan", label: "Pengaturan", icon: Settings2 },
-];
-
-const pageTitles: Record<string, { title: string; subtitle: string }> = {
-  "/dashboard": {
-    title: "Dashboard operasional warung",
-    subtitle:
-      "Lihat angka penting, stok menipis, dan aktivitas terbaru tanpa mengganggu layar kasir.",
-  },
-  "/kasir": {
-    title: "Kasir cepat untuk jam sibuk",
-    subtitle:
-      "Layar ini khusus untuk jualan cepat: pilih produk, atur jumlah, dan selesaikan transaksi.",
-  },
-  "/inventaris": {
-    title: "Kontrol stok tanpa buku catatan",
-    subtitle:
-      "Pantau produk aktif, restok cepat, dan sorot barang yang mulai menipis.",
-  },
-  "/buku-hutang": {
-    title: "Catatan kasbon yang rapi",
-    subtitle:
-      "Simpan pelanggan berhutang, kirim pengingat, dan tandai pelunasan dengan satu klik.",
-  },
-  "/laporan": {
-    title: "Laporan untung yang gampang dipahami",
-    subtitle:
-      "Lihat omzet, pengeluaran, dan preview PDF untuk kebutuhan pinjaman atau evaluasi usaha.",
-  },
-  "/pengaturan": {
-    title: "Pengaturan warung",
-    subtitle:
-      "Atur profil warung, notifikasi stok menipis, dan metode bayar yang ingin ditampilkan.",
-  },
-};
+import { Menu, Store } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription, SheetHeader } from "@/components/ui/sheet";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
 
 export function AppShell({
   children,
@@ -78,177 +18,126 @@ export function AppShell({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const { settings } = useAppState();
-  const activePage = pageTitles[pathname] ?? pageTitles["/kasir"];
+  const router = useRouter();
+  const { settings, transactions } = useAppState();
+  
   const [aiOpen, setAiOpen] = useState(false);
-  const [leftCollapsed, setLeftCollapsed] = useState(false);
+  const { theme: nextTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (aiOpen) {
-      const timer = setTimeout(() => {
-        setLeftCollapsed(true);
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-  }, [aiOpen]);
+    setMounted(true);
+  }, []);
+
+  const theme = (mounted ? nextTheme : 'dark') === 'light' ? 'light' : 'dark';
+
+  const totalSalesToday = useMemo(() => {
+    const today = new Date().toDateString();
+    return transactions
+      .filter((tx) => new Date(tx.createdAt).toDateString() === today)
+      .reduce((sum, tx) => sum + tx.total, 0);
+  }, [transactions]);
+
+  const historyCount = transactions.length;
+
+  let activeTab: any = 'dashboard';
+  if (pathname === '/kasir') activeTab = 'pos';
+  if (pathname === '/inventaris') activeTab = 'manage';
+  if (pathname === '/pengaturan') activeTab = 'settings';
+  if (pathname === '/laporan') activeTab = 'history';
+  if (pathname === '/buku-hutang') activeTab = 'report';
 
   return (
-    <div className="relative h-screen overflow-hidden bg-background">
-      <div className="relative z-10 mx-auto flex h-full w-full max-w-[1600px] gap-3 p-3 lg:gap-4 lg:p-5">
-        <aside
-          className={cn(
-            "glass-panel hidden h-full shrink-0 flex-col overflow-hidden rounded-[32px] border border-border/40 shadow-[0_32px_80px_-40px_rgba(220,38,38,0.25)] transition-all duration-300 ease-out lg:flex",
-            leftCollapsed ? "w-[88px] items-center px-5 py-4" : "w-[292px] p-5",
-          )}
-        >
-          {leftCollapsed ? (
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground">
-              <Store className="size-5" />
-            </div>
-          ) : (
-            <div className="rounded-[22px] bg-sidebar px-4 py-3 text-sidebar-foreground transition-all">
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Store className="size-4" />
-                </div>
-                <p className="truncate text-sm font-medium">
-                  {settings.storeName}
-                </p>
-              </div>
-              <ThemeToggle className="mt-3" />
-            </div>
-          )}
+    <div className="w-full h-screen bg-background text-foreground dark:bg-slate-950 dark:text-slate-100 flex overflow-hidden font-sans relative transition-colors duration-300">
+      {/* Background Mesh Gradients */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-600/15 rounded-full blur-[130px] pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[40%] bg-yellow-600/10 rounded-full blur-[130px] pointer-events-none"></div>
+      <div className="absolute top-[30%] left-[40%] w-[35%] h-[35%] bg-amber-600/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-          <Button
-            variant="ghost"
-            size={leftCollapsed ? "default" : "icon-sm"}
-            onClick={() => setLeftCollapsed((v) => !v)}
-            disabled={aiOpen}
-            aria-label={leftCollapsed ? "Buka sidebar" : "Tutup sidebar"}
-            title={
-              aiOpen
-                ? "Sidebar otomatis tertutup saat Asisten AI aktif"
-                : leftCollapsed
-                  ? "Buka sidebar"
-                  : "Tutup sidebar"
-            }
-            className={cn(
-              "mt-3 rounded-xl",
-              leftCollapsed ? "size-12 p-0" : "self-end",
-            )}
-          >
-            {leftCollapsed ? (
-              <ChevronsRight className="size-4" />
-            ) : (
-              <ChevronsLeft className="size-4" />
-            )}
-          </Button>
+      {/* Desktop Sidebar (GDC) */}
+      <div className="hidden lg:block h-full z-20">
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={(tab) => {
+            if (tab === "dashboard") router.push("/dashboard");
+            if (tab === "pos") router.push("/kasir");
+            if (tab === "manage") router.push("/inventaris");
+            if (tab === "settings") router.push("/pengaturan");
+            if (tab === "history") router.push("/laporan");
+            if (tab === "report") router.push("/buku-hutang");
+          }}
+          totalSalesToday={totalSalesToday}
+          historyCount={historyCount}
+          theme={theme}
+          onThemeChange={setTheme}
+          userProfileName={settings.ownerName || "Kasir"}
+          userProfileImage={settings.userProfileImage}
+        />
+      </div>
 
-          <nav
-            className={cn(
-              "mt-3 flex-1 overflow-y-auto",
-              leftCollapsed
-                ? "flex flex-col items-center gap-1.5"
-                : "space-y-2",
-            )}
-          >
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  title={leftCollapsed ? item.label : undefined}
-                  className={cn(
-                    "flex items-center gap-3 rounded-2xl text-sm font-medium transition-all duration-200",
-                    leftCollapsed ? "size-12 justify-center" : "px-4 py-3",
-                    isActive
-                      ? "bg-gradient-to-r from-primary to-orange-600 text-white shadow-[0_12px_24px_-10px_rgba(220,38,38,0.6)] scale-[1.02]"
-                      : "text-foreground/70 hover:bg-red-50 hover:text-red-900 dark:hover:bg-red-950/50 dark:hover:text-red-50 active:scale-95",
-                  )}
-                >
-                  <Icon className={cn("shrink-0", leftCollapsed ? "size-5" : "size-4")} />
-                  {!leftCollapsed && item.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {!leftCollapsed && <AccountPanel />}
-        </aside>
-
-        <div className="pointer-events-none fixed top-3 left-3 z-40 lg:hidden">
-          <Sheet>
-            <SheetTrigger
-              render={
-                <Button
-                  variant="outline"
-                  size="icon-lg"
-                  className="pointer-events-auto rounded-2xl bg-card/85 shadow-[0_18px_40px_-28px_rgba(68,39,20,0.75)] backdrop-blur"
+      {/* Central Content Canvas */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
+        {/* Mobile Header Bar */}
+        <header className="lg:hidden flex items-center justify-between px-4 py-3.5 bg-sidebar/90 dark:bg-slate-950/60 backdrop-blur-md border-b border-sidebar-border/40 dark:border-white/10 shrink-0 z-30">
+          <div className="flex items-center gap-3">
+            <Sheet>
+              <SheetTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    className="rounded-xl bg-slate-900 hover:bg-slate-800 shadow-md border border-white/10 h-9 w-9 flex items-center justify-center pointer-events-auto"
+                  />
+                }
+              >
+                <Menu className="size-5 text-white" />
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[280px] sm:w-[320px] bg-slate-950 p-0 border-r border-white/10">
+                <SheetHeader className="sr-only">
+                  <SheetTitle>Menu</SheetTitle>
+                  <SheetDescription>Navigasi Kasir</SheetDescription>
+                </SheetHeader>
+                <Sidebar
+                  activeTab={activeTab}
+                  setActiveTab={(tab) => {
+                    if (tab === "dashboard") router.push("/dashboard");
+                    if (tab === "pos") router.push("/kasir");
+                    if (tab === "manage") router.push("/inventaris");
+                    if (tab === "settings") router.push("/pengaturan");
+                    if (tab === "history") router.push("/laporan");
+                    if (tab === "report") router.push("/buku-hutang");
+                  }}
+                  totalSalesToday={totalSalesToday}
+                  historyCount={historyCount}
+                  theme={theme}
+                  onThemeChange={setTheme}
+                  userProfileName={settings.ownerName || "Kasir"}
+                  userProfileImage={settings.userProfileImage}
                 />
-              }
-            >
-              <Menu className="size-5" />
-            </SheetTrigger>
-            <SheetContent
-              side="left"
-              className="w-[320px] bg-sidebar text-sidebar-foreground"
-            >
-              <SheetHeader className="px-6 pt-6">
-                <SheetTitle className="text-sidebar-foreground">
-                  {settings.storeName}
-                </SheetTitle>
-                <SheetDescription className="text-sidebar-foreground/70">
-                  {activePage.title}
-                </SheetDescription>
-              </SheetHeader>
-              <div className="space-y-2 px-4 pb-6">
-                {navigation.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={cn(
-                        buttonVariants({
-                          variant: isActive ? "secondary" : "ghost",
-                          size: "lg",
-                        }),
-                        "w-full justify-start rounded-2xl",
-                        isActive
-                          ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                      )}
-                    >
-                      <Icon className="size-4" />
-                      {item.label}
-                    </Link>
-                  );
-                })}
-                <Link
-                  href="/auth"
-                  className={cn(
-                    buttonVariants({ size: "lg" }),
-                    "mt-4 h-11 w-full rounded-2xl",
-                  )}
-                >
-                  Akun
-                </Link>
-                <ThemeToggle className="mt-4" />
+              </SheetContent>
+            </Sheet>
+            
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 bg-red-600 rounded-lg flex items-center justify-center shadow-md">
+                <Store className="w-4 h-4 text-white" />
               </div>
-            </SheetContent>
-          </Sheet>
-        </div>
+              <span className="text-sm font-black text-foreground dark:text-white uppercase tracking-tight">
+                MIE JEBEW GDC
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] bg-red-650/15 border border-red-500/20 text-red-400 font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono">
+              Online
+            </span>
+          </div>
+        </header>
 
-        <main className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto pt-14 lg:pt-0">
+        <main className="flex-1 overflow-y-auto overflow-x-clip p-4 md:p-8">
           {children}
         </main>
-
-        <AIAssistantPanel open={aiOpen} onOpenChange={setAiOpen} />
       </div>
+
+      <AIAssistantPanel open={aiOpen} onOpenChange={setAiOpen} />
     </div>
   );
 }

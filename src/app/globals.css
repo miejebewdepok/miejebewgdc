@@ -46,6 +46,20 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* AI Generator typo custom color mappings */
+  --color-red-650: var(--red-650);
+  --color-red-655: var(--red-655);
+  --color-slate-650: var(--slate-650);
+  --color-slate-605: var(--slate-605);
+  --color-slate-655: var(--slate-655);
+  --color-slate-955: var(--slate-955);
+  --color-zinc-650: var(--zinc-650);
+  --color-zinc-655: var(--zinc-655);
+  --color-emerald-650: var(--emerald-650);
+  --color-emerald-655: var(--emerald-655);
+  --color-yellow-650: var(--yellow-650);
+  --color-indigo-650: var(--indigo-650);
 }
 
 :root {
@@ -81,6 +95,20 @@
   --sidebar-accent-foreground: #dc2626;
   --sidebar-border: rgba(220, 38, 38, 0.12);
   --sidebar-ring: rgba(220, 38, 38, 0.45);
+
+  /* Typo custom color definitions (Light Mode) */
+  --red-650: #b91c1c;
+  --red-655: #b91c1c;
+  --slate-650: #475569;
+  --slate-605: #475569;
+  --slate-655: #334155;
+  --slate-955: #0f172a;
+  --zinc-650: #4b5563;
+  --zinc-655: #374151;
+  --emerald-650: #047857;
+  --emerald-655: #047857;
+  --yellow-650: #a16207;
+  --indigo-650: #4338ca;
 }
 
 .dark {
@@ -115,6 +143,20 @@
   --sidebar-accent-foreground: #fef2f2;
   --sidebar-border: rgba(239, 68, 68, 0.15);
   --sidebar-ring: rgba(239, 68, 68, 0.45);
+
+  /* Typo custom color definitions (Dark Mode) */
+  --red-650: #f87171;
+  --red-655: #f87171;
+  --slate-650: #94a3b8;
+  --slate-605: #94a3b8;
+  --slate-655: #cbd5e1;
+  --slate-955: #f1f5f9;
+  --zinc-650: #a1a1aa;
+  --zinc-655: #d4d4d8;
+  --emerald-650: #34d399;
+  --emerald-655: #34d399;
+  --yellow-650: #facc15;
+  --indigo-650: #818cf8;
 }
 
 @layer base {
@@ -131,7 +173,7 @@
     background-image:
       radial-gradient(circle at top left, rgba(239, 68, 68, 0.12), transparent 30%),
       radial-gradient(circle at top right, rgba(234, 88, 12, 0.08), transparent 30%),
-      linear-gradient(180deg, #fef2f2 0%, #fff1f2 40%, #fef2f2 100%);
+      #fff8f8;
     min-height: 100vh;
   }
 
@@ -139,7 +181,7 @@
     background-image:
       radial-gradient(circle at top left, rgba(220, 38, 38, 0.15), transparent 28%),
       radial-gradient(circle at top right, rgba(234, 88, 12, 0.10), transparent 26%),
-      linear-gradient(180deg, #09090b 0%, #18181b 42%, #09090b 100%);
+      #09090b;
   }
 
   ::selection {
@@ -161,40 +203,53 @@
     background: rgba(24, 24, 27, 0.72);
   }
 
-  /* Glassmorphism theme panels from AI Studio */
+  /* Glassmorphism theme panels from AI Studio (KopiKaca) */
   .glass-morphism {
-    background: rgba(255, 255, 255, 0.85);
-    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(220, 38, 38, 0.08);
   }
 
   .dark .glass-morphism {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .glass-morphism-medium {
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(15, 23, 42, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.15);
   }
 
   .dark .glass-morphism-medium {
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.11);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(239, 68, 68, 0.2);
   }
 
   .glass-morphism-intense {
-    background: rgba(255, 255, 255, 0.98);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
-    border: 1px solid rgba(15, 23, 42, 0.14);
+    border: 1px solid rgba(220, 38, 38, 0.15);
   }
 
   .dark .glass-morphism-intense {
-    background: rgba(9, 9, 11, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
   }
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Custom scrollbar styling for standard glass container scroll */
@@ -203,32 +258,113 @@
   height: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.01);
+  background: rgba(255, 255, 255, 0.02);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(220, 38, 38, 0.3); /* Soft Red scroll thumb */
+  background: rgba(239, 68, 68, 0.2);
   border-radius: 999px;
 }
 .dark ::-webkit-scrollbar-thumb {
   background: rgba(239, 68, 68, 0.2);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(234, 179, 8, 0.4); /* Glow Yellow under hover */
+  background: rgba(234, 179, 8, 0.4);
 }
 
-/* Fire glow pulsing animations - Red/Yellow combination */
-@keyframes spicy-glow {
+/* Pulse animation for best seller and premium actions */
+@keyframes glow-pulse {
   0%, 100% {
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.25);
-    border-color: rgba(239, 68, 68, 0.4);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
   }
   50% {
-    box-shadow: 0 0 30px rgba(234, 179, 8, 0.55);
-    border-color: rgba(234, 179, 8, 0.7);
+    box-shadow: 0 0 25px rgba(99, 102, 241, 0.5);
   }
 }
 
 .glow-active {
-  animation: spicy-glow 2.5s infinite;
+  animation: glow-pulse 3s infinite;
+}
+
+/* Accessibility & legibility enhancements in Light Mode */
+html:not(.dark) {
+  .text-slate-300 { color: #475569 !important; }
+  .text-slate-400 { color: #334155 !important; }
+  .text-slate-500 { color: #1e293b !important; }
+  .text-zinc-300 { color: #4b5563 !important; }
+  .text-zinc-400 { color: #374151 !important; }
+  .text-zinc-500 { color: #18181b !important; }
+  
+  /* Additional text opacity/muted styles */
+  .text-slate-400\/70 { color: rgba(51, 65, 85, 0.9) !important; }
+  .text-zinc-400\/70 { color: rgba(55, 65, 81, 0.9) !important; }
+  .text-muted-foreground { color: #5c0f0f !important; }
+  .text-sidebar-foreground\/65 { color: #5c0f0f !important; }
+  .text-sidebar-foreground\/60 { color: #450a0a !important; }
+  .text-sidebar-foreground\/50 { color: #5c0f0f !important; }
+}
+
+/* =========================================================================
+   Print Styles specifically for 58mm Thermal Printer
+   ========================================================================= */
+@media print {
+  @page {
+    margin: 0;
+    size: 58mm auto;
+  }
+  
+  body * {
+    visibility: hidden;
+  }
+  
+  #print-receipt, #print-receipt * {
+    visibility: visible;
+  }
+  
+  #print-receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 58mm !important;
+    margin: 0 !important;
+    padding: 0 2mm !important; /* tiny margin for thermal paper */
+    color: #000 !important;
+    background: transparent !important;
+    font-size: 10px !important; 
+    line-height: 1.2 !important;
+  }
+  
+  /* Reset some basic styles for the receipt */
+  #print-receipt table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  #print-receipt td, #print-receipt th {
+    padding: 1px 0 !important;
+    border-bottom: none !important;
+  }
+  #print-receipt .border-dashed {
+    border-color: #000 !important;
+    border-style: dashed !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+  #print-receipt .border-dashed[class*="border-t"] {
+    border-top-width: 1.5px !important;
+  }
+  #print-receipt .border-dashed[class*="border-b"] {
+    border-bottom-width: 1.5px !important;
+  }
+  
+  /* Ensure colors print black/white on thermal */
+  #print-receipt * {
+    color: #000 !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* Make sure background is totally clear so no gray patches */
+  body {
+    background: transparent !important;
+  }
 }

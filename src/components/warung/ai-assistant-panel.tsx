@@ -896,3 +896,4 @@ export function AIAssistantPanel({
     </aside>
   );
 }
+

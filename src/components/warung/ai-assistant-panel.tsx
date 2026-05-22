@@ -494,7 +494,7 @@ export function AIAssistantPanel({
 
     try {
       const rec = new SpeechRecognition();
-      rec.continuous = false;
+      rec.continuous = true;
       rec.interimResults = false;
       rec.lang = "id-ID"; // Indonesian language dictation
 
@@ -504,7 +504,8 @@ export function AIAssistantPanel({
       };
 
       rec.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
+        const currentResultIndex = event.resultIndex;
+        const transcript = event.results[currentResultIndex][0].transcript;
         if (transcript) {
           setInput((prev) => prev ? `${prev} ${transcript}` : transcript);
           toast.success("Suara berhasil diterjemahkan!");

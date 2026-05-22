@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { Product } from '@/lib/types';
-import { Flame, Utensils, Coffee, Sparkles, AlertCircle, ArrowUp, ArrowDown } from 'lucide-react';
+import { Flame, Utensils, Coffee, Sparkles, AlertCircle, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -10,9 +10,39 @@ interface ProductCardProps {
   isArrangeMode?: boolean;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
+  onMoveTop?: () => void;
+  onMoveBottom?: () => void;
+  index?: number;
+  draggable?: boolean;
+  onDragStart?: (e: React.DragEvent) => void;
+  onDragEnd?: (e: React.DragEvent) => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDragEnter?: (e: React.DragEvent) => void;
+  onDragLeave?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent) => void;
+  isDragging?: boolean;
+  isDragOver?: boolean;
 }
 
-export default function ProductCard({ product, onAddToCart, isArrangeMode = false, onMoveUp, onMoveDown }: ProductCardProps) {
+export default function ProductCard({
+  product,
+  onAddToCart,
+  isArrangeMode = false,
+  onMoveUp,
+  onMoveDown,
+  onMoveTop,
+  onMoveBottom,
+  index = 0,
+  draggable,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDragEnter,
+  onDragLeave,
+  onDrop,
+  isDragging = false,
+  isDragOver = false,
+}: ProductCardProps) {
   const formatRupiah = (val: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -57,9 +87,20 @@ export default function ProductCard({ product, onAddToCart, isArrangeMode = fals
   return (
     <div 
       onClick={() => !isArrangeMode && product?.stock > 0 && onAddToCart(product)}
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onDragOver={onDragOver}
+      onDragEnter={onDragEnter}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
       className={`glass-morphism rounded-[22px] sm:rounded-3xl flex flex-col h-[215px] sm:h-[275px] overflow-hidden transition-all duration-300 relative group select-none border border-sidebar-border/30 dark:border-white/10 ${
         isArrangeMode
-          ? 'border-emerald-500/30 bg-emerald-950/5 dark:bg-emerald-950/10'
+          ? isDragging
+            ? 'opacity-40 border-dashed border-emerald-500 bg-emerald-950/5 scale-95'
+            : isDragOver
+              ? 'scale-[1.02] border-emerald-400 bg-emerald-950/20 shadow-[0_0_20px_rgba(16,185,129,0.25)] border-solid z-20'
+              : 'border-emerald-500/30 hover:border-emerald-500/65 bg-emerald-950/5 dark:bg-emerald-950/10 cursor-grab active:cursor-grabbing hover:shadow-[0_0_15px_rgba(16,185,129,0.15)]'
           : product?.stock > 0 
             ? 'cursor-pointer hover:border-red-500/40 hover:bg-sidebar-accent/40 dark:hover:bg-white/5 hover:shadow-[0_0_20px_rgba(239,68,68,0.15)] active:scale-[0.98]' 
             : 'opacity-45 cursor-not-allowed border-rose-500/5'
@@ -88,11 +129,17 @@ export default function ProductCard({ product, onAddToCart, isArrangeMode = fals
           </div>
         )}
 
-        {/* Category Icon Badge floating on image */}
-        <div className="absolute top-3 left-3">
-          <div className="p-2 bg-sidebar/85 dark:bg-slate-950/85 rounded-2xl border border-sidebar-border/50 dark:border-white/10 backdrop-blur-md shadow-lg">
-            {getCategoryIcon(product.category, "w-4 h-4")}
-          </div>
+        {/* Category Icon Badge or Rank Badge floating on image */}
+        <div className="absolute top-3 left-3 z-30">
+          {isArrangeMode ? (
+            <div className="px-2.5 py-1 bg-emerald-600 border border-emerald-500 rounded-xl text-[10px] font-black text-white shadow-lg shadow-emerald-600/35 backdrop-blur-md animate-in zoom-in-75 duration-200">
+              #{index + 1}
+            </div>
+          ) : (
+            <div className="p-2 bg-sidebar/85 dark:bg-slate-950/85 rounded-2xl border border-sidebar-border/50 dark:border-white/10 backdrop-blur-md shadow-lg">
+              {getCategoryIcon(product.category, "w-4 h-4")}
+            </div>
+          )}
         </div>
 
         {/* Availability stock level overlay floating on image */}
@@ -142,34 +189,68 @@ export default function ProductCard({ product, onAddToCart, isArrangeMode = fals
 
       {/* Arrange mode position shifter controls overlay */}
       {isArrangeMode && (
-        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-[4px] z-30 flex flex-col items-center justify-center gap-2.5 p-3 animate-in fade-in zoom-in-95 duration-200">
-          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Atur Posisi</span>
-          <div className="flex gap-2.5">
+        <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[0.5px] z-30 flex flex-col items-center justify-center p-2 animate-in fade-in duration-200">
+          {/* Glassmorphic Control Dock */}
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-slate-900/90 dark:bg-black/90 border border-emerald-500/30 rounded-2xl p-1.5 flex gap-1 shadow-2xl backdrop-blur-md items-center animate-in zoom-in-95 duration-200"
+          >
+            {/* Button: Move to Top */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoveTop?.();
+              }}
+              className="p-2 bg-emerald-600/10 hover:bg-emerald-600 text-emerald-500 hover:text-white rounded-xl transition-all cursor-pointer active:scale-90"
+              title="Pindahkan ke Paling Atas"
+            >
+              <ChevronsUp className="w-3.5 h-3.5 sm:w-4 h-4" />
+            </button>
+            
+            {/* Button: Move Up */}
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onMoveUp?.();
               }}
-              className="p-3 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-2xl shadow-lg hover:scale-110 active:scale-95 transition-all cursor-pointer border border-emerald-500/20"
+              className="p-2 bg-emerald-600/10 hover:bg-emerald-600 text-emerald-500 hover:text-white rounded-xl transition-all cursor-pointer active:scale-90"
               title="Pindahkan Ke Atas"
             >
-              <ArrowUp className="w-5 h-5" />
+              <ChevronUp className="w-3.5 h-3.5 sm:w-4 h-4" />
             </button>
+            
+            {/* Button: Move Down */}
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onMoveDown?.();
               }}
-              className="p-3 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-2xl shadow-lg hover:scale-110 active:scale-95 transition-all cursor-pointer border border-emerald-500/20"
+              className="p-2 bg-emerald-600/10 hover:bg-emerald-600 text-emerald-500 hover:text-white rounded-xl transition-all cursor-pointer active:scale-90"
               title="Pindahkan Ke Bawah"
             >
-              <ArrowDown className="w-5 h-5" />
+              <ChevronDown className="w-3.5 h-3.5 sm:w-4 h-4" />
+            </button>
+            
+            {/* Button: Move to Bottom */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoveBottom?.();
+              }}
+              className="p-2 bg-emerald-600/10 hover:bg-emerald-600 text-emerald-500 hover:text-white rounded-xl transition-all cursor-pointer active:scale-90"
+              title="Pindahkan ke Paling Bawah"
+            >
+              <ChevronsDown className="w-3.5 h-3.5 sm:w-4 h-4" />
             </button>
           </div>
-          <span className="text-[8px] font-bold text-slate-400 text-center leading-normal">
-            Geser urutan menu<br/>atas / bawah
+          
+          {/* Helpful micro label at bottom of card */}
+          <span className="text-[8px] sm:text-[9.5px] font-black tracking-widest text-white mt-2 bg-emerald-950/80 border border-emerald-500/20 px-2 py-0.5 rounded-full shadow-md select-none font-mono">
+            DRAG / TAP TOMBOL
           </span>
         </div>
       )}

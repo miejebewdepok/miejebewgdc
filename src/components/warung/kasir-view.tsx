@@ -61,6 +61,10 @@ export function KasirView() {
     }
     return [];
   });
+  
+  // Drag and Drop States for catalog sorting
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   // Local categories from localStorage — shared key with Kelola Menu
   const [localCategories] = useState<string[]>(() => {
@@ -109,15 +113,33 @@ export function KasirView() {
     });
   }, [sortedProducts, selectedCategory, catalogSearch]);
 
-  const handleMoveProduct = (productId: string, direction: 'up' | 'down') => {
+  const handleMoveProduct = (
+    productId: string, 
+    direction: 'up' | 'down' | 'top' | 'bottom' | 'to-target',
+    targetProductId?: string
+  ) => {
     const currentFilteredIds = filteredProducts.map(p => p.id);
     if (currentFilteredIds.length <= 1) return;
     
     const idx = currentFilteredIds.indexOf(productId);
     if (idx === -1) return;
     
-    const newIndex = direction === 'up' ? idx - 1 : idx + 1;
+    let newIndex = idx;
+    if (direction === 'up') {
+      newIndex = idx - 1;
+    } else if (direction === 'down') {
+      newIndex = idx + 1;
+    } else if (direction === 'top') {
+      newIndex = 0;
+    } else if (direction === 'bottom') {
+      newIndex = currentFilteredIds.length - 1;
+    } else if (direction === 'to-target' && targetProductId) {
+      newIndex = currentFilteredIds.indexOf(targetProductId);
+      if (newIndex === -1) return;
+    }
+    
     if (newIndex < 0 || newIndex >= currentFilteredIds.length) return;
+    if (newIndex === idx) return;
     
     const reorderedFilteredIds = [...currentFilteredIds];
     const [removed] = reorderedFilteredIds.splice(idx, 1);
@@ -132,6 +154,45 @@ export function KasirView() {
     setProductOrder(newOverallOrder);
     localStorage.setItem("miejebew_product_order_v4", JSON.stringify(newOverallOrder));
     toast.success("Posisi menu berhasil diperbarui.");
+  };
+
+  // Drag and Drop Event Handlers
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    e.dataTransfer.setData("text/plain", id);
+    setDraggedId(id);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedId(null);
+    setDragOverId(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent, id: string) => {
+    e.preventDefault();
+  };
+
+  const handleDragEnter = (e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    if (draggedId !== id) {
+      setDragOverId(id);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent, id: string) => {
+    if (dragOverId === id) {
+      setDragOverId(null);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    const sourceId = e.dataTransfer.getData("text/plain") || draggedId;
+    setDraggedId(null);
+    setDragOverId(null);
+    
+    if (!sourceId || sourceId === targetId) return;
+    
+    handleMoveProduct(sourceId, 'to-target', targetId);
   };
 
   const subtotal = cartLines.reduce((sum, item) => sum + item.lineTotal, 0);
@@ -302,13 +363,26 @@ export function KasirView() {
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
-                {filteredProducts.map((product) => (
+                {filteredProducts.map((product, idx) => (
                   <ProductCard
                     key={product.id}
                     product={product}
                     isArrangeMode={isArrangeMode}
+                    index={idx}
                     onMoveUp={() => handleMoveProduct(product.id, 'up')}
                     onMoveDown={() => handleMoveProduct(product.id, 'down')}
+                    onMoveTop={() => handleMoveProduct(product.id, 'top')}
+                    onMoveBottom={() => handleMoveProduct(product.id, 'bottom')}
+                    // Drag and drop events
+                    draggable={isArrangeMode}
+                    onDragStart={(e) => handleDragStart(e, product.id)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={(e) => handleDragOver(e, product.id)}
+                    onDragEnter={(e) => handleDragEnter(e, product.id)}
+                    onDragLeave={(e) => handleDragLeave(e, product.id)}
+                    onDrop={(e) => handleDrop(e, product.id)}
+                    isDragging={draggedId === product.id}
+                    isDragOver={dragOverId === product.id}
                     onAddToCart={() => {
                       setCustomizingProduct(product);
                       setSelectedSpicyLevel(0);

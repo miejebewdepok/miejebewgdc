@@ -1,15 +1,18 @@
 // @ts-nocheck
 import React from 'react';
 import { Product } from '@/lib/types';
-import { Flame, Utensils, Coffee, Sparkles, AlertCircle } from 'lucide-react';
+import { Flame, Utensils, Coffee, Sparkles, AlertCircle, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
   onAddToCart: (product: Product) => void;
   key?: string;
+  isArrangeMode?: boolean;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
 }
 
-export default function ProductCard({ product, onAddToCart }: ProductCardProps) {
+export default function ProductCard({ product, onAddToCart, isArrangeMode = false, onMoveUp, onMoveDown }: ProductCardProps) {
   const formatRupiah = (val: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -53,29 +56,31 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
 
   return (
     <div 
-      onClick={() => product?.stock > 0 && onAddToCart(product)}
+      onClick={() => !isArrangeMode && product?.stock > 0 && onAddToCart(product)}
       className={`glass-morphism rounded-[22px] sm:rounded-3xl flex flex-col h-[215px] sm:h-[275px] overflow-hidden transition-all duration-300 relative group select-none border border-sidebar-border/30 dark:border-white/10 ${
-        product?.stock > 0 
-          ? 'cursor-pointer hover:border-red-500/40 hover:bg-sidebar-accent/40 dark:hover:bg-white/5 hover:shadow-[0_0_20px_rgba(239,68,68,0.15)] active:scale-[0.98]' 
-          : 'opacity-45 cursor-not-allowed border-rose-500/5'
+        isArrangeMode
+          ? 'border-emerald-500/30 bg-emerald-950/5 dark:bg-emerald-950/10'
+          : product?.stock > 0 
+            ? 'cursor-pointer hover:border-red-500/40 hover:bg-sidebar-accent/40 dark:hover:bg-white/5 hover:shadow-[0_0_20px_rgba(239,68,68,0.15)] active:scale-[0.98]' 
+            : 'opacity-45 cursor-not-allowed border-rose-500/5'
       }`}
     >
       {/* Product Image Frame Section */}
-      <div className="w-full h-[100px] sm:h-[150px] relative overflow-hidden shrink-0 bg-sidebar-accent dark:bg-slate-900 border-b border-sidebar-border/20 dark:border-white/5">
+      <div className="w-full h-[100px] sm:h-[145px] relative overflow-hidden shrink-0 bg-sidebar-accent dark:bg-slate-900 border-b border-sidebar-border/20 dark:border-white/5 p-2 flex items-center justify-center">
         {imgUrl ? (
-          <>
+          <div className="w-full h-full relative rounded-2xl overflow-hidden bg-sidebar/20 dark:bg-slate-950/20 flex items-center justify-center p-1.5">
             <img 
               src={imgUrl} 
               alt={product.name} 
-              className="w-full h-full object-cover object-center transition-all duration-700 scale-100 group-hover:scale-105 brightness-[0.98] group-hover:brightness-105 group-hover:contrast-[1.03]"
+              className="max-w-full max-h-full w-auto h-auto object-contain rounded-xl transition-all duration-700 scale-100 group-hover:scale-105 brightness-[0.98] group-hover:brightness-105 group-hover:contrast-[1.03]"
               referrerPolicy="no-referrer"
             />
             {/* Subtle elegant shadow bottom gradient to blend cleanly */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent" />
-          </>
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/10 via-transparent to-transparent pointer-events-none" />
+          </div>
         ) : (
           /* Dynamic stylish fallback gradient matching category design theme with large aesthetic watermark icon */
-          <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center overflow-hidden`}>
+          <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center overflow-hidden w-full h-full rounded-2xl`}>
             <div className="opacity-[0.08] transform scale-[3] transition-transform duration-700 group-hover:scale-[3.3] group-hover:rotate-12">
               {getCategoryIcon(product.category, "w-16 h-16")}
             </div>
@@ -134,6 +139,40 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
 
       {/* Subtle background glow highlight on hover */}
       <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-red-600/5 rounded-full blur-xl group-hover:bg-red-500/10 transition-all pointer-events-none"></div>
+
+      {/* Arrange mode position shifter controls overlay */}
+      {isArrangeMode && (
+        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-[4px] z-30 flex flex-col items-center justify-center gap-2.5 p-3 animate-in fade-in zoom-in-95 duration-200">
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Atur Posisi</span>
+          <div className="flex gap-2.5">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoveUp?.();
+              }}
+              className="p-3 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-2xl shadow-lg hover:scale-110 active:scale-95 transition-all cursor-pointer border border-emerald-500/20"
+              title="Pindahkan Ke Atas"
+            >
+              <ArrowUp className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoveDown?.();
+              }}
+              className="p-3 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-2xl shadow-lg hover:scale-110 active:scale-95 transition-all cursor-pointer border border-emerald-500/20"
+              title="Pindahkan Ke Bawah"
+            >
+              <ArrowDown className="w-5 h-5" />
+            </button>
+          </div>
+          <span className="text-[8px] font-bold text-slate-400 text-center leading-normal">
+            Geser urutan menu<br/>atas / bawah
+          </span>
+        </div>
+      )}
     </div>
   );
 }

@@ -8,7 +8,7 @@ import ProductCard from "./gdc/ProductCard";
 import CartSection from "./gdc/CartSection";
 import CheckoutModal from "./gdc/CheckoutModal";
 import SavedBillsModal from "./gdc/SavedBillsModal";
-import { Search, ChevronDown, ChevronUp, ShoppingCart, LayoutGrid, Flame, Utensils, Beef, Coffee, Leaf, Cookie, Clock, X } from "lucide-react";
+import { Search, ChevronDown, ChevronUp, ShoppingCart, LayoutGrid, Flame, Utensils, Beef, Coffee, Leaf, Cookie, Clock, X, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import React from "react";
 
@@ -52,6 +52,16 @@ export function KasirView() {
   const [selectedFilling, setSelectedFilling] = useState<string>("Beef Slice");
   const [selectedSize, setSelectedSize] = useState<string>("REGULER");
 
+  // Reorder mode states
+  const [isArrangeMode, setIsArrangeMode] = useState(false);
+  const [productOrder, setProductOrder] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("miejebew_product_order_v4");
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
   // Local categories from localStorage — shared key with Kelola Menu
   const [localCategories] = useState<string[]>(() => {
     if (typeof window !== "undefined") {
@@ -71,14 +81,58 @@ export function KasirView() {
     )];
   }, [localCategories, products]);
 
+  // Sort products according to manual sort order
+  const sortedProducts = useMemo(() => {
+    if (productOrder.length === 0) return products;
+    
+    const orderMap = new Map<string, number>();
+    productOrder.forEach((id, idx) => {
+      orderMap.set(id, idx);
+    });
+    
+    return [...products].sort((a, b) => {
+      const aIdx = orderMap.has(a.id) ? orderMap.get(a.id)! : 999999;
+      const bIdx = orderMap.has(b.id) ? orderMap.get(b.id)! : 999999;
+      
+      if (aIdx !== bIdx) return aIdx - bIdx;
+      
+      return products.indexOf(a) - products.indexOf(b);
+    });
+  }, [products, productOrder]);
+
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
+    return sortedProducts.filter((product) => {
       const matchCategory = selectedCategory === "Semua" || product.category === selectedCategory;
       const matchSearch = product.name.toLowerCase().includes(catalogSearch.toLowerCase()) || 
                           product.description.toLowerCase().includes(catalogSearch.toLowerCase());
       return matchCategory && matchSearch;
     });
-  }, [products, selectedCategory, catalogSearch]);
+  }, [sortedProducts, selectedCategory, catalogSearch]);
+
+  const handleMoveProduct = (productId: string, direction: 'up' | 'down') => {
+    const currentFilteredIds = filteredProducts.map(p => p.id);
+    if (currentFilteredIds.length <= 1) return;
+    
+    const idx = currentFilteredIds.indexOf(productId);
+    if (idx === -1) return;
+    
+    const newIndex = direction === 'up' ? idx - 1 : idx + 1;
+    if (newIndex < 0 || newIndex >= currentFilteredIds.length) return;
+    
+    const reorderedFilteredIds = [...currentFilteredIds];
+    const [removed] = reorderedFilteredIds.splice(idx, 1);
+    reorderedFilteredIds.splice(newIndex, 0, removed);
+    
+    const otherIds = products
+      .map(p => p.id)
+      .filter(id => !currentFilteredIds.includes(id));
+      
+    const newOverallOrder = [...reorderedFilteredIds, ...otherIds];
+    
+    setProductOrder(newOverallOrder);
+    localStorage.setItem("miejebew_product_order_v4", JSON.stringify(newOverallOrder));
+    toast.success("Posisi menu berhasil diperbarui.");
+  };
 
   const subtotal = cartLines.reduce((sum, item) => sum + item.lineTotal, 0);
   const tax = 0; // Tax completely disabled/removed for cashier as requested!
@@ -178,15 +232,30 @@ export function KasirView() {
               </button>
             )}
           </div>
-          <div className="relative flex-1 max-w-sm">
-            <input
-              type="text"
-              placeholder="Cari menu..."
-              value={catalogSearch}
-              onChange={(e) => setCatalogSearch(e.target.value)}
-              className="w-full bg-sidebar-accent/30 dark:bg-white/5 border border-sidebar-border dark:border-white/10 rounded-2xl py-2.5 pl-10 pr-4 text-sm text-foreground dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500/40 backdrop-blur-md transition-colors"
-            />
-            <Search className="absolute left-3.5 top-3 w-4 h-4 text-muted-foreground" />
+          <div className="flex items-center gap-2 max-w-md w-full justify-end">
+            <button
+              onClick={() => setIsArrangeMode(!isArrangeMode)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider cursor-pointer border transition-all shrink-0 select-none",
+                isArrangeMode
+                  ? "bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-600/25"
+                  : "bg-sidebar-accent/30 dark:bg-white/5 border-sidebar-border dark:border-white/10 text-slate-400 hover:text-foreground dark:text-slate-300"
+              )}
+            >
+              <ArrowUpDown className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{isArrangeMode ? "Selesai Susun" : "Susun Menu"}</span>
+              <span className="sm:hidden">{isArrangeMode ? "Selesai" : "Susun"}</span>
+            </button>
+            <div className="relative flex-1 max-w-xs sm:max-w-sm">
+              <input
+                type="text"
+                placeholder="Cari menu..."
+                value={catalogSearch}
+                onChange={(e) => setCatalogSearch(e.target.value)}
+                className="w-full bg-sidebar-accent/30 dark:bg-white/5 border border-sidebar-border dark:border-white/10 rounded-2xl py-2.5 pl-10 pr-4 text-sm text-foreground dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500/40 backdrop-blur-md transition-colors"
+              />
+              <Search className="absolute left-3.5 top-3 w-4 h-4 text-muted-foreground" />
+            </div>
           </div>
         </div>
       </header>
@@ -237,6 +306,9 @@ export function KasirView() {
                   <ProductCard
                     key={product.id}
                     product={product}
+                    isArrangeMode={isArrangeMode}
+                    onMoveUp={() => handleMoveProduct(product.id, 'up')}
+                    onMoveDown={() => handleMoveProduct(product.id, 'down')}
                     onAddToCart={() => {
                       setCustomizingProduct(product);
                       setSelectedSpicyLevel(0);

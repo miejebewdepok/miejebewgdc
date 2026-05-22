@@ -467,6 +467,89 @@ export function AIAssistantPanel({
   const bottomRef = useRef<HTMLDivElement>(null);
   const hasBootstrappedRef = useRef(false);
 
+  // States & Refs for speech recognition
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  // Cleanup voice recording on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  const startListening = () => {
+    if (typeof window === "undefined") return;
+
+    // Check browser compatibility for SpeechRecognition API
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      toast.error("Browser Anda tidak mendukung Input Suara (Speech Recognition).");
+      return;
+    }
+
+    try {
+      const rec = new SpeechRecognition();
+      rec.continuous = false;
+      rec.interimResults = false;
+      rec.lang = "id-ID"; // Indonesian language dictation
+
+      rec.onstart = () => {
+        setIsListening(true);
+        toast.success("Mulai merekam suara... Silakan berbicara.");
+      };
+
+      rec.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        if (transcript) {
+          setInput((prev) => prev ? `${prev} ${transcript}` : transcript);
+          toast.success("Suara berhasil diterjemahkan!");
+        }
+      };
+
+      rec.onerror = (event: any) => {
+        console.error("Speech recognition error:", event.error);
+        if (event.error === "not-allowed") {
+          toast.error("Izin mikrofon ditolak. Harap izinkan akses mikrofon di browser Anda.");
+        } else {
+          toast.error(`Terjadi kesalahan input suara: ${event.error}`);
+        }
+        setIsListening(false);
+      };
+
+      rec.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = rec;
+      rec.start();
+    } catch (e) {
+      console.error(e);
+      toast.error("Gagal memulai input suara.");
+      setIsListening(false);
+    }
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+      toast.info("Perekaman suara dihentikan.");
+    }
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
+
   const bootstrap = useCallback(async () => {
     if (hasBootstrappedRef.current) return;
     hasBootstrappedRef.current = true;
@@ -913,13 +996,18 @@ export function AIAssistantPanel({
                     disabled={!chat && !isOfflineSimMode}
                   />
                   <Button
-                    variant="outline"
+                    variant={isListening ? "default" : "outline"}
                     size="icon-lg"
-                    className="rounded-2xl"
-                    onClick={() => toast.info("Voice input belum tersedia.")}
-                    aria-label="Rekam suara"
+                    className={cn(
+                      "rounded-2xl transition-all duration-300",
+                      isListening && "bg-red-600 hover:bg-red-700 text-white animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.5)] border-red-500"
+                    )}
+                    onClick={toggleListening}
+                    aria-label={isListening ? "Hentikan perekaman" : "Rekam suara"}
+                    title={isListening ? "Hentikan perekaman" : "Rekam suara"}
+                    disabled={!chat && !isOfflineSimMode}
                   >
-                    <Mic className="size-4" />
+                    <Mic className={cn("size-4", isListening && "scale-110")} />
                   </Button>
                   <Button
                     size="icon-lg"

@@ -470,10 +470,12 @@ export function AIAssistantPanel({
   // States & Refs for speech recognition
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const shouldBeListeningRef = useRef(false);
 
   // Cleanup voice recording on unmount
   useEffect(() => {
     return () => {
+      shouldBeListeningRef.current = false;
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
@@ -516,26 +518,42 @@ export function AIAssistantPanel({
         console.error("Speech recognition error:", event.error);
         if (event.error === "not-allowed") {
           toast.error("Izin mikrofon ditolak. Harap izinkan akses mikrofon di browser Anda.");
+          shouldBeListeningRef.current = false;
+          setIsListening(false);
+        } else if (event.error === "no-speech") {
+          console.log("No speech detected, will auto-restart if enabled.");
         } else {
           toast.error(`Terjadi kesalahan input suara: ${event.error}`);
         }
-        setIsListening(false);
       };
 
       rec.onend = () => {
-        setIsListening(false);
+        if (shouldBeListeningRef.current) {
+          // Auto-restart on mobile when OS native recognition stops on silence
+          try {
+            rec.start();
+          } catch (e) {
+            console.error("Failed to auto-restart speech recognition:", e);
+            setIsListening(false);
+          }
+        } else {
+          setIsListening(false);
+        }
       };
 
       recognitionRef.current = rec;
+      shouldBeListeningRef.current = true;
       rec.start();
     } catch (e) {
       console.error(e);
       toast.error("Gagal memulai input suara.");
+      shouldBeListeningRef.current = false;
       setIsListening(false);
     }
   };
 
   const stopListening = () => {
+    shouldBeListeningRef.current = false;
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       setIsListening(false);

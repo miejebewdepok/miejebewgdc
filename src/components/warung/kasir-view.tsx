@@ -718,11 +718,24 @@ export function KasirView() {
               <div
                 className={cn(
                   "transition-all duration-300 ease-in-out overflow-hidden",
-                  isToppingsExpanded ? "max-h-[350px] opacity-100 mt-1" : "max-h-0 opacity-0 pointer-events-none"
+                  isToppingsExpanded ? "max-h-[450px] opacity-100 mt-1" : "max-h-0 opacity-0 pointer-events-none"
                 )}
               >
                 <div className="grid grid-cols-3 gap-2 py-1">
-                  {["Bakso", "Bakso Ikan", "Sosis", "Nugget", "Kornet", "Otak-Otak", "Tahu Aci", "Scallop", "Cireng"].map((topping) => {
+                  {[
+                    "Bakso",
+                    "Bakso Ikan",
+                    "Sosis",
+                    "Nugget",
+                    "Kornet",
+                    "Otak-Otak",
+                    "Tahu Aci",
+                    "Scallop",
+                    "Cireng",
+                    "Beef Slice",
+                    "Telur",
+                    "Keju Slice",
+                  ].map((topping) => {
                     const count = selectedToppings.filter((t) => t === topping).length;
                     return (
                       <div
@@ -734,7 +747,14 @@ export function KasirView() {
                             : "bg-sidebar-accent/50 dark:bg-white/5 border-sidebar-border dark:border-white/5 text-foreground/80 dark:text-slate-200 hover:bg-sidebar-accent dark:hover:bg-white/10"
                         )}
                       >
-                        <span className="truncate block text-left font-extrabold">{topping}</span>
+                        <div className="flex flex-col text-left leading-tight min-w-0">
+                          <span className="truncate block font-extrabold text-[10px]">{topping}</span>
+                          {["Beef Slice", "Telur", "Keju Slice"].includes(topping) && (
+                            <span className="text-[8px] font-black text-amber-600 dark:text-amber-500 leading-none mt-0.5">
+                              +Rp {topping === "Beef Slice" ? "2.5k" : topping === "Telur" ? "4k" : "3k"}
+                            </span>
+                          )}
+                        </div>
                         
                         {count === 0 ? (
                           <button
@@ -822,25 +842,37 @@ export function KasirView() {
                   <span className="font-mono">+ Rp {(selectedFilling === 'Special' ? 10000 : 5000).toLocaleString('id-ID')}</span>
                 </div>
               )}
-              {selectedToppings.length > 0 && (
-                <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
-                  <span>
-                    Tambahan {selectedToppings.length} Topping 
-                    {selectedToppings.length === 3 && " (Promo Paket 3)"}
-                    {selectedToppings.length === 7 && " (Promo Paket 7)"}
-                    {selectedToppings.length !== 3 && selectedToppings.length !== 7 && " (+Rp 2k/top)"}
-                  </span>
-                  <span className="font-mono">
-                    + Rp {(
-                      selectedToppings.length === 3 
-                        ? 5000 
-                        : selectedToppings.length === 7 
-                        ? 10000 
-                        : selectedToppings.length * 2000
-                    ).toLocaleString('id-ID')}
-                  </span>
-                </div>
-              )}
+              {selectedToppings.length > 0 && (() => {
+                const specialToppings = selectedToppings.filter((t) => ["Beef Slice", "Telur", "Keju Slice"].includes(t));
+                const standardToppings = selectedToppings.filter((t) => !["Beef Slice", "Telur", "Keju Slice"].includes(t));
+                const stdCount = standardToppings.length;
+                const stdSurcharge = stdCount === 3 
+                  ? 5000 
+                  : (stdCount === 7 
+                    ? 10000 
+                    : stdCount * 2000);
+                
+                let specialSurcharge = 0;
+                specialToppings.forEach((t) => {
+                  if (t === "Beef Slice") specialSurcharge += 2500;
+                  else if (t === "Telur") specialSurcharge += 4000;
+                  else if (t === "Keju Slice") specialSurcharge += 3000;
+                });
+                
+                const totalSurcharge = stdSurcharge + specialSurcharge;
+                return (
+                  <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
+                    <span>
+                      Tambahan {selectedToppings.length} Topping 
+                      {stdCount > 0 && ` (${stdCount} Std${stdCount === 3 ? " Paket 3" : stdCount === 7 ? " Paket 7" : ""})`}
+                      {specialToppings.length > 0 && ` (${specialToppings.length} Premium)`}
+                    </span>
+                    <span className="font-mono">
+                      + Rp {totalSurcharge.toLocaleString('id-ID')}
+                    </span>
+                  </div>
+                );
+              })()}
               <div className="flex justify-between text-sm font-bold border-t border-sidebar-border/30 dark:border-white/5 pt-2 mt-1">
                 <span>Harga Unit</span>
                 <span className="text-red-650 dark:text-red-400 font-mono font-extrabold">
@@ -851,13 +883,25 @@ export function KasirView() {
                         (customizingProduct.category === 'Kebab' && selectedSize === 'LARGE' && selectedFilling === 'Special' ? 10000 : 0) +
                         (customizingProduct.category === 'Lumpia Beef' && ['Beef Patty', 'Chicken Katsu'].includes(selectedFilling) ? 5000 : 0) +
                         (customizingProduct.category === 'Lumpia Beef' && selectedFilling === 'Special' ? 10000 : 0) +
-                        (!['Kebab', 'Lumpia Beef', 'Snack'].includes(customizingProduct.category) ? (
-                          selectedToppings.length === 3 
+                        (!['Kebab', 'Lumpia Beef', 'Snack'].includes(customizingProduct.category) ? (() => {
+                          const specialToppings = selectedToppings.filter((t) => ["Beef Slice", "Telur", "Keju Slice"].includes(t));
+                          const standardToppings = selectedToppings.filter((t) => !["Beef Slice", "Telur", "Keju Slice"].includes(t));
+                          const stdCount = standardToppings.length;
+                          const stdSurcharge = stdCount === 3 
                             ? 5000 
-                            : selectedToppings.length === 7 
-                            ? 10000 
-                            : selectedToppings.length * 2000
-                        ) : 0))).toLocaleString('id-ID')}
+                            : (stdCount === 7 
+                              ? 10000 
+                              : stdCount * 2000);
+                          
+                          let specialSurcharge = 0;
+                          specialToppings.forEach((t) => {
+                            if (t === "Beef Slice") specialSurcharge += 2500;
+                            else if (t === "Telur") specialSurcharge += 4000;
+                            else if (t === "Keju Slice") specialSurcharge += 3000;
+                          });
+                          
+                          return stdSurcharge + specialSurcharge;
+                        })() : 0))).toLocaleString('id-ID')}
                 </span>
               </div>
             </div>

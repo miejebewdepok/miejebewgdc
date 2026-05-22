@@ -149,15 +149,26 @@ export function AppStateProvider({
     
     const spicySurcharge = isSnack ? 0 : ((level === 4 || level === 5) ? 2000 : 0);
     
-    // Promo: 3 toppings = 5,000, 7 toppings = 10,000, otherwise 2,000 each
-    const toppingsCount = toppings.length;
-    const toppingsSurcharge = isSnack 
-      ? 0 
-      : (toppingsCount === 3 
-        ? 5000 
-        : toppingsCount === 7 
+    // Toppings pricing logic: standard toppings cost 2,000 each (promo: 3 = 5,000, 7 = 10,000)
+    // Special toppings cost: Beef Slice (+2,500), Telur (+4,000), Keju Slice (+3,000)
+    const specialToppings = toppings.filter((t) => ["Beef Slice", "Telur", "Keju Slice"].includes(t));
+    const standardToppings = toppings.filter((t) => !["Beef Slice", "Telur", "Keju Slice"].includes(t));
+
+    const stdCount = standardToppings.length;
+    const stdSurcharge = stdCount === 3 
+      ? 5000 
+      : (stdCount === 7 
         ? 10000 
-        : toppingsCount * 2000);
+        : stdCount * 2000);
+
+    let specialSurcharge = 0;
+    specialToppings.forEach((t) => {
+      if (t === "Beef Slice") specialSurcharge += 2500;
+      else if (t === "Telur") specialSurcharge += 4000;
+      else if (t === "Keju Slice") specialSurcharge += 3000;
+    });
+
+    const toppingsSurcharge = isSnack ? 0 : stdSurcharge + specialSurcharge;
 
     let fillingSurcharge = 0;
     if (!isSnack) {

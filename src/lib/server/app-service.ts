@@ -372,6 +372,8 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
       paymentMethod: transaction.paymentMethod as PaymentMethod,
       customerName: transaction.customerName,
       total: transaction.total,
+      amountPaid: transaction.amountPaid ?? undefined,
+      change: transaction.change ?? undefined,
       createdAt: transaction.createdAt,
       items: itemsByTransaction.get(transaction.id) ?? [],
     })),

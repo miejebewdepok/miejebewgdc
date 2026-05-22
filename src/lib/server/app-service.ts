@@ -576,20 +576,20 @@ export async function createTransaction(
 
     // Construct a beautiful name incorporating spicy level and toppings
     const extras: string[] = [];
+    if (item.spicyLevel !== undefined) {
+      if (product.category === 'Kebab' || product.category === 'Lumpia Beef') {
+         if (item.spicyLevel === 0) extras.push("Tidak Pedas");
+         else if (item.spicyLevel === 1) extras.push("Sedang");
+         else if (item.spicyLevel === 2) extras.push("Pedas");
+      } else {
+         extras.push(`Level ${item.spicyLevel}`);
+      }
+    }
     if (item.size) {
       extras.push(`Ukuran: ${item.size}`);
     }
     if (item.filling) {
       extras.push(`Varian Isi: ${item.filling}`);
-    }
-    if (item.spicyLevel !== undefined) {
-      if (product.category === 'Kebab' || product.category === 'Lumpia Beef') {
-         if (item.spicyLevel === 0) extras.push("Tidak Pedas");
-         else if (item.spicyLevel === 2 || item.spicyLevel === 3) extras.push("Sedang");
-         else if (item.spicyLevel === 4 || item.spicyLevel === 5) extras.push("Pedas");
-      } else {
-         extras.push(`Level ${item.spicyLevel}`);
-      }
     }
     if (item.toppings && item.toppings.length > 0) {
       const counts: Record<string, number> = {};

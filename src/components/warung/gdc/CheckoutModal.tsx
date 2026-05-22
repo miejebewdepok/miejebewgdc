@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { CartItem, Transaction, Settings } from '@/lib/types';
-import { X, CreditCard, Banknote, QrCode, FileText, Printer, CheckCircle } from 'lucide-react';
+import { X, CreditCard, Banknote, QrCode, FileText, Printer, CheckCircle, Loader2 } from 'lucide-react';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -12,7 +12,7 @@ interface CheckoutModalProps {
   total: number;
   serviceCharge: number;
   settings: Settings;
-  onSuccessCheckout: (transaction: Transaction) => void;
+  onSuccessCheckout: (transaction: Transaction) => Promise<boolean>;
 }
 
 export default function CheckoutModal({
@@ -31,6 +31,7 @@ export default function CheckoutModal({
   const [amountPaid, setAmountPaid] = useState<number>(0);
   const [amountPaidInput, setAmountPaidInput] = useState<string>('');
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [invoiceNo, setInvoiceNo] = useState('');
   const [createdTransaction, setCreatedTransaction] = useState<Transaction | null>(null);
   // Mobile tab switcher
@@ -44,6 +45,7 @@ export default function CheckoutModal({
     setAmountPaid(0);
     setAmountPaidInput('');
     setIsCompleted(false);
+    setIsSubmitting(false);
     setCreatedTransaction(null);
     setMobileTab('payment');
   }, [isOpen]);
@@ -90,8 +92,9 @@ export default function CheckoutModal({
     }
   };
 
-  const processPayment = () => {
+  const processPayment = async () => {
     if (paymentMethod === 'Tunai' && amountPaid < total) return;
+    setIsSubmitting(true);
     const newTx: Transaction = {
       id: `tx-${Date.now()}`,
       invoiceNo,
@@ -105,9 +108,17 @@ export default function CheckoutModal({
       customerName: customerName.trim() || 'Umum',
       paymentMethod
     };
-    setCreatedTransaction(newTx);
-    setIsCompleted(true);
-    onSuccessCheckout(newTx);
+    try {
+      const success = await onSuccessCheckout(newTx);
+      if (success) {
+        setCreatedTransaction(newTx);
+        setIsCompleted(true);
+      }
+    } catch (err) {
+      console.error("Checkout failed:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Shared receipt content — rendered in both mobile tab and desktop aside
@@ -142,7 +153,7 @@ export default function CheckoutModal({
                 <tr key={idx} className="align-top">
                   <td className="py-1">
                     <span className="block font-bold text-slate-700 break-words whitespace-normal pr-1 leading-tight">{item.product?.name || 'Menu'}</span>
-                    {item.notes && item.notes.split('\n').map((note: string, i: number) => (
+                    {item.notes && item.notes.split('\n').map((n: string) => n.trim()).filter(Boolean).map((note: string, i: number) => (
                       <span key={i} className="block text-[8.5px] text-red-600 font-extrabold uppercase tracking-tight mt-0.5">» {note}</span>
                     ))}
                   </td>
@@ -239,10 +250,11 @@ export default function CheckoutModal({
                     <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold uppercase">Nama Pelanggan / Nomor Meja</label>
                     <input
                       type="text"
+                      disabled={isSubmitting}
                       placeholder="e.g. Meja 05, Mas Joni"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl py-3 px-4 text-sm text-foreground dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/40 font-semibold"
+                      className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl py-3 px-4 text-sm text-foreground dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/40 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                   </div>
 
@@ -254,12 +266,13 @@ export default function CheckoutModal({
                         <button
                           key={m}
                           type="button"
+                          disabled={isSubmitting}
                           onClick={() => handlePaymentMethodChange(m)}
                           className={`flex items-center justify-center gap-1.5 py-3 rounded-2xl font-extrabold text-xs border transition-all cursor-pointer ${
                             paymentMethod === m
                               ? 'bg-red-600 text-white border-red-500 shadow-lg'
                               : 'bg-black/5 border-black/10 dark:bg-white/5 dark:border-white/10 text-slate-700 dark:text-slate-300'
-                          }`}
+                          } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                           {m === 'Tunai' && <Banknote className={`w-4 h-4 ${paymentMethod === m ? 'text-white' : 'text-yellow-600 dark:text-yellow-400'}`} />}
                           {m === 'QRIS' && <QrCode className={`w-4 h-4 ${paymentMethod === m ? 'text-white' : 'text-red-500'}`} />}
@@ -280,12 +293,13 @@ export default function CheckoutModal({
                             <button
                               type="button"
                               key={amount}
+                              disabled={isSubmitting}
                               onClick={() => handlePresetClick(amount)}
                               className={`px-3 py-2 text-xs font-mono font-bold rounded-xl border cursor-pointer transition-all ${
                                 amountPaid === amount
                                   ? 'bg-yellow-500 text-slate-950 border-yellow-400 shadow-sm'
                                   : 'bg-black/5 border-black/10 dark:bg-white/5 dark:border-white/10 text-slate-700 dark:text-slate-300'
-                              }`}
+                              } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                               {amount === total ? 'Uang Pas' : formatRupiah(amount)}
                             </button>
@@ -298,13 +312,14 @@ export default function CheckoutModal({
                           <input
                             type="text"
                             placeholder="0"
+                            disabled={isSubmitting}
                             value={amountPaidInput ? parseInt(amountPaidInput).toLocaleString('id-ID') : ''}
                             onChange={(e) => handleManualInput(e.target.value)}
-                            className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl py-3 px-4 text-xl font-mono text-foreground dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                            className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl py-3 px-4 text-xl font-mono text-foreground dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
                           />
                           {amountPaid > 0 && (
-                            <button type="button" onClick={() => { setAmountPaid(0); setAmountPaidInput(''); }}
-                              className="absolute right-4 top-1/2 -translate-y-1/2 text-xs bg-black/10 dark:bg-white/10 px-2.5 py-1 rounded-xl text-slate-500 dark:text-slate-400">
+                            <button type="button" disabled={isSubmitting} onClick={() => { setAmountPaid(0); setAmountPaidInput(''); }}
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-xs bg-black/10 dark:bg-white/10 px-2.5 py-1 rounded-xl text-slate-500 dark:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed">
                               Clear
                             </button>
                           )}
@@ -352,15 +367,22 @@ export default function CheckoutModal({
                   </div>
                   <button
                     type="button"
-                    disabled={isInsufficient}
+                    disabled={isInsufficient || isSubmitting}
                     onClick={processPayment}
                     className={`py-3.5 px-5 rounded-2xl font-black cursor-pointer transition-all flex items-center gap-2 text-sm ${
-                      isInsufficient
+                      isInsufficient || isSubmitting
                         ? 'bg-zinc-200 dark:bg-zinc-800 text-slate-400 dark:text-slate-500 border border-black/5 dark:border-zinc-700 cursor-not-allowed'
                         : 'bg-red-600 hover:bg-red-700 text-white shadow-xl shadow-red-600/30 active:scale-95'
                     }`}
                   >
-                    PROSES SELESAI
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-white" />
+                        MENYIMPAN...
+                      </>
+                    ) : (
+                      "PROSES SELESAI"
+                    )}
                   </button>
                 </div>
               </div>
@@ -407,7 +429,7 @@ export default function CheckoutModal({
           </div>
 
           {/* Close Button */}
-          {!isCompleted && (
+          {!isCompleted && !isSubmitting && (
             <button
               type="button"
               onClick={onClose}

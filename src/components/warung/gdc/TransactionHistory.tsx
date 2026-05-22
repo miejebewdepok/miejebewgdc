@@ -320,7 +320,14 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                         {selectedTx.items.map((item, idx) => (
                           <tr key={idx} className="align-top">
                             <td className="py-1">
-                              <span className="block text-foreground dark:text-white font-bold break-words whitespace-normal pr-1 leading-tight">{item.productName || item.product?.name || 'Menu'}</span>
+                              {(() => {
+                                const productName = item.productName || item.product?.name || 'Menu';
+                                return productName.split('\n').map((line, i) => (
+                                  <span key={i} className={i === 0 ? "block text-foreground dark:text-white font-bold break-words whitespace-normal pr-1 leading-tight" : "block text-[9px] text-red-500 dark:text-red-400 font-extrabold uppercase tracking-tight mt-0.5"}>
+                                    {i === 0 ? line : `» ${line}`}
+                                  </span>
+                                ));
+                              })()}
                               {item.notes && <span className="block text-[8px] text-yellow-600 dark:text-yellow-500 italic mt-0.5">* {item.notes}</span>}
                             </td>
                             <td className="text-center py-1 text-foreground dark:text-white font-bold">{item.quantity}</td>

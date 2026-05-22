@@ -87,27 +87,22 @@ export function KasirView() {
 
   const mappedCartItems = cartLines.map(line => {
     const isSpecialCategory = line.product.category === 'Kebab' || line.product.category === 'Lumpia Beef';
-    let spicyNote = `Lvl ${line.spicyLevel}`;
-    if (isSpecialCategory) {
-      if (line.spicyLevel === 0) spicyNote = "Tidak Pedas";
-      else if (line.spicyLevel === 1) spicyNote = "Sedang";
-      else if (line.spicyLevel === 2) spicyNote = "Pedas";
-    }
     let notesArr: string[] = [];
+    
+    if (line.spicyLevel !== undefined) {
+      if (isSpecialCategory) {
+        if (line.spicyLevel === 0) notesArr.push("Tidak Pedas");
+        else if (line.spicyLevel === 1) notesArr.push("Sedang");
+        else if (line.spicyLevel === 2) notesArr.push("Pedas");
+      } else {
+        notesArr.push(`Level ${line.spicyLevel}`);
+      }
+    }
     if (line.size) {
       notesArr.push(`Ukuran: ${line.size}`);
     }
     if (line.filling) {
       notesArr.push(`Varian Isi: ${line.filling}`);
-    }
-    if (line.spicyLevel !== undefined) {
-      if (['Kebab', 'Lumpia Beef'].includes(line.product.category)) {
-        if (line.spicyLevel === 0) notesArr.push("Tidak Pedas");
-        else if (line.spicyLevel === 2 || line.spicyLevel === 3) notesArr.push("Sedang");
-        else if (line.spicyLevel === 4 || line.spicyLevel === 5) notesArr.push("Pedas");
-      } else {
-        notesArr.push(`Level ${line.spicyLevel}`);
-      }
     }
     if (line.toppings && line.toppings.length > 0) {
       const counts: Record<string, number> = {};
@@ -138,7 +133,7 @@ export function KasirView() {
     setIsCheckoutModalOpen(true);
   }
 
-  async function handleSuccessCheckout(tx: any) {
+  async function handleSuccessCheckout(tx: any): Promise<boolean> {
     try {
       const transaction = await checkout({
         customerName: tx.customerName,
@@ -148,11 +143,13 @@ export function KasirView() {
       });
       if (!transaction) {
         toast.error("Keranjang masih kosong.");
-        return;
+        return false;
       }
       toast.success("Transaksi berhasil disimpan.");
+      return true;
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Gagal menyimpan transaksi.");
+      return false;
     }
   }
 

@@ -272,7 +272,7 @@ export function AppStateProvider({
     }));
   }
 
-  async function checkout(customerName?: string) {
+  async function checkout(txData: { customerName?: string; paymentMethod?: PaymentMethod; amountPaid?: number; change?: number }) {
     if (state.cart.length === 0) {
       return null;
     }
@@ -283,13 +283,17 @@ export function AppStateProvider({
     }>("/api/transactions", {
       method: "POST",
       body: JSON.stringify({
-        paymentMethod: state.paymentMethod,
-        customerName: customerName || "Umum",
+        paymentMethod: txData.paymentMethod || state.paymentMethod,
+        customerName: txData.customerName || "Umum",
+        amountPaid: txData.amountPaid,
+        change: txData.change,
         items: state.cart.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
           spicyLevel: item.spicyLevel ?? 0,
           toppings: item.toppings ?? [],
+          filling: item.filling,
+          size: item.size,
         })),
       }),
     });

@@ -517,11 +517,15 @@ export async function createTransaction(
   payload: {
     paymentMethod: PaymentMethod;
     customerName?: string;
+    amountPaid?: number;
+    change?: number;
     items: Array<{
       productId: string;
       quantity: number;
       spicyLevel?: number;
       toppings?: string[];
+      filling?: string;
+      size?: string;
     }>;
   }
 ) {
@@ -554,12 +558,32 @@ export async function createTransaction(
       : toppingsCount === 7 
       ? 10000 
       : toppingsCount * 2000;
-    const unitPrice = product.sellPrice + spicySurcharge + toppingsSurcharge;
+      
+    let fillingSurcharge = 0;
+    if (product.category === 'Kebab') {
+      if (item.size === 'REGULER') {
+        if (item.filling === 'Beef') fillingSurcharge = 2000;
+      } else if (item.size === 'LARGE') {
+        if (item.filling === 'Beef Slice' || item.filling === 'Beef' || item.filling === 'Chicken Katsu') fillingSurcharge = 5000;
+        else if (item.filling === 'Special') fillingSurcharge = 10000;
+      }
+    } else {
+      if (item.filling === 'Beef Patty' || item.filling === 'Chicken Katsu') fillingSurcharge = 5000;
+      else if (item.filling === 'Special') fillingSurcharge = 10000;
+    }
+
+    const unitPrice = product.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge;
 
     // Construct a beautiful name incorporating spicy level and toppings
     let suffix = "";
+    if (item.size) {
+      suffix += `Ukuran: ${item.size}`;
+    }
+    if (item.filling) {
+      suffix += (suffix ? " • Varian Isi: " : "Varian Isi: ") + item.filling;
+    }
     if (item.spicyLevel !== undefined) {
-      suffix += `Lvl ${item.spicyLevel}`;
+      suffix += (suffix ? ` • Lvl ${item.spicyLevel}` : `Lvl ${item.spicyLevel}`);
     }
     if (item.toppings && item.toppings.length > 0) {
       const counts: Record<string, number> = {};
@@ -595,6 +619,8 @@ export async function createTransaction(
       total,
       paymentMethod: payload.paymentMethod,
       customerName: payload.customerName || "Umum",
+      amountPaid: payload.amountPaid,
+      change: payload.change,
       createdAt,
     });
 

@@ -133,7 +133,12 @@ export function KasirView() {
 
   async function handleSuccessCheckout(tx: any) {
     try {
-      const transaction = await checkout(tx.customerName);
+      const transaction = await checkout({
+        customerName: tx.customerName,
+        paymentMethod: tx.paymentMethod,
+        amountPaid: tx.amountPaid,
+        change: tx.change,
+      });
       if (!transaction) {
         toast.error("Keranjang masih kosong.");
         return;

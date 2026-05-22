@@ -5,7 +5,7 @@ import Dashboard from "./gdc/Dashboard";
 import { useRouter } from "next/navigation";
 
 export function DashboardView() {
-  const { products, transactions, updateProduct } = useAppState();
+  const { products, transactions, updateProduct, savedBills, loadBill, deleteBill } = useAppState();
   const router = useRouter();
 
   return (
@@ -13,9 +13,12 @@ export function DashboardView() {
       <Dashboard
         products={products}
         transactions={transactions}
-        savedBills={[]} // Not supported by state yet
-        onLoadBill={() => {}}
-        onDeleteBill={() => {}}
+        savedBills={savedBills}
+        onLoadBill={(id) => {
+          loadBill(id);
+          router.push("/kasir");
+        }}
+        onDeleteBill={deleteBill}
         onUpdateProduct={(p) => {
           updateProduct(p.id, {
             name: p.name,

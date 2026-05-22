@@ -7,7 +7,8 @@ import { Product, ProductCategory, Transaction } from "@/lib/types";
 import ProductCard from "./gdc/ProductCard";
 import CartSection from "./gdc/CartSection";
 import CheckoutModal from "./gdc/CheckoutModal";
-import { Search, ChevronDown, ChevronUp, ShoppingCart, LayoutGrid, Flame, Utensils, Beef, Coffee, Leaf, Cookie } from "lucide-react";
+import SavedBillsModal from "./gdc/SavedBillsModal";
+import { Search, ChevronDown, ChevronUp, ShoppingCart, LayoutGrid, Flame, Utensils, Beef, Coffee, Leaf, Cookie, Clock, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import React from "react";
 
@@ -30,13 +31,18 @@ export function KasirView() {
     updateCartQuantity,
     removeFromCart,
     checkout,
-    settings
+    settings,
+    saveBill,
+    savedBills,
+    loadBill,
+    deleteBill
   } = useAppState();
 
   const [catalogSearch, setCatalogSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
+  const [isSavedBillsOpen, setIsSavedBillsOpen] = useState(false);
 
   // States for Spicy Level and Toppings customization modal
   const [customizingProduct, setCustomizingProduct] = useState<Product | null>(null);
@@ -130,9 +136,20 @@ export function KasirView() {
       {/* Header Canvas */}
       <header className="pb-4 shrink-0">
         <div className="flex items-center justify-between gap-3 mb-4">
-          <h1 className="text-xl sm:text-2xl font-extrabold text-foreground dark:text-white tracking-tight shrink-0">
-            Kasir Resto
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-foreground dark:text-white tracking-tight shrink-0">
+              Kasir Resto
+            </h1>
+            {savedBills.length > 0 && (
+              <button
+                onClick={() => setIsSavedBillsOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-2xl text-xs font-extrabold text-amber-700 dark:text-amber-400 cursor-pointer transition-all"
+              >
+                <Clock className="w-3.5 h-3.5 text-amber-500" />
+                <span>{savedBills.length} Bill Ditunda</span>
+              </button>
+            )}
+          </div>
           <div className="relative flex-1 max-w-sm">
             <input
               type="text"
@@ -213,7 +230,10 @@ export function KasirView() {
           onRemoveItem={(id) => removeFromCart(id)}
           onClearCart={handleClearCart}
           onCheckout={handleCheckout}
-          onSaveBill={() => toast.success("Bill ditunda!")}
+          onSaveBill={(billName) => {
+            saveBill(billName);
+            toast.success(`Bill "${billName}" berhasil ditunda!`);
+          }}
         />
       </div>
 
@@ -504,12 +524,44 @@ export function KasirView() {
                 setIsMobileCartOpen(false);
                 handleCheckout();
               }}
-              onSaveBill={() => {
+              onSaveBill={(billName) => {
                 setIsMobileCartOpen(false);
-                toast.success("Bill ditunda!");
+                saveBill(billName);
+                toast.success(`Bill "${billName}" berhasil ditunda!`);
               }}
               onCloseMobile={() => setIsMobileCartOpen(false)}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Saved Bills Modal Dialog */}
+      {isSavedBillsOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="relative w-full max-w-4xl h-[85vh] bg-sidebar/95 dark:bg-slate-950/90 rounded-[32px] border border-sidebar-border dark:border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Close Button */}
+            <button
+              onClick={() => setIsSavedBillsOpen(false)}
+              className="absolute top-6 right-6 p-2 bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 rounded-full cursor-pointer transition-colors z-50"
+              title="Tutup"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            
+            <div className="flex-1 overflow-hidden p-2">
+              <SavedBillsModal
+                savedBills={savedBills}
+                onLoadBill={(id) => {
+                  loadBill(id);
+                  setIsSavedBillsOpen(false);
+                  toast.success("Bill berhasil dipulihkan!");
+                }}
+                onDeleteBill={(id) => {
+                  deleteBill(id);
+                  toast.success("Bill berhasil dihapus!");
+                }}
+              />
+            </div>
           </div>
         </div>
       )}

@@ -63,6 +63,7 @@ export interface SavedBill {
   id: string;
   name: string;
   date: string;
+  createdAt: string;
   items: any[];
 }
 

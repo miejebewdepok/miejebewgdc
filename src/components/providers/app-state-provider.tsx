@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { emptyAppState } from "@/lib/empty-state";
-import { AppState, Debt, DebtDraft, PaymentMethod, Product, ProductDraft, Settings, Transaction } from "@/lib/types";
+import { AppState, Debt, DebtDraft, PaymentMethod, Product, ProductDraft, SavedBill, Settings, Transaction } from "@/lib/types";
 
 type CartLine = {
   id: string;
@@ -35,6 +35,10 @@ type AppStateContextValue = AppState & {
   resetWorkspace: () => Promise<void>;
   deleteTransaction: (transactionId: string) => Promise<void>;
   updateTransaction: (transactionId: string, payload: { paymentMethod?: PaymentMethod; createdAt?: string }) => Promise<void>;
+  savedBills: SavedBill[];
+  saveBill: (name: string) => void;
+  loadBill: (id: string) => void;
+  deleteBill: (id: string) => void;
 };
 
 const AppStateContext = createContext<AppStateContextValue | null>(null);
@@ -69,6 +73,23 @@ export function AppStateProvider({
   const router = useRouter();
   const [state, setState] = useState<AppState>(emptyAppState);
   const { data: session, isPending } = useSession();
+  const [savedBills, setSavedBills] = useState<SavedBill[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("miejebew_saved_bills_v1");
+    if (saved) {
+      try {
+        setSavedBills(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse saved bills", e);
+      }
+    }
+  }, []);
+
+  const persistBills = (newBills: SavedBill[]) => {
+    setSavedBills(newBills);
+    localStorage.setItem("miejebew_saved_bills_v1", JSON.stringify(newBills));
+  };
   const sessionUserId = session?.user?.id ?? null;
 
   useEffect(() => {
@@ -412,6 +433,60 @@ export function AppStateProvider({
     }));
   }
 
+  function saveBill(name: string) {
+    if (cartLines.length === 0) return;
+
+    const newBill: SavedBill = {
+      id: Math.random().toString(36).substring(2, 9),
+      name: name,
+      date: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      items: cartLines.map(line => ({
+        id: line.id,
+        productId: line.product.id,
+        quantity: line.quantity,
+        spicyLevel: line.spicyLevel,
+        toppings: line.toppings,
+        product: line.product,
+        sellPrice: line.product.sellPrice
+      }))
+    };
+
+    const newBills = [newBill, ...savedBills];
+    persistBills(newBills);
+
+    setState((current) => ({
+      ...current,
+      cart: []
+    }));
+  }
+
+  function loadBill(id: string) {
+    const billToLoad = savedBills.find(b => b.id === id);
+    if (!billToLoad) return;
+
+    const cartItemsToLoad = billToLoad.items.map((item: any) => ({
+      id: item.id || `${item.productId}-lvl${item.spicyLevel || 0}-${(item.toppings || []).sort().join(",")}`,
+      productId: item.productId,
+      quantity: item.quantity,
+      spicyLevel: item.spicyLevel ?? 0,
+      toppings: item.toppings ?? []
+    }));
+
+    setState((current) => ({
+      ...current,
+      cart: cartItemsToLoad
+    }));
+
+    const newBills = savedBills.filter(b => b.id !== id);
+    persistBills(newBills);
+  }
+
+  function deleteBill(id: string) {
+    const newBills = savedBills.filter(b => b.id !== id);
+    persistBills(newBills);
+  }
+
   return (
     <AppStateContext.Provider
       value={{
@@ -435,6 +510,10 @@ export function AppStateProvider({
         resetWorkspace,
         deleteTransaction,
         updateTransaction,
+        savedBills,
+        saveBill,
+        loadBill,
+        deleteBill,
       }}
     >
       {children}

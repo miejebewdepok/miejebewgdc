@@ -115,7 +115,7 @@ export function AuthScreen() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <span className="text-[10px] text-red-750 dark:text-slate-500 uppercase font-bold tracking-wider">Menu Terlaris</span>
-                  <div className="text-lg font-black text-[#450a0a] dark:text-white mt-0.5">Mie Iblis Pedas</div>
+                  <div className="text-lg font-black text-[#450a0a] dark:text-white mt-0.5">Mie Jebew Delight</div>
                   <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5 mt-1">
                     <TrendingUp className="w-2.5 h-2.5" /> 45 porsi terjual hari ini
                   </div>

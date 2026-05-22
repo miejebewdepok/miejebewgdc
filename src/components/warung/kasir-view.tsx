@@ -107,7 +107,7 @@ export function KasirView() {
     }
     
     if (line.filling) {
-      customNote += ` • Isian: ${line.filling}`;
+      customNote += ` • Varian Isi: ${line.filling}`;
     }
     if (line.size) {
       customNote = `Ukuran: ${line.size} • ` + customNote;
@@ -348,7 +348,9 @@ export function KasirView() {
                         onClick={() => {
                           setSelectedSize(sizeObj.label);
                           if (sizeObj.label === 'REGULER' && (selectedFilling === 'Chicken Katsu' || selectedFilling === 'Special')) {
-                            setSelectedFilling('Beef Slice');
+                            setSelectedFilling('Beef');
+                          } else if (sizeObj.label === 'LARGE' && selectedFilling === 'Beef Slice') {
+                            setSelectedFilling('Beef');
                           }
                         }}
                         className={cn(
@@ -378,17 +380,17 @@ export function KasirView() {
             {customizingProduct.category === 'Kebab' && (
               <div className="flex flex-col gap-2">
                 <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                  Pilihan Isian
+                  Varian Isi
                 </span>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { label: "Beef Slice", reqLarge: false },
-                    { label: "Beef", reqLarge: false },
-                    { label: "Chicken Katsu", reqLarge: true },
-                    { label: "Special", reqLarge: true },
+                    { label: "Beef Slice", reqLarge: false, reqReguler: true },
+                    { label: "Beef", reqLarge: false, reqReguler: false },
+                    { label: "Chicken Katsu", reqLarge: true, reqReguler: false },
+                    { label: "Special", reqLarge: true, reqReguler: false },
                   ].map((filling) => {
                     const isSelected = selectedFilling === filling.label;
-                    const isDisabled = filling.reqLarge && selectedSize === 'REGULER';
+                    const isDisabled = (filling.reqLarge && selectedSize === 'REGULER') || (filling.reqReguler && selectedSize === 'LARGE');
                     let displaySurcharge = 0;
                     if (selectedSize === 'REGULER' && filling.label === 'Beef') displaySurcharge = 2000;
                     if (selectedSize === 'LARGE' && filling.label === 'Special') displaySurcharge = 5000;
@@ -427,7 +429,7 @@ export function KasirView() {
             {customizingProduct.category === 'Lumpia Beef' && (
               <div className="flex flex-col gap-2">
                 <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                  Pilihan Isian
+                  Varian Isi
                 </span>
                 <div className="grid grid-cols-2 gap-2">
                   {[
@@ -608,13 +610,13 @@ export function KasirView() {
                 <>
                   {selectedSize === 'REGULER' && selectedFilling === 'Beef' && (
                     <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
-                      <span>Isian Beef</span>
+                      <span>Varian Isi Beef</span>
                       <span className="font-mono">+ Rp 2.000</span>
                     </div>
                   )}
                   {selectedSize === 'LARGE' && selectedFilling === 'Special' && (
                     <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
-                      <span>Isian Special</span>
+                      <span>Varian Isi Special</span>
                       <span className="font-mono">+ Rp 5.000</span>
                     </div>
                   )}
@@ -622,7 +624,7 @@ export function KasirView() {
               )}
               {customizingProduct.category === 'Lumpia Beef' && !['Beef Slice', 'Kornet'].includes(selectedFilling) && (
                 <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
-                  <span>Isian {selectedFilling}</span>
+                  <span>Varian Isi {selectedFilling}</span>
                   <span className="font-mono">+ Rp {(selectedFilling === 'Special' ? 10000 : 5000).toLocaleString('id-ID')}</span>
                 </div>
               )}

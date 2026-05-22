@@ -11,8 +11,10 @@ import {
   Settings,
   TrendingUp,
   Sun,
-  Moon
+  Moon,
+  LogOut
 } from 'lucide-react';
+import { signOut } from '@/lib/auth-client';
 
 interface SidebarProps {
   activeTab: 'dashboard' | 'pos' | 'history' | 'manage' | 'report' | 'settings';
@@ -178,31 +180,49 @@ export default function Sidebar({
         </div>
 
         {/* Terminal Info & User Profile */}
-        <div className="border-t border-sidebar-border/40 dark:border-white/10 pt-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full border border-sidebar-border/40 dark:border-white/20 shrink-0 relative overflow-hidden bg-slate-850">
-            {userProfileImage ? (
-              <img 
-                src={userProfileImage} 
-                alt={userProfileName} 
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-tr from-red-600 via-yellow-500 to-orange-500 flex items-center justify-center font-extrabold text-xs text-slate-950 font-mono">
-                {userProfileName
-                  .trim()
-                  .split(/\s+/)
-                  .map(n => n[0])
-                  .join('')
-                  .toUpperCase()
-                  .slice(0, 2) || 'AB'}
-              </div>
-            )}
+        <div className="border-t border-sidebar-border/40 dark:border-white/10 pt-4 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="w-10 h-10 rounded-full border border-sidebar-border/40 dark:border-white/20 shrink-0 relative overflow-hidden bg-slate-850">
+              {userProfileImage ? (
+                <img 
+                  src={userProfileImage} 
+                  alt={userProfileName} 
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-tr from-red-600 via-yellow-500 to-orange-500 flex items-center justify-center font-extrabold text-xs text-slate-950 font-mono">
+                  {userProfileName
+                    .trim()
+                    .split(/\s+/)
+                    .map(n => n[0])
+                    .join('')
+                    .toUpperCase()
+                    .slice(0, 2) || 'AB'}
+                </div>
+              )}
+            </div>
+            <div className="overflow-hidden">
+              <span className="text-sm font-semibold text-foreground dark:text-white block truncate font-sans" title={userProfileName}>{userProfileName}</span>
+              <span className="text-[10px] text-sidebar-foreground/65 dark:text-slate-400 block font-mono">Terminal 01 • Kasir</span>
+            </div>
           </div>
-          <div className="overflow-hidden">
-            <span className="text-sm font-semibold text-foreground dark:text-white block truncate font-sans" title={userProfileName}>{userProfileName}</span>
-            <span className="text-[10px] text-sidebar-foreground/65 dark:text-slate-400 block font-mono">Terminal 01 • Kasir</span>
-          </div>
+
+          <button
+            onClick={async () => {
+              try {
+                await signOut();
+                window.location.href = '/auth';
+              } catch (err) {
+                console.error('Failed to log out:', err);
+                window.location.href = '/auth';
+              }
+            }}
+            className="p-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 hover:text-red-400 border border-red-500/20 rounded-xl transition-all cursor-pointer shadow-md shrink-0 ml-auto flex items-center justify-center"
+            title="Keluar / Ganti Akun"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </aside>

@@ -70,7 +70,11 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
 
   // Product sales breakdown (dynamically computed from all actual items sold)
   const salesByCategory = useMemo(() => {
-    const categories: Record<string, number> = {};
+    // Seed default categories so they always appear in the report
+    const categories: Record<string, number> = {
+      'Qalla Coffe': 0,
+      'Tea Series': 0
+    };
 
     filteredTransactions.forEach(tx => {
       tx.items.forEach(item => {
@@ -84,17 +88,17 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       });
     });
 
-    // Convert to array, filter out categories with 0 sales if there are others, and sort by highest revenue
+    // Convert to array, always include Qalla Coffe and Tea Series even if 0, filter others if 0
     const result = Object.entries(categories)
       .map(([name, value]) => ({ name, value }))
-      .filter(item => item.value > 0);
+      .filter(item => item.value > 0 || ['Qalla Coffe', 'Tea Series'].includes(item.name));
 
-    // Fallback if no sales yet, so chart doesn't look empty
+    // Fallback if no sales yet and empty
     if (result.length === 0) {
       return [
         { name: 'Mie Pedas', value: 0 },
-        { name: 'Lumpia Beef', value: 0 },
-        { name: 'Kebab', value: 0 },
+        { name: 'Qalla Coffe', value: 0 },
+        { name: 'Tea Series', value: 0 },
         { name: 'Snack', value: 0 }
       ];
     }
@@ -194,139 +198,128 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
   }, [filteredTransactions]);
 
   return (
-    <div className="flex-1 flex flex-col gap-6 overflow-y-auto pr-1">
+    <div className="flex-1 flex flex-col gap-6 overflow-y-auto pr-1 sm:pr-2 pb-8">
       
-      {/* Top filter toggles */}
-      <div className="flex items-center justify-between">
+      {/* Top Header & Toggles */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-extrabold text-foreground dark:text-white flex items-center gap-2">
-            <FileSpreadsheet className="text-red-500 w-5 h-5" /> Laporan Keuangan Neraca
+          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground dark:text-white flex items-center gap-2">
+            <FileSpreadsheet className="text-red-500 w-5 h-5 sm:w-6 sm:h-6" /> Laporan Keuangan
           </h2>
-          <p className="text-slate-550 dark:text-slate-400 text-xs">Arsip laba rugi, omset kotor, dan rasio hidangan pedas</p>
+          <p className="text-slate-550 dark:text-slate-400 text-xs sm:text-sm mt-1">Arsip laba rugi, omset kotor, dan performa penjualan</p>
         </div>
 
-        <div className="flex bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-2xl p-1 shrink-0">
-          <button
-            onClick={() => setTimeRange('today')}
-            className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-              timeRange === 'today'
-                ? 'bg-red-500 text-white shadow-md'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
-          >
-            Hari Ini
-          </button>
-          <button
-            onClick={() => setTimeRange('week')}
-            className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-              timeRange === 'week'
-                ? 'bg-red-500 text-white shadow-md'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
-          >
-            7 Hari Terakhir
-          </button>
-          <button
-            onClick={() => setTimeRange('month')}
-            className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-              timeRange === 'month'
-                ? 'bg-red-500 text-white shadow-md'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
-          >
-            Bulan Ini
-          </button>
+        {/* Modern iOS-like Segmented Control */}
+        <div className="flex bg-black/5 dark:bg-slate-800/50 p-1 rounded-2xl w-full md:w-auto overflow-x-auto no-scrollbar shadow-inner">
+          {(['today', 'week', 'month'] as const).map((range) => (
+            <button
+              key={range}
+              onClick={() => setTimeRange(range)}
+              className={`flex-1 md:flex-none px-4 py-2 text-[11px] sm:text-xs font-bold rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer ${
+                timeRange === range
+                  ? 'bg-white dark:bg-slate-700 text-red-600 dark:text-white shadow-sm'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5'
+              }`}
+            >
+              {range === 'today' ? 'Hari Ini' : range === 'week' ? '7 Hari' : 'Bulan Ini'}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* KPI Cards Grid - Spicy hot design elements */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* KPI Cards Grid - Premium Glassmorphism */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         
         {/* Gross Revenue Card */}
-        <div className="glass-morphism rounded-3xl p-5 border-l-4 border-l-yellow-500 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-yellow-500/5 rounded-full blur-xl group-hover:bg-yellow-500/10 transition-colors"></div>
-          <div className="flex justify-between items-start mb-2">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold tracking-wider">OMSET KOTOR</span>
-            <div className="p-1 px-1.5 bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 rounded-lg">
+        <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-slate-200/50 dark:border-white/5 relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all pointer-events-none"></div>
+          <div className="flex justify-between items-start mb-3 relative z-10">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase">Omset Kotor</span>
+            <div className="p-1.5 bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-xl group-hover:scale-110 transition-transform">
               <DollarSign className="w-4 h-4" />
             </div>
           </div>
-          <span className="text-xl font-bold font-mono text-foreground dark:text-white tracking-tight block">
+          <span className="text-2xl font-black font-mono text-slate-800 dark:text-white tracking-tight block relative z-10">
             {formatRupiah(totalGrossRevenue)}
           </span>
-          <div className="flex items-center gap-1.5 text-[10px] text-yellow-600 dark:text-yellow-400/80 font-bold font-mono mt-2">
-            <TrendingUp className="w-3.5 h-3.5" />
-            <span>Target Kasir Terkontrol</span>
+          <div className="flex items-center gap-1.5 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-2">
+            <TrendingUp className="w-3 h-3" />
+            <span>Target Tercapai</span>
           </div>
         </div>
 
-        {/* Dynamic Estimated Costs Card (HPP) */}
-        <div className="glass-morphism rounded-3xl p-5 border-l-4 border-l-slate-400 relative overflow-hidden group">
-          <div className="flex justify-between items-start mb-2">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold tracking-wider">BIAYA OPERASIONAL (HPP)</span>
-            <div className="p-1 px-1.5 bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 rounded-lg">
-              <TrendingDown className="w-4 h-4" />
+        {/* HPP Card */}
+        <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-slate-200/50 dark:border-white/5 relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-slate-500/10 rounded-full blur-2xl group-hover:bg-slate-500/20 transition-all pointer-events-none"></div>
+          <div className="flex justify-between items-start mb-3 relative z-10">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase">Operasional (HPP)</span>
+            <div className="p-1.5 bg-slate-500/10 dark:bg-slate-500/20 text-slate-600 dark:text-slate-300 rounded-xl group-hover:scale-110 transition-transform">
+              <Layers className="w-4 h-4" />
             </div>
           </div>
-          <span className="text-xl font-bold font-mono text-foreground dark:text-slate-300 tracking-tight block">
+          <span className="text-2xl font-black font-mono text-slate-800 dark:text-slate-200 tracking-tight block relative z-10">
             {formatRupiah(estimatedHpp)}
           </span>
-          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-2">Rasio HPP Bahan Baku: 45%</p>
+          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400 font-bold mt-2">
+            <TrendingDown className="w-3 h-3" />
+            <span>Estimasi {hppFactor * 100}% Modal</span>
+          </div>
         </div>
 
-        {/* Laba Bersih Card (Highlight with hot fiery Red Theme) */}
-        <div className="glass-morphism rounded-3xl p-5 border-l-4 border-l-red-500 relative overflow-hidden group shadow-lg shadow-red-500/5">
-          <div className="absolute -right-5 -bottom-5 w-20 h-20 bg-red-500/10 rounded-full blur-2xl group-hover:bg-red-500/25 transition-all pointer-events-none"></div>
-          <div className="flex justify-between items-start mb-2">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold tracking-wider">LABA BERSIH RESTO</span>
-            <div className="p-1 px-1.5 bg-red-500/15 text-red-650 dark:text-red-500 rounded-lg animate-pulse">
-              <TrendingUp className="w-4 h-4" />
+        {/* Laba Bersih Card - The Star! */}
+        <div className="bg-gradient-to-br from-red-50 to-white dark:from-red-950/20 dark:to-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-red-200/50 dark:border-red-500/10 relative overflow-hidden group hover:shadow-xl hover:shadow-red-500/10 hover:-translate-y-1 transition-all duration-300">
+          <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-red-500/20 dark:bg-red-500/10 rounded-full blur-3xl group-hover:bg-red-500/30 transition-all pointer-events-none"></div>
+          <div className="absolute top-0 left-0 w-20 h-20 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+          <div className="flex justify-between items-start mb-3 relative z-10">
+            <span className="text-[10px] text-red-800/70 dark:text-red-300/70 font-bold tracking-widest uppercase">Laba Bersih</span>
+            <div className="p-1.5 bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl animate-pulse group-hover:animate-none group-hover:scale-110 transition-transform">
+              <Sparkles className="w-4 h-4" />
             </div>
           </div>
-          <span className="text-xl font-extrabold font-mono text-red-650 dark:text-red-400 tracking-tight block">
+          <span className="text-2xl font-black font-mono text-red-700 dark:text-red-400 tracking-tight block relative z-10">
             {formatRupiah(netProfit)}
           </span>
-          <div className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-2 font-mono">
-            <span> Margin Kunci: ~55% Netto</span>
+          <div className="flex items-center gap-1.5 text-[10px] text-red-600/80 dark:text-red-400/80 font-bold mt-2 relative z-10">
+            <Award className="w-3 h-3" />
+            <span>Margin Profit Tinggi</span>
           </div>
         </div>
 
         {/* Ticket Stats Card */}
-        <div className="glass-morphism rounded-3xl p-5 border-l-4 border-l-indigo-400 relative overflow-hidden group">
-          <div className="flex justify-between items-start mb-2">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold tracking-wider">NOTA TERBAYAR</span>
-            <div className="p-1 px-1.5 bg-indigo-500/10 text-indigo-650 dark:text-indigo-400 rounded-lg">
+        <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-slate-200/50 dark:border-white/5 relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all pointer-events-none"></div>
+          <div className="flex justify-between items-start mb-3 relative z-10">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase">Nota Terbayar</span>
+            <div className="p-1.5 bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-xl group-hover:scale-110 transition-transform">
               <Activity className="w-4 h-4" />
             </div>
           </div>
-          <span className="text-xl font-bold font-mono text-foreground dark:text-white tracking-tight block">
+          <span className="text-2xl font-black font-mono text-slate-800 dark:text-white tracking-tight block relative z-10">
             {transactionCount} Bill
           </span>
-          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-2 font-mono">
-            Rerata: {formatRupiah(averageTransactionValue)} / Nota
-          </p>
+          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400 font-bold font-mono mt-2 relative z-10">
+            <span>Rerata {formatRupiah(averageTransactionValue)}</span>
+          </div>
         </div>
       </div>
 
       {/* Main Charts & Breakdown Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-2">
         
-        {/* Sales Trend Chart (Mock container but fully interactive using SVGs / custom flexbars in absolute values) */}
-        <div className="lg:col-span-8 glass-morphism rounded-3xl p-6 flex flex-col justify-between min-h-[340px]">
-          <div>
-            <h3 className="text-sm font-bold text-foreground dark:text-white uppercase tracking-wider mb-1">Grafik Volume Omset</h3>
-            <p className="text-slate-550 dark:text-slate-400 text-xs">Aktivitas arus masuk dana dari seluruh terminal POS</p>
+        {/* Sales Trend Chart */}
+        <div className="lg:col-span-8 bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200/50 dark:border-white/5 rounded-[32px] p-5 sm:p-6 flex flex-col justify-between min-h-[340px] shadow-sm">
+          <div className="mb-6">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">Grafik Volume Omset</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">Aktivitas penjualan di berbagai waktu</p>
           </div>
 
-          {/* Interactive Graph Plotting bar container */}
-          <div className="flex items-end justify-between h-52 pt-6 pb-2 px-2 border-b border-black/5 dark:border-white/10 relative">
-            
+          <div className="flex items-end justify-between h-52 sm:h-64 pt-6 pb-2 px-1 sm:px-4 border-b border-slate-200 dark:border-white/10 relative">
             {/* Guide gridlines */}
-            <div className="absolute inset-x-0 top-0 border-b border-dashed border-black/5 dark:border-white/5 text-[9px] text-slate-500 font-mono pt-0.5">
-              Target Level Max: {formatRupiah(maxChartValue)}
+            <div className="absolute inset-x-0 top-0 border-b border-dashed border-slate-200 dark:border-white/5 text-[9px] text-slate-400 font-mono pt-1 pl-1">
+              {formatRupiah(maxChartValue)}
             </div>
-            <div className="absolute inset-x-0 top-1/2 border-b border-dashed border-black/5 dark:border-white/5 text-[9px] text-slate-500 font-mono">
-              Level 50%: {formatRupiah(maxChartValue / 2)}
+            <div className="absolute inset-x-0 top-1/2 border-b border-dashed border-slate-200 dark:border-white/5 text-[9px] text-slate-400 font-mono pt-1 pl-1">
+              {formatRupiah(maxChartValue / 2)}
             </div>
 
             {salesChartData.map((data, index) => {
@@ -336,80 +329,77 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
               return (
                 <div 
                   key={index}
-                  className="flex flex-col items-center flex-1 gap-2 group relative h-full justify-end"
+                  className="flex flex-col items-center flex-1 gap-2 group relative h-full justify-end px-0.5 sm:px-1"
                   onMouseEnter={() => setHoveredBarIndex(index)}
                   onMouseLeave={() => setHoveredBarIndex(null)}
                 >
                   {/* Tooltip on Hover */}
-                  {isHovered && (
-                    <div className="absolute -top-10 z-30 bg-red-600 border border-yellow-400 text-white text-[10px] font-bold py-1.5 px-2.5 rounded-xl text-center shadow-lg pointer-events-none transform -translate-y-1 font-mono">
-                      {formatRupiah(data.sum)}
-                    </div>
-                  )}
+                  <div className={`absolute bottom-[calc(100%+8px)] z-30 bg-slate-800 dark:bg-slate-700 text-white text-[10px] font-bold py-1.5 px-2 rounded-xl text-center shadow-lg pointer-events-none transform font-mono whitespace-nowrap transition-all duration-200 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+                    {formatRupiah(data.sum)}
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 border-[3px] border-transparent border-t-slate-800 dark:border-t-slate-700"></div>
+                  </div>
 
-                  {/* Visual Bar with Hot-Gradient styling */}
+                  {/* Visual Bar with Modern Gradient */}
                   <div 
-                    className={`w-10 rounded-t-xl transition-all duration-300 relative cursor-pointer ${
-                      isHovered 
-                        ? 'bg-gradient-to-t from-red-650 to-yellow-500 opacity-100 scale-x-110 shadow-lg shadow-red-500/10' 
-                        : 'bg-gradient-to-t from-red-750/50 to-red-550/60 dark:from-red-700/60 dark:to-red-500/70 group-hover:from-red-650 group-hover:to-yellow-500 group-hover:opacity-100'
-                    }`}
-                    style={{ height: `${Math.max(4, heightPercent)}%` }}
+                    className="w-full max-w-[32px] sm:max-w-[48px] rounded-t-2xl transition-all duration-300 relative cursor-pointer overflow-hidden"
+                    style={{ 
+                      height: `${Math.max(4, heightPercent)}%`,
+                      opacity: isHovered || hoveredBarIndex === null ? 1 : 0.6
+                    }}
                   >
-                    {/* Inner core beam highlight */}
-                    <div className="absolute inset-x-1.5 top-1 bg-white/20 h-1/2 rounded-t-lg"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-red-600/90 to-amber-400/90 dark:from-red-600 dark:to-amber-500"></div>
+                    {/* Inner highlight for 3D glass effect */}
+                    <div className="absolute inset-x-1 top-1 bg-white/20 h-1/3 rounded-t-xl backdrop-blur-sm"></div>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Label coordinates along the charts */}
-          <div className="flex justify-between px-2 text-[10px] text-slate-500 dark:text-slate-400 font-mono pt-2">
+          <div className="flex justify-between px-1 sm:px-4 text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-mono pt-3">
             {salesChartData.map((data, index) => (
-              <span key={index} className="flex-1 text-center truncate">
-                {data.label}
+              <span key={index} className="flex-1 text-center leading-tight">
+                {data.label.replace(' ', '\n')}
               </span>
             ))}
           </div>
         </div>
 
         {/* TOP Category Share Panel */}
-        <div className="lg:col-span-4 glass-morphism rounded-3xl p-6 flex flex-col justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-foreground dark:text-white uppercase tracking-wider mb-3">Distribusi Menu</h3>
-            <p className="text-slate-550 dark:text-slate-400 text-xs mb-4">Urutan sumbangsih kategori menu terhadap omset kotor</p>
+        <div className="lg:col-span-4 bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200/50 dark:border-white/5 rounded-[32px] p-5 sm:p-6 flex flex-col shadow-sm mt-4 lg:mt-0">
+          <div className="mb-5">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">Distribusi Menu</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">Kontribusi kategori menu ke omset kotor</p>
           </div>
 
           {/* Progress stack */}
-          <div className="flex-1 flex flex-col gap-4 justify-center">
+          <div className="flex-1 flex flex-col gap-5 justify-center mb-6">
             {salesByCategory.map((category, index) => {
               const maxCategoryVal = Math.max(...salesByCategory.map(c => c.value)) || 1;
               const barPercent = maxCategoryVal === 0 ? 0 : Math.round((category.value / maxCategoryVal) * 100);
 
-              // Cycle through beautiful modern gradients for dynamic categories
+              // Cohesive hot monochrome gradients
               const gradients = [
-                'from-red-600 to-red-500',
-                'from-orange-500 to-amber-500',
-                'from-yellow-500 to-yellow-400',
-                'from-emerald-500 to-teal-500',
-                'from-sky-500 to-blue-500',
-                'from-purple-500 to-indigo-500',
-                'from-pink-500 to-rose-400'
+                'from-red-600 to-red-400',
+                'from-red-500 to-orange-400',
+                'from-orange-500 to-amber-400',
+                'from-amber-500 to-yellow-400',
+                'from-yellow-500 to-yellow-300',
+                'from-slate-400 to-slate-300',
+                'from-slate-500 to-slate-400'
               ];
-              const gradientClass = gradients[index % gradients.length];
+              const gradientClass = gradients[Math.min(index, gradients.length - 1)];
 
               return (
-                <div key={category.name} className="flex flex-col gap-1.5 animate-fade-in">
+                <div key={category.name} className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2">
                   <div className="flex justify-between text-xs">
-                    <span className="font-semibold text-slate-700 dark:text-slate-200">{category.name}</span>
-                    <span className="font-mono font-bold text-foreground dark:text-slate-100">{formatRupiah(category.value)}</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-200">{category.name}</span>
+                    <span className="font-mono font-bold text-slate-800 dark:text-white">{formatRupiah(category.value)}</span>
                   </div>
                   
-                  {/* Fire Theme Double bar stack container */}
-                  <div className="w-full h-2 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden border border-black/5 dark:border-white/5">
+                  <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800/80 rounded-full overflow-hidden shadow-inner border border-black/5 dark:border-white/5">
                     <div 
-                      className={`h-full rounded-full transition-all duration-500 bg-gradient-to-r ${gradientClass}`}
+                      className={`h-full rounded-full transition-all duration-1000 ease-out bg-gradient-to-r ${gradientClass}`}
                       style={{ width: `${barPercent}%` }}
                     ></div>
                   </div>
@@ -418,52 +408,64 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
             })}
           </div>
 
-          {/* Top highlight indicator */}
-          <div className="mt-4 pt-3 border-t border-black/5 dark:border-white/5 bg-red-500/5 rounded-2xl p-3 border border-red-500/10 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Award className="w-4 h-4 text-yellow-600 dark:text-yellow-500 shrink-0" />
-              <div>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-bold">MENU TERLARIS</span>
-                <span className="text-xs font-bold text-foreground dark:text-white block line-clamp-1">{bestSellerProduct.name}</span>
+          {/* Best Seller Highlight */}
+          <div className="mt-auto p-4 bg-gradient-to-r from-red-50 to-amber-50 dark:from-red-950/30 dark:to-amber-950/20 border border-red-100 dark:border-red-900/30 rounded-2xl flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center shrink-0">
+                <Award className="w-4 h-4 text-red-600 dark:text-red-400" />
+              </div>
+              <div className="min-w-0 pr-2">
+                <span className="text-[10px] text-red-800/60 dark:text-red-200/60 font-bold uppercase tracking-wider block mb-0.5">Menu Terlaris</span>
+                <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white block truncate">{bestSellerProduct.name}</span>
               </div>
             </div>
-            <span className="text-xs font-mono font-extrabold bg-yellow-500 text-slate-950 px-2 py-1 rounded-lg">
-              {bestSellerProduct.qty} porsi
-            </span>
+            <div className="text-right shrink-0">
+              <span className="text-xs font-mono font-black text-red-600 dark:text-red-400 bg-white/60 dark:bg-slate-900/60 px-2 py-1 rounded-lg border border-red-100 dark:border-red-900/50 shadow-sm">
+                {bestSellerProduct.qty}x
+              </span>
+            </div>
           </div>
-
         </div>
-
       </div>
 
       {/* Payment methods stats */}
-      <div className="glass-morphism rounded-3xl p-6">
-        <h3 className="text-sm font-bold text-foreground dark:text-white uppercase tracking-wider mb-5">Analisis Aliran Kas & E-Payment</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200/50 dark:border-white/5 rounded-[32px] p-5 sm:p-6 mt-2 mb-4 shadow-sm">
+        <div className="mb-6">
+          <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">Analisis Aliran Kas & E-Payment</h3>
+          <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">Proporsi metode pembayaran yang digunakan pelanggan</p>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           {paymentMethodStats.map((item) => (
             <div 
               key={item.method} 
-              className="bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between h-28 relative overflow-hidden"
+              className="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/80 dark:border-white/5 rounded-[20px] p-5 flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow"
             >
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">{item.method}</span>
-                  <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-200">{item.percentage}% Share</span>
+              {/* Subtle background icon for premium feel */}
+              <div className="absolute -right-4 -bottom-4 opacity-[0.03] dark:opacity-5 pointer-events-none transition-transform group-hover:scale-110">
+                <DollarSign className="w-24 h-24" />
+              </div>
+
+              <div className="relative z-10">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">{item.method}</span>
+                  <span className="text-[10px] font-mono font-black px-2 py-0.5 rounded-full bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 shadow-sm">
+                    {item.percentage}%
+                  </span>
                 </div>
-                <span className="text-lg font-bold font-mono text-foreground dark:text-white block">
+                <span className="text-xl sm:text-2xl font-black font-mono text-slate-800 dark:text-white block mt-1">
                   {formatRupiah(item.amount)}
                 </span>
               </div>
               
-              {/* Payment proportion micro bar */}
-              <div className="w-full bg-slate-200 dark:bg-slate-900 h-1.5 rounded-full overflow-hidden mt-3">
+              <div className="w-full bg-slate-200 dark:bg-slate-900/80 h-1.5 rounded-full overflow-hidden mt-5 relative z-10 border border-black/5 dark:border-white/5">
                 <div 
-                  className={`h-full rounded-full ${
+                  className={`h-full rounded-full transition-all duration-1000 ease-out ${
                     item.method === 'QRIS' 
                       ? 'bg-red-500' 
                       : item.method === 'Debit' 
-                      ? 'bg-yellow-500' 
-                      : 'bg-slate-650 dark:bg-white'
+                      ? 'bg-amber-500' 
+                      : 'bg-slate-500 dark:bg-slate-400'
                   }`}
                   style={{ width: `${item.percentage}%` }}
                 ></div>

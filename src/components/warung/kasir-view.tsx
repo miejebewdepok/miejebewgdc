@@ -281,7 +281,7 @@ export function KasirView() {
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-3">
             <h1 className="text-xl sm:text-2xl font-extrabold text-foreground dark:text-white tracking-tight shrink-0">
-              Kasir Resto
+              Kasir
             </h1>
             {savedBills.length > 0 && (
               <button
@@ -297,15 +297,14 @@ export function KasirView() {
             <button
               onClick={() => setIsArrangeMode(!isArrangeMode)}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider cursor-pointer border transition-all shrink-0 select-none",
+                "flex items-center justify-center w-10 h-10 rounded-2xl cursor-pointer border transition-all shrink-0 select-none",
                 isArrangeMode
                   ? "bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-600/25"
                   : "bg-sidebar-accent/30 dark:bg-white/5 border-sidebar-border dark:border-white/10 text-slate-400 hover:text-foreground dark:text-slate-300"
               )}
+              title={isArrangeMode ? "Selesai Susun" : "Susun Menu"}
             >
-              <ArrowUpDown className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{isArrangeMode ? "Selesai Susun" : "Susun Menu"}</span>
-              <span className="sm:hidden">{isArrangeMode ? "Selesai" : "Susun"}</span>
+              <ArrowUpDown className="w-4 h-4" />
             </button>
             <div className="relative flex-1 max-w-xs sm:max-w-sm">
               <input

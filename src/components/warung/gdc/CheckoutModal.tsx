@@ -50,7 +50,16 @@ export default function CheckoutModal({
 
   if (!isOpen) return null;
 
-  const change = amountPaid >= total ? amountPaid - total : 0;
+  const activeTotal = isCompleted && createdTransaction ? createdTransaction.total : total;
+  const activeSubtotal = isCompleted && createdTransaction ? createdTransaction.subtotal : subtotal;
+  const activeServiceCharge = isCompleted && createdTransaction ? createdTransaction.tax : serviceCharge;
+  const activeAmountPaid = isCompleted && createdTransaction ? (createdTransaction.amountPaid || 0) : amountPaid;
+  const activeChange = isCompleted && createdTransaction ? (createdTransaction.change || 0) : (amountPaid >= total ? amountPaid - total : 0);
+  const activeCartItems = isCompleted && createdTransaction ? createdTransaction.items : cartItems;
+  const activeCustomerName = isCompleted && createdTransaction ? createdTransaction.customerName : customerName;
+  const activePaymentMethod = isCompleted && createdTransaction ? createdTransaction.paymentMethod : paymentMethod;
+  const activeInvoiceNo = isCompleted && createdTransaction ? createdTransaction.invoiceNo : invoiceNo;
+
   const isInsufficient = paymentMethod === 'Tunai' && amountPaid < total;
 
   const presetAmounts = [total, 20000, 50000, 100000, 150000, 200000].filter(val => val >= total);
@@ -92,7 +101,7 @@ export default function CheckoutModal({
       tax,
       total,
       amountPaid: paymentMethod === 'Tunai' ? amountPaid : total,
-      change: paymentMethod === 'Tunai' ? change : 0,
+      change: paymentMethod === 'Tunai' ? activeChange : 0,
       customerName: customerName.trim() || 'Umum',
       paymentMethod
     };
@@ -113,11 +122,11 @@ export default function CheckoutModal({
       <div className="text-[10px]" style={{ fontFamily: 'monospace' }}>
         <table className="w-full mt-3">
           <tbody>
-            <tr><td className="text-slate-500">Invoice:</td><td className="text-right font-bold text-slate-800">{invoiceNo}</td></tr>
+            <tr><td className="text-slate-500">Invoice:</td><td className="text-right font-bold text-slate-800">{activeInvoiceNo}</td></tr>
             <tr><td className="text-slate-500">Tanggal:</td><td className="text-right">{new Date().toLocaleDateString('id-ID')}</td></tr>
             <tr><td className="text-slate-500">Kasir:</td><td className="text-right">{settings.userProfileName || settings.ownerName || 'Kasir'}</td></tr>
-            <tr><td className="text-slate-500">Pelanggan:</td><td className="text-right font-bold text-slate-800">{customerName || 'Umum'}</td></tr>
-            <tr><td className="text-slate-500">Metode:</td><td className="text-right font-extrabold uppercase text-red-600">{paymentMethod}</td></tr>
+            <tr><td className="text-slate-500">Pelanggan:</td><td className="text-right font-bold text-slate-800">{activeCustomerName || 'Umum'}</td></tr>
+            <tr><td className="text-slate-500">Metode:</td><td className="text-right font-extrabold uppercase text-red-600">{activePaymentMethod}</td></tr>
           </tbody>
         </table>
 
@@ -129,7 +138,7 @@ export default function CheckoutModal({
               </tr>
             </thead>
             <tbody>
-              {cartItems.map((item, idx) => (
+              {activeCartItems.map((item, idx) => (
                 <tr key={idx} className="align-top">
                   <td className="py-1">
                     <span className="block font-bold text-slate-700 break-words whitespace-normal pr-1 leading-tight">{item.product?.name || 'Menu'}</span>
@@ -145,17 +154,17 @@ export default function CheckoutModal({
 
         <table className="w-full mt-1">
           <tbody>
-            <tr><td className="text-slate-500">Subtotal:</td><td className="text-right">Rp {subtotal.toLocaleString('id-ID')}</td></tr>
+            <tr><td className="text-slate-500">Subtotal:</td><td className="text-right">Rp {activeSubtotal.toLocaleString('id-ID')}</td></tr>
             {settings.enableServiceCharge && (
-              <tr><td className="text-slate-500">Biaya Layanan ({settings.serviceChargeRate}%):</td><td className="text-right">Rp {serviceCharge.toLocaleString('id-ID')}</td></tr>
+              <tr><td className="text-slate-500">Biaya Layanan ({settings.serviceChargeRate}%):</td><td className="text-right">Rp {activeServiceCharge.toLocaleString('id-ID')}</td></tr>
             )}
             <tr className="border-t border-slate-200 font-black">
-              <td className="text-slate-900 pt-1">Total Akhir:</td><td className="text-right text-red-600 pt-1">Rp {total.toLocaleString('id-ID')}</td>
+              <td className="text-slate-900 pt-1">Total Akhir:</td><td className="text-right text-red-600 pt-1">Rp {activeTotal.toLocaleString('id-ID')}</td>
             </tr>
-            <tr><td className="text-slate-500">Bayar:</td><td className="text-right">Rp {amountPaid ? amountPaid.toLocaleString('id-ID') : total.toLocaleString('id-ID')}</td></tr>
+            <tr><td className="text-slate-500">Bayar:</td><td className="text-right">Rp {activeAmountPaid ? activeAmountPaid.toLocaleString('id-ID') : activeTotal.toLocaleString('id-ID')}</td></tr>
             <tr className="font-bold">
               <td className="text-slate-500">Kembalian:</td>
-              <td className="text-right text-emerald-600">Rp {paymentMethod === 'Tunai' ? change.toLocaleString('id-ID') : '0'}</td>
+              <td className="text-right text-emerald-600">Rp {activePaymentMethod === 'Tunai' ? activeChange.toLocaleString('id-ID') : '0'}</td>
             </tr>
           </tbody>
         </table>
@@ -363,11 +372,11 @@ export default function CheckoutModal({
                   <h3 className="text-2xl font-bold text-foreground dark:text-white mb-1">Nota Pembayaran Sukses</h3>
                   <p className="text-slate-600 dark:text-slate-400 text-sm">Pesanan Mie Jebew GDC siap dimasak di dapur.</p>
                 </div>
-                {paymentMethod === 'Tunai' && (
+                {activePaymentMethod === 'Tunai' && (
                   <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl p-4 flex justify-between items-center max-w-sm mx-auto w-full mb-4">
                     <div>
                       <span className="text-xs text-slate-500 dark:text-slate-400 block font-semibold">UANG KEMBALIAN</span>
-                      <span className="text-2xl font-mono font-extrabold text-yellow-600 dark:text-yellow-400">{formatRupiah(change)}</span>
+                      <span className="text-2xl font-mono font-extrabold text-yellow-600 dark:text-yellow-400">{formatRupiah(activeChange)}</span>
                     </div>
                     <div className="px-3 py-1.5 bg-yellow-500 text-slate-950 font-black rounded-xl text-xs uppercase">Lunas</div>
                   </div>

@@ -84,7 +84,15 @@ export function KasirView() {
   const total = subtotal + tax + serviceCharge;
 
   const mappedCartItems = cartLines.map(line => {
-    let customNote = `Lvl ${line.spicyLevel}`;
+    const isSpecialCategory = line.product.category === 'Kebab' || line.product.category === 'Lumpia Beef';
+    let spicyNote = `Lvl ${line.spicyLevel}`;
+    if (isSpecialCategory) {
+      if (line.spicyLevel === 0) spicyNote = "Tidak Pedas";
+      else if (line.spicyLevel === 1) spicyNote = "Sedang";
+      else if (line.spicyLevel === 2) spicyNote = "Pedas";
+    }
+    
+    let customNote = spicyNote;
     if (line.toppings && line.toppings.length > 0) {
       const counts: Record<string, number> = {};
       for (const t of line.toppings) {
@@ -268,40 +276,48 @@ export function KasirView() {
             {/* Spicy Levels */}
             <div className="flex flex-col gap-2">
               <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                Tingkat Kepedasan (Level 0 - 5)
+                Tingkat Kepedasan {!['Kebab', 'Lumpia Beef'].includes(customizingProduct.category) && "(Level 0 - 5)"}
               </span>
               <div className="grid grid-cols-3 gap-2">
-                {[0, 1, 2, 3, 4, 5].map((lvl) => {
-                  const hasSurcharge = lvl === 4 || lvl === 5;
-                  const isSelected = selectedSpicyLevel === lvl;
-                  return (
-                    <button
-                      key={lvl}
-                      type="button"
-                      onClick={() => setSelectedSpicyLevel(lvl)}
-                      className={cn(
-                        "py-2.5 px-3 rounded-2xl text-xs font-bold font-sans cursor-pointer transition-all duration-200 flex flex-col items-center justify-center border",
-                        isSelected
-                          ? "bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/35"
-                          : "bg-sidebar-accent/50 dark:bg-white/5 border-sidebar-border dark:border-white/5 text-foreground/80 dark:text-slate-200 hover:bg-sidebar-accent dark:hover:bg-white/10"
-                      )}
-                    >
-                      <span>Lvl {lvl}</span>
-                      {hasSurcharge && (
-                        <span className={cn(
-                          "text-[8px] mt-0.5 font-bold",
-                          isSelected ? "text-yellow-300" : "text-yellow-600 dark:text-yellow-400"
-                        )}>
-                          +Rp 2k
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
+                {(() => {
+                  const isSpecial = ['Kebab', 'Lumpia Beef'].includes(customizingProduct.category);
+                  const levels = isSpecial 
+                    ? [{ lvl: 0, label: "Tidak Pedas" }, { lvl: 1, label: "Sedang" }, { lvl: 2, label: "Pedas" }]
+                    : [0, 1, 2, 3, 4, 5].map(lvl => ({ lvl, label: `Lvl ${lvl}` }));
+
+                  return levels.map(({ lvl, label }) => {
+                    const hasSurcharge = !isSpecial && (lvl === 4 || lvl === 5);
+                    const isSelected = selectedSpicyLevel === lvl;
+                    return (
+                      <button
+                        key={lvl}
+                        type="button"
+                        onClick={() => setSelectedSpicyLevel(lvl)}
+                        className={cn(
+                          "py-2.5 px-3 rounded-2xl text-xs font-bold font-sans cursor-pointer transition-all duration-200 flex flex-col items-center justify-center border",
+                          isSelected
+                            ? "bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/35"
+                            : "bg-sidebar-accent/50 dark:bg-white/5 border-sidebar-border dark:border-white/5 text-foreground/80 dark:text-slate-200 hover:bg-sidebar-accent dark:hover:bg-white/10"
+                        )}
+                      >
+                        <span className="text-center leading-tight">{label}</span>
+                        {hasSurcharge && (
+                          <span className={cn(
+                            "text-[8px] mt-0.5 font-bold",
+                            isSelected ? "text-yellow-300" : "text-yellow-600 dark:text-yellow-400"
+                          )}>
+                            +Rp 2k
+                          </span>
+                        )}
+                      </button>
+                    );
+                  });
+                })()}
               </div>
             </div>
 
             {/* Toppings Selection Accordion Header */}
+            {!['Kebab', 'Lumpia Beef'].includes(customizingProduct.category) && (
             <div className="flex flex-col gap-1.5">
               <button
                 type="button"
@@ -416,6 +432,7 @@ export function KasirView() {
                 </div>
               </div>
             </div>
+            )}
 
             {/* Live Pricing Preview Panel */}
             <div className="bg-sidebar-accent/30 dark:bg-white/4 border border-sidebar-border/30 dark:border-white/5 rounded-2xl p-4 flex flex-col gap-1.5">
@@ -423,7 +440,7 @@ export function KasirView() {
                 <span>Harga Dasar Menu</span>
                 <span className="font-mono">Rp {customizingProduct.sellPrice.toLocaleString('id-ID')}</span>
               </div>
-              {(selectedSpicyLevel === 4 || selectedSpicyLevel === 5) && (
+              {(!['Kebab', 'Lumpia Beef'].includes(customizingProduct.category) && (selectedSpicyLevel === 4 || selectedSpicyLevel === 5)) && (
                 <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
                   <span>Tambahan Level {selectedSpicyLevel}</span>
                   <span className="font-mono">+ Rp 2.000</span>
@@ -452,7 +469,7 @@ export function KasirView() {
                 <span>Harga Unit</span>
                 <span className="text-red-650 dark:text-red-400 font-mono font-extrabold">
                   Rp {((customizingProduct.sellPrice + 
-                        ((selectedSpicyLevel === 4 || selectedSpicyLevel === 5) ? 2000 : 0) + 
+                        ((!['Kebab', 'Lumpia Beef'].includes(customizingProduct.category) && (selectedSpicyLevel === 4 || selectedSpicyLevel === 5)) ? 2000 : 0) + 
                         (selectedToppings.length === 3 
                           ? 5000 
                           : selectedToppings.length === 7 

@@ -102,7 +102,14 @@ export default function CartSection({
                   </p>
                   <div className="flex flex-wrap gap-1 mt-1">
                     <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-red-500/15 text-red-500 border border-red-500/10 uppercase tracking-tight">
-                      🔥 Lvl {item.spicyLevel ?? 0}
+                      🔥 {(() => {
+                        if (item.product?.category === 'Kebab' || item.product?.category === 'Lumpia Beef') {
+                          if (item.spicyLevel === 0) return "Tidak Pedas";
+                          if (item.spicyLevel === 1) return "Sedang";
+                          if (item.spicyLevel === 2) return "Pedas";
+                        }
+                        return `Lvl ${item.spicyLevel ?? 0}`;
+                      })()}
                     </span>
                     {item.toppings && item.toppings.length > 0 && (
                       <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 border border-yellow-500/10 uppercase tracking-tight">

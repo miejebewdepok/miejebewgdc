@@ -11,7 +11,6 @@ type Variant = "sidebar" | "default";
 const options: { value: Mode; label: string; icon: typeof Sun }[] = [
   { value: "light", label: "Terang", icon: Sun },
   { value: "dark", label: "Gelap", icon: Moon },
-  { value: "system", label: "Sistem", icon: Monitor },
 ];
 
 const styles: Record<Variant, { container: string; active: string; inactive: string }> = {

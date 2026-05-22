@@ -97,7 +97,7 @@ export function AuthScreen() {
               Kelola Pembukuan &amp; <span className="bg-gradient-to-r from-red-500 via-orange-400 to-amber-400 bg-clip-text text-transparent">Stok Kasir</span> dalam Satu Aplikasi.
             </h1>
             <p className="mt-4 text-sm sm:text-base leading-relaxed text-red-900/80 dark:text-slate-400 max-w-xl">
-              Platform kasir modern yang dirancang khusus untuk Mie Jebew GDC. Pantau penjualan harian, kelola kasbon/hutang, cetak struk thermal otomatis, dan lacak kustomisasi menu secara realtime.
+              Platform kasir modern yang dirancang khusus untuk Mie Jebew GDC. Pantau penjualan harian, cetak struk thermal otomatis, dan lacak kustomisasi menu secara realtime.
             </p>
           </div>
 
@@ -114,10 +114,10 @@ export function AuthScreen() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-[10px] text-red-750 dark:text-slate-500 uppercase font-bold tracking-wider">Omset Hari Ini</span>
-                  <div className="text-lg font-black text-[#450a0a] dark:text-white mt-0.5">Rp 3.450.000</div>
+                  <span className="text-[10px] text-red-750 dark:text-slate-500 uppercase font-bold tracking-wider">Menu Terlaris</span>
+                  <div className="text-lg font-black text-[#450a0a] dark:text-white mt-0.5">Mie Iblis Pedas</div>
                   <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5 mt-1">
-                    <TrendingUp className="w-2.5 h-2.5" /> +12.4% dari kemarin
+                    <TrendingUp className="w-2.5 h-2.5" /> 45 porsi terjual hari ini
                   </div>
                 </div>
                 <div>

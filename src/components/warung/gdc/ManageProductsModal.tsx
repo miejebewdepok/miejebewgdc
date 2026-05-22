@@ -26,6 +26,9 @@ export default function ManageProductsModal({
   // Sub-tab toggling
   const [subTab, setSubTab] = useState<'products' | 'categories'>('products');
 
+  // Search state
+  const [searchTerm, setSearchTerm] = useState('');
+
   // Form states for Product
   const [name, setName] = useState('');
   const [price, setPrice] = useState<number>(0);
@@ -34,6 +37,12 @@ export default function ManageProductsModal({
   const [bestSeller, setBestSeller] = useState(false);
   const [isAvailable, setIsAvailable] = useState(true);
   const [stock, setStock] = useState<number>(50);
+
+  // Filter products based on search
+  const filteredProducts = products.filter(prod => 
+    prod.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    prod.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Category manager states
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -154,14 +163,41 @@ export default function ManageProductsModal({
             </div>
           </div>
 
-          {subTab === 'products' && (
-            <button
-              onClick={openAddForm}
-              className="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-1.5 shadow-lg shadow-red-600/25 cursor-pointer transition-colors animate-fade-in"
-            >
-              <Plus className="w-4 h-4" /> TAMBAH MENU BARU
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {subTab === 'products' && (
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Cari menu..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl py-2.5 px-3 pl-8 text-xs text-foreground dark:text-white focus:outline-none focus:ring-1 focus:ring-red-500 w-44 md:w-56"
+                />
+                <svg
+                  className="absolute left-2.5 top-3 h-3.5 w-3.5 text-slate-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+            )}
+
+            {subTab === 'products' && (
+              <button
+                onClick={openAddForm}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-1.5 shadow-lg shadow-red-600/25 cursor-pointer transition-colors animate-fade-in shrink-0"
+              >
+                <Plus className="w-4 h-4" /> TAMBAH MENU BARU
+              </button>
+            )}
+          </div>
         </div>
 
         {subTab === 'products' ? (
@@ -172,6 +208,12 @@ export default function ManageProductsModal({
                 <Coffee className="w-12 h-12 text-slate-400 dark:text-slate-500 mb-3" />
                 <h3 className="text-base font-bold text-slate-700 dark:text-slate-300">Belum Ada Menu</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs">Tambahkan menu mie, dimsum atau minuman dingin pertama Anda untuk memulai perdagangan.</p>
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center p-8 text-center bg-black/2 dark:bg-white/2 rounded-2xl border border-dashed border-black/10 dark:border-white/5 animate-fade-in">
+                <Coffee className="w-12 h-12 text-slate-400 dark:text-slate-500 mb-3" />
+                <h3 className="text-base font-bold text-slate-700 dark:text-slate-300">Menu Tidak Ditemukan</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs">Tidak ada menu dengan kata kunci "{searchTerm}". Silakan gunakan nama atau kategori lain.</p>
               </div>
             ) : (
               <table className="w-full text-left text-sm border-collapse">
@@ -186,7 +228,7 @@ export default function ManageProductsModal({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-black/5 dark:divide-white/5">
-                  {products.map((prod) => (
+                  {filteredProducts.map((prod) => (
                     <tr key={prod.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                       <td className="py-2.5 pr-2 font-bold text-slate-800 dark:text-slate-200">
                         <div className="flex items-center gap-3">

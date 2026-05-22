@@ -68,14 +68,9 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
     return transactionCount > 0 ? Math.round(totalGrossRevenue / transactionCount) : 0;
   }, [totalGrossRevenue, transactionCount]);
 
-  // Product sales breakdown
+  // Product sales breakdown (dynamically computed from all actual items sold)
   const salesByCategory = useMemo(() => {
-    const categories: Record<string, number> = {
-      'Mie Pedas': 0,
-      'Dimsum': 0,
-      'Minuman Dingin': 0,
-      'Snack': 0
-    };
+    const categories: Record<string, number> = {};
 
     filteredTransactions.forEach(tx => {
       tx.items.forEach(item => {
@@ -89,7 +84,22 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       });
     });
 
-    return Object.entries(categories).map(([name, value]) => ({ name, value }));
+    // Convert to array, filter out categories with 0 sales if there are others, and sort by highest revenue
+    const result = Object.entries(categories)
+      .map(([name, value]) => ({ name, value }))
+      .filter(item => item.value > 0);
+
+    // Fallback if no sales yet, so chart doesn't look empty
+    if (result.length === 0) {
+      return [
+        { name: 'Mie Pedas', value: 0 },
+        { name: 'Lumpia Beef', value: 0 },
+        { name: 'Kebab', value: 0 },
+        { name: 'Snack', value: 0 }
+      ];
+    }
+
+    return result.sort((a, b) => b.value - a.value);
   }, [filteredTransactions]);
 
   // Payment methods breakdown
@@ -373,12 +383,24 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
 
           {/* Progress stack */}
           <div className="flex-1 flex flex-col gap-4 justify-center">
-            {salesByCategory.map((category) => {
+            {salesByCategory.map((category, index) => {
               const maxCategoryVal = Math.max(...salesByCategory.map(c => c.value)) || 1;
-              const barPercent = Math.round((category.value / maxCategoryVal) * 100);
+              const barPercent = maxCategoryVal === 0 ? 0 : Math.round((category.value / maxCategoryVal) * 100);
+
+              // Cycle through beautiful modern gradients for dynamic categories
+              const gradients = [
+                'from-red-600 to-red-500',
+                'from-orange-500 to-amber-500',
+                'from-yellow-500 to-yellow-400',
+                'from-emerald-500 to-teal-500',
+                'from-sky-500 to-blue-500',
+                'from-purple-500 to-indigo-500',
+                'from-pink-500 to-rose-400'
+              ];
+              const gradientClass = gradients[index % gradients.length];
 
               return (
-                <div key={category.name} className="flex flex-col gap-1.5">
+                <div key={category.name} className="flex flex-col gap-1.5 animate-fade-in">
                   <div className="flex justify-between text-xs">
                     <span className="font-semibold text-slate-700 dark:text-slate-200">{category.name}</span>
                     <span className="font-mono font-bold text-foreground dark:text-slate-100">{formatRupiah(category.value)}</span>
@@ -387,15 +409,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
                   {/* Fire Theme Double bar stack container */}
                   <div className="w-full h-2 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden border border-black/5 dark:border-white/5">
                     <div 
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        category.name === 'Mie Pedas' 
-                          ? 'bg-gradient-to-r from-red-600 to-red-500' 
-                          : category.name === 'Dimsum'
-                          ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
-                          : category.name === 'Minuman Dingin'
-                          ? 'bg-gradient-to-r from-teal-400 to-emerald-400'
-                          : 'bg-gradient-to-r from-gray-400 to-slate-400 dark:to-white'
-                      }`}
+                      className={`h-full rounded-full transition-all duration-500 bg-gradient-to-r ${gradientClass}`}
                       style={{ width: `${barPercent}%` }}
                     ></div>
                   </div>

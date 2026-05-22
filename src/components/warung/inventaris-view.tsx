@@ -30,7 +30,7 @@ export function InventarisView() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden">
+    <div className="w-full h-[calc(100vh-100px)] md:h-[calc(100vh-130px)] flex flex-col overflow-hidden">
       <ManageProductsModal
         products={products}
         categories={categories}

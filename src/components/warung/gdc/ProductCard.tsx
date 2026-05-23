@@ -151,15 +151,24 @@ export default function ProductCard({
             {product.name}
           </h3>
           {product.stock !== undefined && (
-            <span className={`text-[8px] sm:text-[9.5px] font-extrabold font-mono uppercase tracking-wider select-none mt-0.5 sm:mt-1 ${
-              product.stock <= 0 
-                ? 'text-rose-500 dark:text-rose-450 animate-pulse font-black'
-                : product.stock <= 5
-                ? 'text-amber-500 dark:text-amber-450 font-black animate-pulse'
-                : 'text-slate-400 dark:text-slate-500'
-            }`}>
-              {product.stock <= 0 ? 'Habis' : `Stok: ${product.stock}`}
-            </span>
+            <div className="mt-1 select-none">
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[8.5px] sm:text-[10px] font-extrabold font-mono uppercase tracking-wider border ${
+                product.stock <= 0 
+                  ? 'bg-rose-500/10 dark:bg-rose-500/15 border-rose-500/25 text-rose-500 dark:text-rose-400 animate-pulse font-black'
+                  : product.stock <= 5
+                  ? 'bg-amber-500/10 dark:bg-amber-500/15 border-amber-500/25 text-amber-500 dark:text-amber-400 font-black animate-pulse'
+                  : 'bg-zinc-800/10 dark:bg-white/5 border-zinc-700/15 dark:border-white/10 text-slate-500 dark:text-slate-400'
+              }`}>
+                <span className={`w-1 h-1 rounded-full mr-1 ${
+                  product.stock <= 0 
+                    ? 'bg-rose-500 animate-pulse'
+                    : product.stock <= 5
+                    ? 'bg-amber-500 animate-pulse'
+                    : 'bg-slate-400 dark:bg-slate-500'
+                }`} />
+                {product.stock <= 0 ? 'Habis' : `Stok: ${product.stock}`}
+              </span>
+            </div>
           )}
         </div>
         

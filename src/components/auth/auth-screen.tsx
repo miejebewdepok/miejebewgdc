@@ -55,7 +55,7 @@ export function AuthScreen() {
   }, [queryMode]);
 
   return (
-    <div className="relative min-h-screen bg-[#fef2f2] dark:bg-[#090b11] text-[#450a0a] dark:text-slate-100 overflow-hidden flex items-center justify-center px-4 py-8 lg:p-12 font-sans select-none transition-colors duration-300">
+    <div className="relative min-h-screen bg-[#fef2f2] dark:bg-[#090b11] text-[#450a0a] dark:text-slate-100 overflow-hidden flex items-center justify-center px-4 py-8 lg:p-12 font-sans select-none transition-colors duration-300 dark">
       
       {/* ── BACKGROUND GLOWING BLOBS (MESH GRADIENT) ── */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-200/50 dark:bg-red-600/10 rounded-full blur-[120px] pointer-events-none animate-pulse duration-[8000ms]" />
@@ -65,10 +65,7 @@ export function AuthScreen() {
       {/* Grid Pattern overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#dc262608_1px,transparent_1px),linear-gradient(to_bottom,#dc262608_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
 
-      {/* ── TOP NAVBAR ── */}
-      <div className="absolute top-4 right-4 z-20 lg:top-8 lg:right-8">
-        <ThemeToggle variant="default" className="border-red-200/60 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md text-red-950 dark:text-white hover:bg-red-50 dark:hover:bg-slate-800/60 transition-all rounded-full" />
-      </div>
+
 
       {/* ── MAIN CONTAINER ── */}
       <div className="w-full max-w-6xl grid gap-8 lg:grid-cols-[1.1fr_0.9fr] relative z-10 items-stretch">
@@ -89,7 +86,7 @@ export function AuthScreen() {
                   <span className="text-xs font-black uppercase tracking-[0.25em] bg-gradient-to-r from-red-500 to-amber-400 bg-clip-text text-transparent">MIE JEBEW GDC</span>
                   <span className="text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded-full uppercase">POS v2.0</span>
                 </div>
-                <p className="mt-0.5 text-xs text-red-900/60 dark:text-slate-400 font-medium">Sistem Manajemen Kasir Restoran Pintar</p>
+                <p className="mt-0.5 text-xs text-red-900/60 dark:text-slate-400 font-medium">Sistem Manajemen Kasir</p>
               </div>
             </div>
 
@@ -108,9 +105,8 @@ export function AuthScreen() {
               <div className="flex items-center justify-between border-b border-red-100/85 dark:border-white/5 pb-3">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-xs font-bold text-red-950 dark:text-slate-300">Live POS Widget</span>
+                  <span className="text-xs font-bold text-red-955 dark:text-slate-300">Live POS Widget</span>
                 </div>
-                <span className="text-[10px] font-mono text-red-700/60 dark:text-slate-500">22 Mei 2026</span>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>

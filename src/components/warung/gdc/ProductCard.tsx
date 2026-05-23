@@ -94,7 +94,7 @@ export default function ProductCard({
       onDragEnter={onDragEnter}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
-      className={`glass-morphism rounded-[22px] sm:rounded-3xl flex flex-col h-[225px] sm:h-[275px] overflow-hidden transition-all duration-300 relative group select-none border border-sidebar-border/30 dark:border-white/10 ${
+      className={`glass-morphism rounded-[22px] sm:rounded-3xl flex flex-col h-[232px] sm:h-[275px] overflow-hidden transition-all duration-300 relative group select-none border border-sidebar-border/30 dark:border-white/10 ${
         isArrangeMode
           ? isDragging
             ? 'opacity-40 border-dashed border-emerald-500 bg-emerald-950/5 scale-95'
@@ -140,7 +140,7 @@ export default function ProductCard({
       </div>
 
       {/* Product Details Section with Elegant Spacing */}
-      <div className="py-2 px-2.5 sm:py-3 sm:px-4 flex flex-col justify-between flex-1 relative z-10 bg-sidebar-accent/10 dark:bg-slate-950/20">
+      <div className="pt-2 px-2.5 pb-3 sm:py-3 sm:px-4 flex flex-col justify-between flex-1 relative z-10 bg-sidebar-accent/10 dark:bg-slate-950/20">
         <div className="flex flex-col gap-0.5 sm:gap-1">
           <div className="select-none">
             <span className="text-[8px] sm:text-[9px] font-extrabold text-red-500 uppercase tracking-widest font-mono">

@@ -187,7 +187,25 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
         const key = item.productId || item.id;
         if (key) {
           if (!products[key]) {
-            products[key] = { name: item.productName || item.product?.name || 'Menu', qty: 0 };
+            let cleanName = item.product?.name || item.productName || 'Menu';
+            
+            // Extract only the base name (remove newlines, Level, toppings)
+            cleanName = cleanName.split('\n')[0];
+            if (cleanName.includes(' Level ')) {
+              cleanName = cleanName.split(' Level ')[0];
+            }
+            if (cleanName.includes(' level ')) {
+              cleanName = cleanName.split(' level ')[0];
+            }
+            if (cleanName.includes(' Level-')) {
+              cleanName = cleanName.split(' Level-')[0];
+            }
+            if (cleanName.includes(' » ')) {
+              cleanName = cleanName.split(' » ')[0];
+            }
+            cleanName = cleanName.trim();
+
+            products[key] = { name: cleanName, qty: 0 };
           }
           products[key].qty += item.quantity;
         }

@@ -129,45 +129,35 @@ export default function ProductCard({
           </div>
         )}
 
-        {/* Category Icon Badge or Rank Badge floating on image */}
-        <div className="absolute top-3 left-3 z-30">
-          {isArrangeMode ? (
+        {/* Category Icon Badge or Rank Badge floating on image (Only in Arrange Mode to keep normal mode extremely clean!) */}
+        {isArrangeMode && (
+          <div className="absolute top-3 left-3 z-30">
             <div className="px-2.5 py-1 bg-emerald-600 border border-emerald-500 rounded-xl text-[10px] font-black text-white shadow-lg shadow-emerald-600/35 backdrop-blur-md animate-in zoom-in-75 duration-200">
               #{index + 1}
             </div>
-          ) : (
-            <div className="p-2 bg-sidebar/85 dark:bg-slate-950/85 rounded-2xl border border-sidebar-border/50 dark:border-white/10 backdrop-blur-md shadow-lg">
-              {getCategoryIcon(product.category, "w-4 h-4")}
-            </div>
-          )}
-        </div>
-
-        {/* Availability stock level overlay floating on image */}
-        <div className="absolute top-3 right-3">
-          {product?.stock > 0 ? (
-            product.stock !== undefined && (
-              <span className={`text-[9px] font-mono font-black px-2.5 py-1 rounded-xl uppercase tracking-wider block backdrop-blur-md shadow-lg border ${
-                product.stock <= 5 
-                  ? 'bg-amber-600/90 text-white border-amber-400 animate-pulse' 
-                  : 'bg-sidebar/85 dark:bg-slate-950/85 text-foreground dark:text-slate-300 border-sidebar-border/60 dark:border-white/15'
-              }`}>
-                Stok: {product.stock}
-              </span>
-            )
-          ) : (
-            <span className="flex items-center gap-1 bg-sidebar/90 dark:bg-zinc-950/90 border border-sidebar-border/60 dark:border-white/15 backdrop-blur-md text-[9px] uppercase font-black text-muted-foreground dark:text-slate-400 px-2.5 py-1 rounded-xl shadow-lg">
-              <AlertCircle className="w-3 h-3 text-slate-500" /> Habis
-            </span>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Product Details Section with Elegant Spacing */}
       <div className="p-2.5 sm:p-4 flex flex-col justify-between flex-1 relative z-10 bg-sidebar-accent/10 dark:bg-slate-950/20">
         <div className="flex flex-col gap-0.5 sm:gap-1">
-          <span className="text-[8px] sm:text-[9px] font-extrabold text-red-500 uppercase tracking-widest font-mono">
-            {product.category}
-          </span>
+          <div className="flex items-center justify-between select-none">
+            <span className="text-[8px] sm:text-[9px] font-extrabold text-red-500 uppercase tracking-widest font-mono">
+              {product.category}
+            </span>
+            {product.stock !== undefined && (
+              <span className={`text-[8px] sm:text-[9.5px] font-extrabold font-mono uppercase tracking-wider ${
+                product.stock <= 0 
+                  ? 'text-rose-500 dark:text-rose-450 animate-pulse font-black'
+                  : product.stock <= 5
+                  ? 'text-amber-500 dark:text-amber-450 font-black animate-pulse'
+                  : 'text-slate-400 dark:text-slate-500'
+              }`}>
+                {product.stock <= 0 ? 'Habis' : `Stok: ${product.stock}`}
+              </span>
+            )}
+          </div>
           <h3 className="font-extrabold text-foreground dark:text-white group-hover:text-red-650 dark:group-hover:text-red-400 transition-colors line-clamp-2 text-[11px] sm:text-[13px] md:text-sm leading-snug">
             {product.name}
           </h3>

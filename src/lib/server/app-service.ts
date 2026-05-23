@@ -603,7 +603,7 @@ export async function createTransaction(
       const formattedToppings = Object.entries(counts)
         .map(([topping, count]) => (count > 1 ? `${topping} (x${count})` : topping))
         .join(", ");
-      extras.push(`Top: ${formattedToppings}`);
+      extras.push(formattedToppings);
     }
     const finalName = extras.length > 0 ? `${product.name}\n${extras.join('\n')}` : product.name;
 

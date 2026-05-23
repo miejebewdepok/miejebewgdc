@@ -283,7 +283,7 @@ export function KasirView() {
       const toppingStr = Object.entries(counts)
         .map(([name, count]) => count > 1 ? `${name} (x${count})` : name)
         .join(', ');
-      notesArr.push(`Top: ${toppingStr}`);
+      notesArr.push(toppingStr);
     }
     
     const customNote = notesArr.join('\n');   

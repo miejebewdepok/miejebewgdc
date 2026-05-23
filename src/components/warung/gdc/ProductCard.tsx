@@ -142,25 +142,25 @@ export default function ProductCard({
       {/* Product Details Section with Elegant Spacing */}
       <div className="p-2.5 sm:p-4 flex flex-col justify-between flex-1 relative z-10 bg-sidebar-accent/10 dark:bg-slate-950/20">
         <div className="flex flex-col gap-0.5 sm:gap-1">
-          <div className="flex items-center justify-between select-none">
+          <div className="select-none">
             <span className="text-[8px] sm:text-[9px] font-extrabold text-red-500 uppercase tracking-widest font-mono">
               {product.category}
             </span>
-            {product.stock !== undefined && (
-              <span className={`text-[8px] sm:text-[9.5px] font-extrabold font-mono uppercase tracking-wider ${
-                product.stock <= 0 
-                  ? 'text-rose-500 dark:text-rose-450 animate-pulse font-black'
-                  : product.stock <= 5
-                  ? 'text-amber-500 dark:text-amber-450 font-black animate-pulse'
-                  : 'text-slate-400 dark:text-slate-500'
-              }`}>
-                {product.stock <= 0 ? 'Habis' : `Stok: ${product.stock}`}
-              </span>
-            )}
           </div>
           <h3 className="font-extrabold text-foreground dark:text-white group-hover:text-red-650 dark:group-hover:text-red-400 transition-colors line-clamp-2 text-[11px] sm:text-[13px] md:text-sm leading-snug">
             {product.name}
           </h3>
+          {product.stock !== undefined && (
+            <span className={`text-[8px] sm:text-[9.5px] font-extrabold font-mono uppercase tracking-wider select-none mt-0.5 sm:mt-1 ${
+              product.stock <= 0 
+                ? 'text-rose-500 dark:text-rose-450 animate-pulse font-black'
+                : product.stock <= 5
+                ? 'text-amber-500 dark:text-amber-450 font-black animate-pulse'
+                : 'text-slate-400 dark:text-slate-500'
+            }`}>
+              {product.stock <= 0 ? 'Habis' : `Stok: ${product.stock}`}
+            </span>
+          )}
         </div>
         
         <div className="flex items-center justify-between mt-1 sm:mt-2 pt-1 sm:pt-2 border-t border-sidebar-border/20 dark:border-white/5">

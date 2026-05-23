@@ -289,7 +289,7 @@ export default function CheckoutModal({
                   {/* Header */}
                   <div className="flex items-center justify-between mb-4 border-b border-black/5 dark:border-white/5 pb-3">
                     <h3 className="text-base font-bold text-foreground dark:text-white flex items-center gap-2">
-                      <Banknote className="text-red-500 w-5 h-5 animate-pulse" /> Settle Kasir Restoran
+                      <Banknote className="text-red-500 w-5 h-5 animate-pulse" /> Settle Kasir
                     </h3>
                     <span className="text-xs font-mono bg-black/5 dark:bg-white/5 px-2.5 py-1 rounded-md text-slate-600 dark:text-slate-400 border border-black/5 dark:border-white/5">
                       {invoiceNo}
@@ -302,7 +302,7 @@ export default function CheckoutModal({
                     <input
                       type="text"
                       disabled={isSubmitting}
-                      placeholder="e.g. Mas Joni"
+                      placeholder="e.g. Rania"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
                       className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl py-3 px-4 text-sm text-foreground dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/40 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
@@ -469,10 +469,13 @@ export default function CheckoutModal({
               </div>
             )}
 
-            {/* RIGHT: Receipt Panel — always on desktop; on mobile only when mobileTab=receipt */}
             <aside
               className={`w-full md:w-80 bg-white p-5 sm:p-6 flex flex-col z-20 shrink-0 text-slate-900 md:rounded-r-3xl border-l border-slate-100 overflow-y-auto ${
-                !isCompleted && mobileTab === 'payment' ? 'hidden md:flex' : 'flex'
+                isCompleted 
+                  ? 'hidden md:flex' 
+                  : mobileTab === 'payment' 
+                  ? 'hidden md:flex' 
+                  : 'flex'
               }`}
             >
               <ReceiptContent />

@@ -247,11 +247,11 @@ export default function CheckoutModal({
 
                   {/* Customer Name */}
                   <div className="mb-4">
-                    <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold uppercase">Nama Pelanggan / Nomor Meja</label>
+                    <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold uppercase">Nama Pelanggan</label>
                     <input
                       type="text"
                       disabled={isSubmitting}
-                      placeholder="e.g. Meja 05, Mas Joni"
+                      placeholder="e.g. Mas Joni"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
                       className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl py-3 px-4 text-sm text-foreground dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/40 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
@@ -274,10 +274,10 @@ export default function CheckoutModal({
                               : 'bg-black/5 border-black/10 dark:bg-white/5 dark:border-white/10 text-slate-700 dark:text-slate-300'
                           } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                          {m === 'Tunai' && <Banknote className={`w-4 h-4 ${paymentMethod === m ? 'text-white' : 'text-yellow-600 dark:text-yellow-400'}`} />}
-                          {m === 'QRIS' && <QrCode className={`w-4 h-4 ${paymentMethod === m ? 'text-white' : 'text-red-500'}`} />}
-                          {m === 'Debit' && <CreditCard className={`w-4 h-4 ${paymentMethod === m ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'}`} />}
-                          {m === 'Tunai' ? 'TUNAI / CASH' : m === 'QRIS' ? 'QRIS DULU' : 'DEBIT / EDC'}
+                          {m === 'Tunai' && <Banknote className={`w-4 h-4 hidden sm:block ${paymentMethod === m ? 'text-white' : 'text-yellow-600 dark:text-yellow-400'}`} />}
+                          {m === 'QRIS' && <QrCode className={`w-4 h-4 hidden sm:block ${paymentMethod === m ? 'text-white' : 'text-red-500'}`} />}
+                          {m === 'Debit' && <CreditCard className={`w-4 h-4 hidden sm:block ${paymentMethod === m ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'}`} />}
+                          {m === 'Tunai' ? 'CASH' : m === 'QRIS' ? 'QRIS' : 'DEBIT'}
                         </button>
                       ))}
                     </div>

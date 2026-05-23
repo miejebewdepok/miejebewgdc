@@ -140,39 +140,64 @@ export function KasirView() {
     direction: 'up' | 'down' | 'top' | 'bottom' | 'to-target',
     targetProductId?: string
   ) => {
-    const currentFilteredIds = filteredProducts.map(p => p.id);
-    if (currentFilteredIds.length <= 1) return;
+    if (filteredProducts.length <= 1) return;
     
-    const idx = currentFilteredIds.indexOf(productId);
+    const idx = filteredProducts.findIndex(p => p.id === productId);
     if (idx === -1) return;
-    
-    let newIndex = idx;
-    if (direction === 'up') {
-      newIndex = idx - 1;
-    } else if (direction === 'down') {
-      newIndex = idx + 1;
+
+    const currentOverallOrder = sortedProducts.map(p => p.id);
+    const overallIdx = currentOverallOrder.indexOf(productId);
+    if (overallIdx === -1) return;
+
+    let targetOverallIdx = -1;
+
+    if (direction === 'to-target' && targetProductId) {
+      targetOverallIdx = currentOverallOrder.indexOf(targetProductId);
+      if (targetOverallIdx === -1) return;
+    } else if (direction === 'up' && idx > 0) {
+      const prevFiltered = filteredProducts[idx - 1];
+      targetOverallIdx = currentOverallOrder.indexOf(prevFiltered.id);
+    } else if (direction === 'down' && idx < filteredProducts.length - 1) {
+      const nextFiltered = filteredProducts[idx + 1];
+      const nextOverallIdx = currentOverallOrder.indexOf(nextFiltered.id);
+      if (nextOverallIdx !== -1) {
+        targetOverallIdx = nextOverallIdx;
+      }
     } else if (direction === 'top') {
-      newIndex = 0;
+      const firstFiltered = filteredProducts[0];
+      targetOverallIdx = currentOverallOrder.indexOf(firstFiltered.id);
     } else if (direction === 'bottom') {
-      newIndex = currentFilteredIds.length - 1;
-    } else if (direction === 'to-target' && targetProductId) {
-      newIndex = currentFilteredIds.indexOf(targetProductId);
-      if (newIndex === -1) return;
+      const lastFiltered = filteredProducts[filteredProducts.length - 1];
+      targetOverallIdx = currentOverallOrder.indexOf(lastFiltered.id);
     }
+
+    if (targetOverallIdx === -1 || targetOverallIdx === overallIdx) return;
+
+    const newOverallOrder = [...currentOverallOrder];
+    const [removed] = newOverallOrder.splice(overallIdx, 1);
     
-    if (newIndex < 0 || newIndex >= currentFilteredIds.length) return;
-    if (newIndex === idx) return;
-    
-    const reorderedFilteredIds = [...currentFilteredIds];
-    const [removed] = reorderedFilteredIds.splice(idx, 1);
-    reorderedFilteredIds.splice(newIndex, 0, removed);
-    
-    const otherIds = products
-      .map(p => p.id)
-      .filter(id => !currentFilteredIds.includes(id));
-      
-    const newOverallOrder = [...reorderedFilteredIds, ...otherIds];
-    
+    // Recalculate target index in the spliced list
+    let finalInsertIdx = -1;
+    if (direction === 'to-target' && targetProductId) {
+      finalInsertIdx = newOverallOrder.indexOf(targetProductId);
+    } else if (direction === 'up') {
+      const prevFiltered = filteredProducts[idx - 1];
+      finalInsertIdx = newOverallOrder.indexOf(prevFiltered.id);
+    } else if (direction === 'down') {
+      const nextFiltered = filteredProducts[idx + 1];
+      finalInsertIdx = newOverallOrder.indexOf(nextFiltered.id) + 1;
+    } else if (direction === 'top') {
+      const firstFiltered = filteredProducts[0];
+      finalInsertIdx = newOverallOrder.indexOf(firstFiltered.id);
+    } else if (direction === 'bottom') {
+      const lastFiltered = filteredProducts[filteredProducts.length - 1];
+      finalInsertIdx = newOverallOrder.indexOf(lastFiltered.id) + 1;
+    }
+
+    if (finalInsertIdx === -1) return;
+
+    newOverallOrder.splice(finalInsertIdx, 0, removed);
+
     setProductOrder(newOverallOrder);
     localStorage.setItem("miejebew_product_order_v4", JSON.stringify(newOverallOrder));
     

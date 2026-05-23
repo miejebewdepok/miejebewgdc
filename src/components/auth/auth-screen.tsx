@@ -275,7 +275,7 @@ export function AuthScreen() {
                         }
                         autoComplete="name"
                         className="h-12 pl-11 pr-4 rounded-2xl bg-white dark:bg-slate-900/60 border-red-200 dark:border-white/5 text-[#450a0a] dark:text-white placeholder-red-900/30 dark:placeholder-slate-600 focus:border-red-500/50 focus:ring-red-500/20 text-sm font-semibold transition-all shadow-inner dark:shadow-none"
-                        placeholder="e.g. Mas Joni"
+                        placeholder="e.g. Rania"
                         required
                       />
                     </div>

@@ -9,7 +9,7 @@ interface TransactionHistoryProps {
 }
 
 export default function TransactionHistory({ transactions }: TransactionHistoryProps) {
-  const { settings, deleteTransaction, updateTransaction } = useAppState();
+  const { settings, deleteTransaction, deleteTransactionsBulk, updateTransaction } = useAppState();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
 
@@ -17,6 +17,26 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
   const [editPaymentMethod, setEditPaymentMethod] = useState<string>('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  const [selectedTxIds, setSelectedTxIds] = useState<string[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
+  const handleBulkDelete = async () => {
+    if (selectedTxIds.length === 0) return;
+    const confirmDelete = window.confirm(`Apakah Anda yakin ingin menghapus ${selectedTxIds.length} nota transaksi terpilih secara massal? Stok makanan/minuman dari seluruh nota ini akan dikembalikan otomatis.`);
+    if (!confirmDelete) return;
+
+    try {
+      setIsBulkDeleting(true);
+      await deleteTransactionsBulk(selectedTxIds);
+      setSelectedTxIds([]);
+      setSelectedTx(null);
+    } catch (e) {
+      alert("Gagal menghapus transaksi terpilih.");
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!selectedTx) return;
@@ -26,6 +46,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
     try {
       setIsDeleting(true);
       await deleteTransaction(selectedTx.id);
+      setSelectedTxIds((prev) => prev.filter((id) => id !== selectedTx.id));
       setSelectedTx(null);
     } catch (e) {
       alert("Gagal menghapus transaksi.");
@@ -91,6 +112,20 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
     );
   });
 
+  const isAllSelected = filteredTx.length > 0 && filteredTx.every((tx) => selectedTxIds.includes(tx.id));
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      const filteredIds = filteredTx.map((tx) => tx.id);
+      setSelectedTxIds((prev) => prev.filter((id) => !filteredIds.includes(id)));
+    } else {
+      const filteredIds = filteredTx.map((tx) => tx.id);
+      setSelectedTxIds((prev) => {
+        const union = new Set([...prev, ...filteredIds]);
+        return Array.from(union);
+      });
+    }
+  };
+
   return (
     <>
       <div className="flex-1 flex flex-col md:flex-row gap-6 h-full overflow-hidden p-1 select-none">
@@ -152,6 +187,45 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
               </div>
             </div>
 
+            {/* Bulk Actions Panel */}
+            {selectedTxIds.length > 0 && (
+              <div className="mb-4 p-3 bg-red-500/10 dark:bg-red-500/15 border border-red-500/20 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 animate-in slide-in-from-top duration-200">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                    {selectedTxIds.length} Nota Transaksi Terpilih
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTxIds([])}
+                    className="flex-1 sm:flex-initial px-4 py-2 border border-slate-300 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 text-slate-600 dark:text-slate-350 rounded-xl text-xs font-extrabold cursor-pointer transition-all uppercase tracking-wider"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleBulkDelete}
+                    disabled={isBulkDeleting}
+                    className="flex-1 sm:flex-initial px-4 py-2 bg-red-650 hover:bg-red-700 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer transition-all shadow-md shadow-red-500/10 disabled:opacity-50 uppercase tracking-wider"
+                  >
+                    {isBulkDeleting ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        Menghapus...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Hapus Terpilih
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* List display */}
             <div className="flex-1 overflow-x-auto overflow-y-auto w-full no-scrollbar">
               {filteredTx.length === 0 ? (
@@ -165,6 +239,16 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                   <table className="w-full text-left text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-black/10 dark:border-white/10 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                      <th className="pb-3 w-8 pr-2 select-none">
+                        <div className="flex items-center justify-center">
+                          <input
+                            type="checkbox"
+                            checked={isAllSelected}
+                            onChange={toggleSelectAll}
+                            className="w-4 h-4 rounded border-black/20 dark:border-white/20 text-red-650 focus:ring-red-500/50 cursor-pointer transition-all"
+                          />
+                        </div>
+                      </th>
                       <th className="pb-3 pr-2">Nota Nomor</th>
                       <th className="pb-3 px-2">Tanggal</th>
                       <th className="pb-3 px-2">Pelanggan</th>
@@ -178,8 +262,24 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                       <tr 
                         key={tx.id} 
                         onClick={() => openTx(tx)}
-                        className="hover:bg-black/5 dark:hover:bg-white/5 group cursor-pointer transition-colors"
+                        className={`hover:bg-black/5 dark:hover:bg-white/5 group cursor-pointer transition-colors ${
+                          selectedTxIds.includes(tx.id) ? "bg-red-500/5 dark:bg-red-500/10 hover:bg-red-500/10 dark:hover:bg-red-500/20" : ""
+                        }`}
                       >
+                        <td className="py-3.5 w-8 pr-2 text-center" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-center">
+                            <input
+                              type="checkbox"
+                              checked={selectedTxIds.includes(tx.id)}
+                              onChange={() => {
+                                setSelectedTxIds((prev) =>
+                                  prev.includes(tx.id) ? prev.filter((id) => id !== tx.id) : [...prev, tx.id]
+                                );
+                              }}
+                              className="w-4 h-4 rounded border-black/20 dark:border-white/20 text-red-650 focus:ring-red-500/50 cursor-pointer transition-all"
+                            />
+                          </div>
+                        </td>
                         <td className="py-3.5 pr-2 font-mono font-bold text-slate-800 dark:text-slate-200 text-xs">
                           {tx.id}
                         </td>

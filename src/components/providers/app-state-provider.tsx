@@ -36,6 +36,7 @@ type AppStateContextValue = AppState & {
   updateSettings: (settings: Settings) => Promise<void>;
   resetWorkspace: () => Promise<void>;
   deleteTransaction: (transactionId: string) => Promise<void>;
+  deleteTransactionsBulk: (transactionIds: string[]) => Promise<void>;
   updateTransaction: (transactionId: string, payload: { paymentMethod?: PaymentMethod; createdAt?: string }) => Promise<void>;
   savedBills: SavedBill[];
   saveBill: (name: string) => void;
@@ -460,6 +461,26 @@ export function AppStateProvider({
     }));
   }
 
+  async function deleteTransactionsBulk(transactionIds: string[]) {
+    let finalProducts = state.products;
+    for (const id of transactionIds) {
+      try {
+        const response = await requestJson<{ products: Product[] }>(`/api/transactions/${id}`, {
+          method: "DELETE",
+        });
+        finalProducts = response.products;
+      } catch (e) {
+        console.error("Gagal menghapus transaksi bulk:", id, e);
+      }
+    }
+
+    setState((current) => ({
+      ...current,
+      transactions: current.transactions.filter((tx) => !transactionIds.includes(tx.id)),
+      products: finalProducts,
+    }));
+  }
+
   async function updateTransaction(transactionId: string, payload: { paymentMethod?: PaymentMethod; createdAt?: string }) {
     const response = await requestJson<{ transaction: Transaction }>(`/api/transactions/${transactionId}`, {
       method: "PATCH",
@@ -550,6 +571,7 @@ export function AppStateProvider({
         updateSettings,
         resetWorkspace,
         deleteTransaction,
+        deleteTransactionsBulk,
         updateTransaction,
         savedBills,
         saveBill,

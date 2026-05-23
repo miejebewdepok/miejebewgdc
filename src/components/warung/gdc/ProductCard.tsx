@@ -107,7 +107,7 @@ export default function ProductCard({
       }`}
     >
       {/* Product Image Frame Section */}
-      <div className="w-full h-[100px] sm:h-[145px] relative overflow-hidden shrink-0 bg-sidebar-accent dark:bg-slate-900 border-b border-sidebar-border/20 dark:border-white/5 p-2 flex items-center justify-center">
+      <div className="w-full h-[100px] sm:h-[132px] relative overflow-hidden shrink-0 bg-sidebar-accent dark:bg-slate-900 border-b border-sidebar-border/20 dark:border-white/5 p-2 flex items-center justify-center">
         {imgUrl ? (
           <div className="w-full h-full relative rounded-2xl overflow-hidden bg-sidebar/20 dark:bg-slate-950/20 flex items-center justify-center p-1.5">
             <img 
@@ -140,7 +140,7 @@ export default function ProductCard({
       </div>
 
       {/* Product Details Section with Elegant Spacing */}
-      <div className="p-2.5 sm:p-4 flex flex-col justify-between flex-1 relative z-10 bg-sidebar-accent/10 dark:bg-slate-950/20">
+      <div className="p-2.5 sm:py-3 sm:px-4 flex flex-col justify-between flex-1 relative z-10 bg-sidebar-accent/10 dark:bg-slate-950/20">
         <div className="flex flex-col gap-0.5 sm:gap-1">
           <div className="select-none">
             <span className="text-[8px] sm:text-[9px] font-extrabold text-red-500 uppercase tracking-widest font-mono">
@@ -151,13 +151,13 @@ export default function ProductCard({
             {product.name}
           </h3>
           {product.stock !== undefined && (
-            <div className="mt-1 select-none">
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[8.5px] sm:text-[10px] font-extrabold font-mono uppercase tracking-wider border ${
+            <div className="mt-0.5 select-none">
+              <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[7.5px] sm:text-[9.5px] font-extrabold font-mono uppercase tracking-wider border ${
                 product.stock <= 0 
                   ? 'bg-rose-500/10 dark:bg-rose-500/15 border-rose-500/25 text-rose-500 dark:text-rose-400 animate-pulse font-black'
                   : product.stock <= 5
                   ? 'bg-amber-500/10 dark:bg-amber-500/15 border-amber-500/25 text-amber-500 dark:text-amber-400 font-black animate-pulse'
-                  : 'bg-zinc-800/10 dark:bg-white/5 border-zinc-700/15 dark:border-white/10 text-slate-500 dark:text-slate-400'
+                  : 'bg-zinc-800/10 dark:bg-white/5 border-zinc-700/15 dark:border-white/10 text-slate-500 dark:text-slate-450'
               }`}>
                 <span className={`w-1 h-1 rounded-full mr-1 ${
                   product.stock <= 0 
@@ -172,7 +172,7 @@ export default function ProductCard({
           )}
         </div>
         
-        <div className="flex items-center justify-between mt-1 sm:mt-2 pt-1 sm:pt-2 border-t border-sidebar-border/20 dark:border-white/5">
+        <div className="flex items-center justify-between mt-1 sm:mt-1 pt-1 sm:pt-1 border-t border-sidebar-border/20 dark:border-white/5">
           <p className="text-xs sm:text-sm md:text-base font-black text-yellow-600 dark:text-yellow-500 font-mono flex items-baseline gap-0.5">
             <span className="text-[9px] sm:text-[10px] text-red-500 font-sans font-extrabold mr-0.5">Rp</span>
             {product.sellPrice.toLocaleString('id-ID')}

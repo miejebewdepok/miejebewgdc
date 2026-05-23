@@ -146,9 +146,9 @@ export function AppStateProvider({
     const toppings = line.toppings ?? [];
     const filling = line.filling;
     const size = line.size;
-    const isSnack = product.category === 'Snack';
+    const isBypassed = ['Snack', 'Qalla Coffee', 'Tea Series'].includes(product.category);
     
-    const spicySurcharge = isSnack ? 0 : ((level === 4 || level === 5) ? 2000 : 0);
+    const spicySurcharge = isBypassed ? 0 : ((level === 4 || level === 5) ? 2000 : 0);
     
     // Special toppings cost: Beef Slice (+2,500), Keju Slice (+3,000), Telur (+4,000)
     const specialToppings = toppings.filter((t) => ["Beef Slice", "Keju Slice", "Telur"].includes(t));
@@ -168,10 +168,10 @@ export function AppStateProvider({
       else if (t === "Keju Slice") specialSurcharge += 3000;
     });
 
-    const toppingsSurcharge = isSnack ? 0 : stdSurcharge + specialSurcharge;
+    const toppingsSurcharge = isBypassed ? 0 : stdSurcharge + specialSurcharge;
 
     let fillingSurcharge = 0;
-    if (!isSnack) {
+    if (!isBypassed) {
       if (product.category === 'Kebab') {
         if (size === 'REGULER') {
           if (filling === 'Beef') fillingSurcharge = 2000;

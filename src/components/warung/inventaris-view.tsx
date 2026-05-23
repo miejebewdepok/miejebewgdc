@@ -11,9 +11,9 @@ export function InventarisView() {
   const [localCategories, setLocalCategories] = useState<string[]>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("miejebew_categories_v4");
-      return saved ? JSON.parse(saved) : ["Mie Pedas", "Lumpia Beef", "Kebab", "Qalla Coffee", "Tea Series", "Snack"];
+      return saved ? JSON.parse(saved) : ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Tea Series"];
     }
-    return ["Mie Pedas", "Lumpia Beef", "Kebab", "Qalla Coffee", "Tea Series", "Snack"];
+    return ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Tea Series"];
   });
 
   // Keep categories updated with any new ones dynamically found in products

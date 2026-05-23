@@ -87,7 +87,27 @@ export function AppStateProvider({
         console.error("Failed to parse saved bills", e);
       }
     }
+
+    // Load active cart from localStorage
+    const savedCart = localStorage.getItem("miejebew_active_cart_v1");
+    if (savedCart) {
+      try {
+        const parsedCart = JSON.parse(savedCart);
+        setState((current) => ({
+          ...current,
+          cart: parsedCart,
+        }));
+      } catch (e) {
+        console.error("Failed to parse active cart", e);
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    if (state !== emptyAppState) {
+      localStorage.setItem("miejebew_active_cart_v1", JSON.stringify(state.cart));
+    }
+  }, [state.cart]);
 
   const persistBills = (newBills: SavedBill[]) => {
     setSavedBills(newBills);

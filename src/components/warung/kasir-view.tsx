@@ -40,7 +40,12 @@ export function KasirView() {
   } = useAppState();
 
   const [catalogSearch, setCatalogSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
+  const [selectedCategory, setSelectedCategory] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("miejebew_active_category") || "Semua";
+    }
+    return "Semua";
+  });
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
   const [isSavedBillsOpen, setIsSavedBillsOpen] = useState(false);
@@ -65,6 +70,10 @@ export function KasirView() {
     }
     return [];
   });
+
+  useEffect(() => {
+    localStorage.setItem("miejebew_active_category", selectedCategory);
+  }, [selectedCategory]);
 
   // Sync state with settings.productOrder, with localStorage as fallback
   useEffect(() => {

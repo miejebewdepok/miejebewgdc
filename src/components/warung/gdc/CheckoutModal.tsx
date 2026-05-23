@@ -40,15 +40,66 @@ export default function CheckoutModal({
   useEffect(() => {
     const rand = Math.floor(1000 + Math.random() * 9000);
     setInvoiceNo(`INV-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${rand}`);
-    setCustomerName('');
-    setPaymentMethod('Tunai');
-    setAmountPaid(0);
-    setAmountPaidInput('');
+    
+    // Restore from localStorage if present
+    const savedName = localStorage.getItem("miejebew_checkout_customer_name");
+    setCustomerName(savedName || '');
+
+    const savedMethod = localStorage.getItem("miejebew_checkout_payment_method");
+    if (savedMethod === 'Tunai' || savedMethod === 'QRIS' || savedMethod === 'Debit') {
+      setPaymentMethod(savedMethod);
+    } else {
+      setPaymentMethod('Tunai');
+    }
+
+    const savedAmountInput = localStorage.getItem("miejebew_checkout_amount_paid_input");
+    const savedAmount = localStorage.getItem("miejebew_checkout_amount_paid");
+    if (savedAmountInput && savedAmount) {
+      setAmountPaidInput(savedAmountInput);
+      setAmountPaid(Number(savedAmount));
+    } else {
+      setAmountPaid(0);
+      setAmountPaidInput('');
+    }
+
     setIsCompleted(false);
     setIsSubmitting(false);
     setCreatedTransaction(null);
     setMobileTab('payment');
   }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen && !isCompleted) {
+      localStorage.setItem("miejebew_checkout_customer_name", customerName);
+    }
+  }, [customerName, isOpen, isCompleted]);
+
+  useEffect(() => {
+    if (isOpen && !isCompleted) {
+      localStorage.setItem("miejebew_checkout_payment_method", paymentMethod);
+    }
+  }, [paymentMethod, isOpen, isCompleted]);
+
+  useEffect(() => {
+    if (isOpen && !isCompleted) {
+      if (amountPaidInput) {
+        localStorage.setItem("miejebew_checkout_amount_paid_input", amountPaidInput);
+        localStorage.setItem("miejebew_checkout_amount_paid", String(amountPaid));
+      } else {
+        localStorage.removeItem("miejebew_checkout_amount_paid_input");
+        localStorage.removeItem("miejebew_checkout_amount_paid");
+      }
+    }
+  }, [amountPaidInput, amountPaid, isOpen, isCompleted]);
+
+  useEffect(() => {
+    if (isCompleted) {
+      localStorage.removeItem("miejebew_checkout_customer_name");
+      localStorage.removeItem("miejebew_checkout_payment_method");
+      localStorage.removeItem("miejebew_checkout_amount_paid_input");
+      localStorage.removeItem("miejebew_checkout_amount_paid");
+    }
+  }, [isCompleted]);
 
   if (!isOpen) return null;
 

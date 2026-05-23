@@ -146,7 +146,7 @@ export function AppStateProvider({
     const toppings = line.toppings ?? [];
     const filling = line.filling;
     const size = line.size;
-    const isBypassed = ['Snack', 'Qalla Coffee', 'Tea Series'].includes(product.category);
+    const isBypassed = ['Snack', 'Qalla Coffee', 'Qalla Tea'].includes(product.category);
     
     const spicySurcharge = isBypassed ? 0 : ((level === 4 || level === 5) ? 2000 : 0);
     

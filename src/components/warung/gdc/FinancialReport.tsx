@@ -77,7 +77,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       'Kebab': 0,
       'Snack': 0,
       'Qalla Coffe': 0,
-      'Tea Series': 0
+      'Qalla Tea': 0
     };
 
     filteredTransactions.forEach(tx => {
@@ -92,7 +92,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       });
     });
 
-    const alwaysShow = ['Mie Pedas', 'Lumpia Beef', 'Kebab', 'Snack', 'Qalla Coffe', 'Tea Series'];
+    const alwaysShow = ['Mie Pedas', 'Lumpia Beef', 'Kebab', 'Snack', 'Qalla Coffe', 'Qalla Tea'];
 
     // Convert to array, always include standard categories even if 0, filter others if 0
     const result = Object.entries(categories)

@@ -666,30 +666,30 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       </div>
 
       {/* Tab Navigation */}
-      <div className="w-full flex justify-between sm:justify-start border-b border-slate-200 dark:border-white/10 gap-1.5 sm:gap-6 overflow-x-auto no-scrollbar whitespace-nowrap py-1 px-4 sm:px-0 -mx-4 sm:mx-0 no-print shadow-sm">
+      <div className="w-full flex justify-between md:justify-start border-b border-slate-200 dark:border-white/10 gap-1.5 md:gap-6 overflow-x-auto no-scrollbar whitespace-nowrap pt-2.5 pb-0 px-4 md:px-0 -mx-4 md:mx-0 no-print shadow-sm">
         <button 
           onClick={() => setActiveTab('sales')}
-          className={`pb-3 text-[11px] xs:text-xs sm:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap ${
+          className={`pb-3.5 pt-2 text-[11px] xs:text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap ${
             activeTab === 'sales' 
               ? 'border-red-500 text-red-600 dark:text-red-400' 
               : 'border-transparent text-slate-400 dark:text-slate-400/80 hover:text-slate-800 dark:hover:text-slate-200'
           }`}
         >
           <TrendingUp className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Ringkasan Penjualan</span>
-          <span className="sm:hidden">Penjualan</span>
+          <span className="hidden md:inline">Ringkasan Penjualan</span>
+          <span className="md:hidden">Penjualan</span>
         </button>
         <button 
           onClick={() => setActiveTab('expenses')}
-          className={`pb-3 text-[11px] xs:text-xs sm:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 relative shrink-0 whitespace-nowrap ${
+          className={`pb-3.5 pt-2 text-[11px] xs:text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 relative shrink-0 whitespace-nowrap ${
             activeTab === 'expenses' 
               ? 'border-red-500 text-red-600 dark:text-red-400' 
               : 'border-transparent text-slate-400 dark:text-slate-400/80 hover:text-slate-800 dark:hover:text-slate-200'
           }`}
         >
           <BookOpen className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Buku Kas Kecil</span>
-          <span className="sm:hidden">Kas Kecil</span>
+          <span className="hidden md:inline">Buku Kas Kecil</span>
+          <span className="md:hidden">Kas Kecil</span>
           {filteredExpenses.length > 0 && (
             <span className="absolute -top-1 -right-2 text-[9px] bg-red-500 text-white font-black px-1.5 py-0.5 rounded-full scale-75 animate-bounce">
               {filteredExpenses.length}
@@ -698,15 +698,15 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
         </button>
         <button 
           onClick={() => setActiveTab('shift')}
-          className={`pb-3 text-[11px] xs:text-xs sm:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap ${
+          className={`pb-3.5 pt-2 text-[11px] xs:text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap ${
             activeTab === 'shift' 
               ? 'border-red-500 text-red-600 dark:text-red-400' 
               : 'border-transparent text-slate-400 dark:text-slate-400/80 hover:text-slate-800 dark:hover:text-slate-200'
           }`}
         >
           <Wallet className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Shift & Laci Kasir</span>
-          <span className="sm:hidden">Shift Laci</span>
+          <span className="hidden md:inline">Shift & Laci Kasir</span>
+          <span className="md:hidden">Shift Laci</span>
           {shiftActive && (
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
           )}

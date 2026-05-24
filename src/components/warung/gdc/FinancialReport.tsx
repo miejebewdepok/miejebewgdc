@@ -666,10 +666,10 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex border-b border-slate-200 dark:border-white/10 gap-4 sm:gap-6 no-print">
+      <div className="flex border-b border-slate-200 dark:border-white/10 gap-2 sm:gap-6 overflow-x-auto no-scrollbar whitespace-nowrap py-1 no-print shadow-sm">
         <button 
           onClick={() => setActiveTab('sales')}
-          className={`pb-3 text-xs sm:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
+          className={`pb-3 text-xs sm:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
             activeTab === 'sales' 
               ? 'border-red-500 text-red-600 dark:text-red-400' 
               : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
@@ -679,7 +679,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
         </button>
         <button 
           onClick={() => setActiveTab('expenses')}
-          className={`pb-3 text-xs sm:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 relative ${
+          className={`pb-3 text-xs sm:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 relative shrink-0 whitespace-nowrap ${
             activeTab === 'expenses' 
               ? 'border-red-500 text-red-600 dark:text-red-400' 
               : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
@@ -694,7 +694,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
         </button>
         <button 
           onClick={() => setActiveTab('shift')}
-          className={`pb-3 text-xs sm:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
+          className={`pb-3 text-xs sm:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
             activeTab === 'shift' 
               ? 'border-red-500 text-red-600 dark:text-red-400' 
               : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'

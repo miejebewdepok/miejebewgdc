@@ -827,13 +827,40 @@ export function AIAssistantPanel({
   const visibleMessages = messages.filter((m) => m.role !== "system");
 
   return (
-    <aside
-      className={cn(
-        "flex h-full shrink-0 flex-col overflow-hidden rounded-[28px] border border-white/60 bg-card/85 shadow-[0_38px_90px_-50px_rgba(68,39,20,0.7)] backdrop-blur-xl transition-[width] duration-200 ease-out",
-        open ? "w-[380px] xl:w-[420px]" : "w-[64px]"
+    <>
+      {/* Mobile Backdrop Overlay when open */}
+      {open && (
+        <div
+          onClick={() => onOpenChange(false)}
+          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[45] animate-in fade-in duration-200"
+        />
       )}
-      aria-label="Asisten AI MIE JEBEW GDC"
-    >
+
+      {/* Floating Action Button (FAB) on Mobile when closed */}
+      {!open && (
+        <button
+          type="button"
+          onClick={() => onOpenChange(true)}
+          className="lg:hidden fixed bottom-4 right-4 z-45 bg-gradient-to-r from-red-650 to-amber-500 text-white p-3.5 rounded-full shadow-[0_8px_20px_-4px_rgba(186,92,35,0.6)] active:scale-[0.93] transition-all duration-200 animate-in fade-in duration-300 flex items-center justify-center border border-white/20 cursor-pointer"
+          aria-label="Buka asisten AI"
+          title="Tanya Asisten AI"
+        >
+          <Sparkles className="w-5.5 h-5.5 animate-pulse" />
+        </button>
+      )}
+
+      <aside
+        className={cn(
+          "flex flex-col overflow-hidden border border-white/60 bg-card/85 backdrop-blur-xl shadow-2xl transition-all duration-200 ease-out",
+          // Mobile Layout (overlay drawer, fixed right)
+          "fixed inset-y-0 right-0 z-50 w-full sm:w-[380px] rounded-l-[28px] rounded-r-none",
+          open ? "flex animate-in slide-in-from-right duration-300" : "hidden",
+          // Desktop Layout (relative sidebar layout)
+          "lg:relative lg:inset-auto lg:z-auto lg:h-full lg:shrink-0 lg:rounded-[28px] lg:shadow-[0_38px_90px_-50px_rgba(68,39,20,0.7)]",
+          open ? "lg:w-[380px] xl:w-[420px] lg:flex" : "lg:w-[64px] lg:flex"
+        )}
+        aria-label="Asisten AI MIE JEBEW GDC"
+      >
       {!open ? (
         <button
           type="button"
@@ -1047,6 +1074,7 @@ export function AIAssistantPanel({
         </>
       )}
     </aside>
+   </>
   );
 }
 

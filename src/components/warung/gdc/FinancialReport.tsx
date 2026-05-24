@@ -713,79 +713,81 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
         </button>
       </div>
 
-      {/* KPI Cards Grid - Premium Cohesive Look */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 no-print">
-        
-        {/* Gross Revenue Card */}
-        <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-slate-200/50 dark:border-white/5 relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all pointer-events-none"></div>
-          <div className="flex justify-between items-start mb-3 relative z-10">
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase">Omset Kotor</span>
-            <div className="p-1.5 bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-xl group-hover:scale-110 transition-transform">
-              <DollarSign className="w-4 h-4" />
+      {/* KPI Cards Grid - Premium Cohesive Look (Hanya tampil di tab Ringkasan Penjualan) */}
+      {activeTab === 'sales' && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 no-print animate-in fade-in duration-300">
+          
+          {/* Gross Revenue Card */}
+          <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-slate-200/50 dark:border-white/5 relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all pointer-events-none"></div>
+            <div className="flex justify-between items-start mb-3 relative z-10">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase">Omset Kotor</span>
+              <div className="p-1.5 bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-xl group-hover:scale-110 transition-transform">
+                <DollarSign className="w-4 h-4" />
+              </div>
+            </div>
+            <span className="text-2xl font-black font-mono text-slate-800 dark:text-white tracking-tight block relative z-10">
+              {formatRupiah(totalGrossRevenue)}
+            </span>
+            <div className="flex items-center gap-1.5 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-2">
+              <TrendingUp className="w-3 h-3" />
+              <span>Target Tercapai</span>
             </div>
           </div>
-          <span className="text-2xl font-black font-mono text-slate-800 dark:text-white tracking-tight block relative z-10">
-            {formatRupiah(totalGrossRevenue)}
-          </span>
-          <div className="flex items-center gap-1.5 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-2">
-            <TrendingUp className="w-3 h-3" />
-            <span>Target Tercapai</span>
-          </div>
-        </div>
 
-        {/* Expenses Card */}
-        <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-slate-200/50 dark:border-white/5 relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-red-500/10 rounded-full blur-2xl group-hover:bg-red-500/20 transition-all pointer-events-none"></div>
-          <div className="flex justify-between items-start mb-3 relative z-10">
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase">Kas Keluar</span>
-            <div className="p-1.5 bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl group-hover:scale-110 transition-transform">
-              <TrendingDown className="w-4 h-4" />
+          {/* Expenses Card */}
+          <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-slate-200/50 dark:border-white/5 relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-red-500/10 rounded-full blur-2xl group-hover:bg-red-500/20 transition-all pointer-events-none"></div>
+            <div className="flex justify-between items-start mb-3 relative z-10">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase">Kas Keluar</span>
+              <div className="p-1.5 bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl group-hover:scale-110 transition-transform">
+                <TrendingDown className="w-4 h-4" />
+              </div>
+            </div>
+            <span className="text-2xl font-black font-mono text-slate-800 dark:text-white tracking-tight block relative z-10">
+              {formatRupiah(totalExpenses)}
+            </span>
+            <div className="flex items-center gap-1.5 text-[10px] text-red-500 dark:text-red-400 font-bold mt-2">
+              <span>{filteredExpenses.length} Transaksi Tercatat</span>
             </div>
           </div>
-          <span className="text-2xl font-black font-mono text-slate-800 dark:text-white tracking-tight block relative z-10">
-            {formatRupiah(totalExpenses)}
-          </span>
-          <div className="flex items-center gap-1.5 text-[10px] text-red-500 dark:text-red-400 font-bold mt-2">
-            <span>{filteredExpenses.length} Transaksi Tercatat</span>
-          </div>
-        </div>
 
-        {/* Laba Bersih Card */}
-        <div className="bg-gradient-to-br from-red-50 to-white dark:from-red-950/20 dark:to-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-red-200/50 dark:border-red-500/10 relative overflow-hidden group hover:shadow-xl hover:shadow-red-500/10 hover:-translate-y-1 transition-all duration-300">
-          <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-red-500/20 dark:bg-red-500/10 rounded-full blur-3xl group-hover:bg-red-500/30 transition-all pointer-events-none"></div>
-          <div className="flex justify-between items-start mb-3 relative z-10">
-            <span className="text-[10px] text-red-800/70 dark:text-red-300/70 font-bold tracking-widest uppercase">Laba Bersih</span>
-            <div className="p-1.5 bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl group-hover:scale-110 transition-transform">
-              <Sparkles className="w-4 h-4" />
+          {/* Laba Bersih Card */}
+          <div className="bg-gradient-to-br from-red-50 to-white dark:from-red-950/20 dark:to-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-red-200/50 dark:border-red-500/10 relative overflow-hidden group hover:shadow-xl hover:shadow-red-500/10 hover:-translate-y-1 transition-all duration-300">
+            <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-red-500/20 dark:bg-red-500/10 rounded-full blur-3xl group-hover:bg-red-500/30 transition-all pointer-events-none"></div>
+            <div className="flex justify-between items-start mb-3 relative z-10">
+              <span className="text-[10px] text-red-800/70 dark:text-red-300/70 font-bold tracking-widest uppercase">Laba Bersih</span>
+              <div className="p-1.5 bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl group-hover:scale-110 transition-transform">
+                <Sparkles className="w-4 h-4" />
+              </div>
+            </div>
+            <span className="text-2xl font-black font-mono text-red-700 dark:text-red-400 tracking-tight block relative z-10">
+              {formatRupiah(netProfit)}
+            </span>
+            <div className="flex items-center gap-1.5 text-[10px] text-red-600/80 dark:text-red-400/80 font-bold mt-2 relative z-10">
+              <Award className="w-3 h-3" />
+              <span>Margin Operasional Real</span>
             </div>
           </div>
-          <span className="text-2xl font-black font-mono text-red-700 dark:text-red-400 tracking-tight block relative z-10">
-            {formatRupiah(netProfit)}
-          </span>
-          <div className="flex items-center gap-1.5 text-[10px] text-red-600/80 dark:text-red-400/80 font-bold mt-2 relative z-10">
-            <Award className="w-3 h-3" />
-            <span>Margin Operasional Real</span>
-          </div>
-        </div>
 
-        {/* Ticket Stats Card */}
-        <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-slate-200/50 dark:border-white/5 relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all pointer-events-none"></div>
-          <div className="flex justify-between items-start mb-3 relative z-10">
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase">Nota Terbayar</span>
-            <div className="p-1.5 bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-xl group-hover:scale-110 transition-transform">
-              <Activity className="w-4 h-4" />
+          {/* Ticket Stats Card */}
+          <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-slate-200/50 dark:border-white/5 relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all pointer-events-none"></div>
+            <div className="flex justify-between items-start mb-3 relative z-10">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase">Nota Terbayar</span>
+              <div className="p-1.5 bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-xl group-hover:scale-110 transition-transform">
+                <Activity className="w-4 h-4" />
+              </div>
+            </div>
+            <span className="text-2xl font-black font-mono text-slate-800 dark:text-white tracking-tight block relative z-10">
+              {transactionCount} Bill
+            </span>
+            <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400 font-bold font-mono mt-2 relative z-10">
+              <span>Rerata {formatRupiah(averageTransactionValue)}</span>
             </div>
           </div>
-          <span className="text-2xl font-black font-mono text-slate-800 dark:text-white tracking-tight block relative z-10">
-            {transactionCount} Bill
-          </span>
-          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400 font-bold font-mono mt-2 relative z-10">
-            <span>Rerata {formatRupiah(averageTransactionValue)}</span>
-          </div>
         </div>
-      </div>
+      )}
 
       {/* Main Tab Renderings */}
       {activeTab === 'sales' && (

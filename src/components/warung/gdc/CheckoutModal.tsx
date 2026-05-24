@@ -497,6 +497,18 @@ export default function CheckoutModal({
 
       {/* ── PRINT ONLY AREA (HIDDEN FROM SCREEN, VISIBLE ONLY ON PRINTING) ── */}
       <div id="print-receipt" className="hidden print:block bg-white text-black font-sans">
+        <style dangerouslySetInnerHTML={{ __html: `
+          @media print {
+            @page {
+              margin: 0;
+              size: ${settings.printerPaperSize || '58mm'} auto;
+            }
+            #print-receipt {
+              width: ${settings.printerPaperSize || '58mm'} !important;
+              font-size: ${settings.printerPaperSize === '80mm' ? '12px' : '10px'} !important;
+            }
+          }
+        ` }} />
         <ReceiptContent />
       </div>
     </>

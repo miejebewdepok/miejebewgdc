@@ -42,6 +42,8 @@ type AppStateContextValue = AppState & {
   saveBill: (name: string) => void;
   loadBill: (id: string) => void;
   deleteBill: (id: string) => void;
+  addExpense: (draft: { title: string; amount: number; category: "Operasional" | "Belanja" | "Utilitas" }) => Promise<void>;
+  deleteExpense: (expenseId: string) => Promise<void>;
 };
 
 const AppStateContext = createContext<AppStateContextValue | null>(null);
@@ -569,6 +571,29 @@ export function AppStateProvider({
     persistBills(newBills);
   }
 
+  async function addExpense(draft: { title: string; amount: number; category: "Operasional" | "Belanja" | "Utilitas" }) {
+    const response = await requestJson<{ expense: any }>("/api/expenses", {
+      method: "POST",
+      body: JSON.stringify(draft),
+    });
+
+    setState((current) => ({
+      ...current,
+      expenses: [response.expense, ...current.expenses],
+    }));
+  }
+
+  async function deleteExpense(expenseId: string) {
+    await requestJson(`/api/expenses/${expenseId}`, {
+      method: "DELETE",
+    });
+
+    setState((current) => ({
+      ...current,
+      expenses: current.expenses.filter((expense) => expense.id !== expenseId),
+    }));
+  }
+
   return (
     <AppStateContext.Provider
       value={{
@@ -597,6 +622,8 @@ export function AppStateProvider({
         saveBill,
         loadBill,
         deleteBill,
+        addExpense,
+        deleteExpense,
       }}
     >
       {children}

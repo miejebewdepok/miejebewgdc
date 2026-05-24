@@ -868,6 +868,22 @@ export async function createExpense(
   };
 }
 
+export async function deleteExpense(userId: string, expenseId: string) {
+  const [deleted] = await db
+    .delete(expenses)
+    .where(and(eq(expenses.id, expenseId), eq(expenses.userId, userId)))
+    .returning();
+
+  if (!deleted) {
+    throw new Error("Pengeluaran tidak ditemukan.");
+  }
+
+  return {
+    id: deleted.id,
+    title: deleted.title,
+  };
+}
+
 export async function updateStoreSettings(userId: string, settings: Settings) {
   // Merge GDC UI inputs to database fields
   const mergedSettings = {

@@ -213,7 +213,7 @@ export const toolDefinitions: OpenRouterToolDef[] = [
         properties: {
           title: { type: "string" },
           amount: { type: "number" },
-          category: { type: "string", enum: ["Operasional", "Belanja", "Utilitas"] },
+          category: { type: "string", description: "Kategori pengeluaran kustom." },
         },
         required: ["title", "amount", "category"],
         additionalProperties: false,
@@ -506,7 +506,7 @@ async function execMarkDebtPaid(userId: string, args: { debtId: string }): Promi
 
 async function execRecordExpense(
   userId: string,
-  args: { title: string; amount: number; category: "Operasional" | "Belanja" | "Utilitas" }
+  args: { title: string; amount: number; category: string }
 ): Promise<ToolResult> {
   const expense = await createExpense(userId, args);
   return {

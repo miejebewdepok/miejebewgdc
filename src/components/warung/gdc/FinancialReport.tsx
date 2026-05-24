@@ -19,7 +19,8 @@ import {
   CheckCircle,
   Clock,
   BookOpen,
-  Wallet
+  Wallet,
+  Settings
 } from 'lucide-react';
 
 interface FinancialReportProps {
@@ -36,7 +37,10 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
   // Petty Cash Flow states
   const [expenseTitle, setExpenseTitle] = useState('');
   const [expenseAmount, setExpenseAmount] = useState('');
-  const [expenseCategory, setExpenseCategory] = useState<'Operasional' | 'Belanja' | 'Utilitas'>('Operasional');
+  const [expenseCategory, setExpenseCategory] = useState<string>('');
+  const [customCategories, setCustomCategories] = useState<string[]>([]);
+  const [isManagingCategories, setIsManagingCategories] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
   const [isSubmittingExpense, setIsSubmittingExpense] = useState(false);
 
   // Cashier Shift states
@@ -63,6 +67,28 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
     setStartingCash(startCash);
     setStartTime(sTime);
     setShiftHistory(history);
+  }, []);
+
+  // Load custom expense categories from localStorage on mount
+  useEffect(() => {
+    const defaultCategories = ['Operasional', 'Belanja', 'Utilitas'];
+    const saved = localStorage.getItem('warung_expense_categories');
+    let cats = defaultCategories;
+    if (saved) {
+      try {
+        cats = JSON.parse(saved);
+        if (!Array.isArray(cats) || cats.length === 0) {
+          cats = defaultCategories;
+        }
+      } catch (e) {
+        cats = defaultCategories;
+      }
+    }
+    setCustomCategories(cats);
+    localStorage.setItem('warung_expense_categories', JSON.stringify(cats));
+    if (cats.length > 0) {
+      setExpenseCategory(cats[0]);
+    }
   }, []);
 
   const formatRupiah = (val: number) => {
@@ -304,6 +330,36 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
     } catch (err) {
       console.error(err);
       alert("Gagal menghapus pengeluaran");
+    }
+  };
+
+  const handleAddCategory = () => {
+    const trimmed = newCategoryName.trim();
+    if (!trimmed) return;
+    if (customCategories.includes(trimmed)) {
+      alert("Kategori tersebut sudah terdaftar!");
+      return;
+    }
+    const updated = [...customCategories, trimmed];
+    setCustomCategories(updated);
+    localStorage.setItem('warung_expense_categories', JSON.stringify(updated));
+    setNewCategoryName('');
+    setExpenseCategory(trimmed); // Auto-select the newly added category
+  };
+
+  const handleDeleteCategory = (catToDelete: string) => {
+    if (customCategories.length <= 1) {
+      alert("Harus ada minimal 1 kategori pengeluaran!");
+      return;
+    }
+    if (!confirm(`Apakah Anda yakin ingin menghapus kategori "${catToDelete}"? (Catatan pengeluaran lama dengan kategori ini tetap tersimpan, namun tidak akan muncul lagi sebagai pilihan dropdown)`)) {
+      return;
+    }
+    const updated = customCategories.filter(c => c !== catToDelete);
+    setCustomCategories(updated);
+    localStorage.setItem('warung_expense_categories', JSON.stringify(updated));
+    if (expenseCategory === catToDelete) {
+      setExpenseCategory(updated[0]);
     }
   };
 
@@ -857,15 +913,26 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Kategori Pengeluaran</label>
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Kategori Pengeluaran</label>
+                  <button
+                    type="button"
+                    onClick={() => setIsManagingCategories(true)}
+                    className="text-[10px] font-extrabold text-red-650 hover:text-red-500 transition-colors flex items-center gap-1 cursor-pointer no-print"
+                  >
+                    <Settings className="w-3 h-3 animate-spin-hover" /> Kelola Kategori
+                  </button>
+                </div>
                 <select
                   value={expenseCategory}
-                  onChange={(e) => setExpenseCategory(e.target.value as any)}
+                  onChange={(e) => setExpenseCategory(e.target.value)}
                   className="w-full bg-black/5 dark:bg-slate-800 border border-slate-200/50 dark:border-white/5 rounded-2xl py-3 px-4 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 cursor-pointer"
                 >
-                  <option value="Operasional" className="dark:bg-slate-900">Operasional Harian (Plastik, Gas, Es)</option>
-                  <option value="Belanja" className="dark:bg-slate-900">Belanja Bahan (Mie, Cabe, Daging)</option>
-                  <option value="Utilitas" className="dark:bg-slate-900">Utilitas & Kebersihan (Uang Sampah, Listrik)</option>
+                  {customCategories.map((cat) => (
+                    <option key={cat} value={cat} className="dark:bg-slate-900">
+                      {cat}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -1206,6 +1273,86 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Kategori Management Modal */}
+      {isManagingCategories && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200 no-print">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-[32px] w-full max-w-md p-6 shadow-2xl flex flex-col gap-4 animate-in scale-in duration-200">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-white/5">
+              <div>
+                <h3 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                  <Settings className="text-red-500 w-4 h-4" /> Kelola Kategori
+                </h3>
+                <p className="text-slate-500 dark:text-slate-400 text-[10px] mt-1">Tambah atau hapus kategori kas keluar operasional</p>
+              </div>
+              <button
+                onClick={() => setIsManagingCategories(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 font-bold transition-all flex items-center justify-center cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* List of current categories */}
+            <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto pr-1">
+              <label className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Daftar Kategori ({customCategories.length})</label>
+              {customCategories.map((cat) => (
+                <div
+                  key={cat}
+                  className="flex items-center justify-between bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-white/5 rounded-2xl py-2 px-3 hover:bg-slate-100/50 dark:hover:bg-slate-800/40 transition-colors"
+                >
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{cat}</span>
+                  <button
+                    onClick={() => handleDeleteCategory(cat)}
+                    disabled={customCategories.length <= 1}
+                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all cursor-pointer disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-400"
+                    title="Hapus Kategori"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Add new category form */}
+            <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-white/5">
+              <label className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Tambah Kategori Baru</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Misal: Gaji Karyawan"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  className="flex-1 bg-black/5 dark:bg-slate-800 border border-slate-200/50 dark:border-white/5 rounded-2xl py-2.5 px-4 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddCategory();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddCategory}
+                  className="bg-gradient-to-r from-red-650 to-amber-500 hover:brightness-110 text-white font-extrabold text-xs px-4 rounded-2xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-[0.97]"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Tambah
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/5">
+              <button
+                type="button"
+                onClick={() => setIsManagingCategories(false)}
+                className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-750 dark:text-slate-200 font-extrabold text-xs py-2.5 px-5 rounded-2xl transition-all cursor-pointer active:scale-[0.97]"
+              >
+                Selesai
+              </button>
+            </div>
           </div>
         </div>
       )}

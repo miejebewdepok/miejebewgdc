@@ -845,7 +845,7 @@ export async function remindDebt(userId: string, debtId: string) {
 
 export async function createExpense(
   userId: string,
-  draft: { title: string; amount: number; category: "Operasional" | "Belanja" | "Utilitas" }
+  draft: { title: string; amount: number; category: string }
 ) {
   const [expense] = await db
     .insert(expenses)
@@ -863,7 +863,7 @@ export async function createExpense(
     id: expense.id,
     title: expense.title,
     amount: expense.amount,
-    category: expense.category as "Operasional" | "Belanja" | "Utilitas",
+    category: expense.category,
     createdAt: expense.createdAt,
   };
 }

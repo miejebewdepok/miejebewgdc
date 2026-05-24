@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await getRequestUser();
-    const draft = (await request.json()) as { title: string; amount: number; category: "Operasional" | "Belanja" | "Utilitas" };
+    const draft = (await request.json()) as { title: string; amount: number; category: string };
     const expense = await createExpense(userId, draft);
     return NextResponse.json({ expense });
   } catch (error) {

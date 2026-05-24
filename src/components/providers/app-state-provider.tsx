@@ -42,7 +42,7 @@ type AppStateContextValue = AppState & {
   saveBill: (name: string) => void;
   loadBill: (id: string) => void;
   deleteBill: (id: string) => void;
-  addExpense: (draft: { title: string; amount: number; category: "Operasional" | "Belanja" | "Utilitas" }) => Promise<void>;
+  addExpense: (draft: { title: string; amount: number; category: string }) => Promise<void>;
   deleteExpense: (expenseId: string) => Promise<void>;
 };
 
@@ -571,7 +571,7 @@ export function AppStateProvider({
     persistBills(newBills);
   }
 
-  async function addExpense(draft: { title: string; amount: number; category: "Operasional" | "Belanja" | "Utilitas" }) {
+  async function addExpense(draft: { title: string; amount: number; category: string }) {
     const response = await requestJson<{ expense: any }>("/api/expenses", {
       method: "POST",
       body: JSON.stringify(draft),

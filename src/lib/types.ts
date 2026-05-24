@@ -87,7 +87,7 @@ export interface Expense {
   title: string;
   amount: number;
   createdAt: string;
-  category: "Operasional" | "Belanja" | "Utilitas";
+  category: string;
 }
 
 export interface Settings {

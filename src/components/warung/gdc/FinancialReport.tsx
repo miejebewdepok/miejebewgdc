@@ -363,6 +363,23 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
     }
   };
 
+  const handleDeleteShiftHistory = (shiftId: string) => {
+    if (!confirm("Apakah Anda yakin ingin menghapus catatan shift ini dari riwayat permanen? Tindakan ini tidak dapat dibatalkan.")) return;
+    const updated = shiftHistory.filter(s => s.id !== shiftId);
+    setShiftHistory(updated);
+    localStorage.setItem("miejebew_shift_history_v1", JSON.stringify(updated));
+  };
+
+  const handleCancelActiveShift = () => {
+    if (!confirm("Apakah Anda yakin ingin membatalkan shift aktif saat ini? Saldo awal laci akan dihapus dan dibatalkan. Catatan penjualan tidak akan hilang, hanya status shift yang di-reset.")) return;
+    localStorage.removeItem("miejebew_shift_active_v1");
+    localStorage.removeItem("miejebew_shift_starting_cash_v1");
+    localStorage.removeItem("miejebew_shift_start_time_v1");
+    setShiftActive(false);
+    setStartingCash(0);
+    setStartTime('');
+  };
+
   // Cashier Shift management handlers
   const handleOpenShift = () => {
     const amt = parseFloat(inputStartingCash);
@@ -1114,8 +1131,17 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
                   </div>
                 </div>
 
-                <div className="text-[10px] text-slate-450 dark:text-slate-450 italic mt-4 bg-slate-50/50 dark:bg-slate-850/20 p-3 rounded-xl border border-dashed border-slate-200 dark:border-white/5 leading-relaxed">
-                  Lakukan hitung manual uang tunai laci kasir saat shift berakhir dan masukkan nominal di panel rekonsiliasi sebelah kanan untuk menutup shift.
+                <div className="flex flex-col gap-2 mt-4">
+                  <div className="text-[10px] text-slate-450 dark:text-slate-450 italic bg-slate-50/50 dark:bg-slate-850/20 p-3 rounded-xl border border-dashed border-slate-200 dark:border-white/5 leading-relaxed">
+                    Lakukan hitung manual uang tunai laci kasir saat shift berakhir dan masukkan nominal di panel rekonsiliasi sebelah kanan untuk menutup shift.
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCancelActiveShift}
+                    className="w-full bg-slate-100/80 hover:bg-red-50 hover:text-red-600 dark:bg-slate-800/80 dark:hover:bg-red-950/20 dark:hover:text-red-400 text-slate-500 font-extrabold text-[10px] sm:text-xs py-2.5 rounded-2xl transition-all border border-slate-200/50 dark:border-white/5 cursor-pointer flex items-center justify-center gap-1.5 active:scale-[0.97] no-print"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Batalkan / Reset Shift Aktif Ini
+                  </button>
                 </div>
               </div>
             )}
@@ -1229,20 +1255,29 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
                               </span>
                             </div>
                             
-                            <div>
-                              {shift.difference === 0 ? (
-                                <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[8px] font-black px-2 py-0.5 rounded-full border border-emerald-500/20">
-                                  COCOK
-                                </span>
-                              ) : shift.difference > 0 ? (
-                                <span className="bg-emerald-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full">
-                                  LEBIH (+{formatRupiah(shift.difference)})
-                                </span>
-                              ) : (
-                                <span className="bg-red-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full animate-pulse">
-                                  SELISIH ({formatRupiah(shift.difference)})
-                                </span>
-                              )}
+                            <div className="flex items-center gap-2">
+                              <div>
+                                {shift.difference === 0 ? (
+                                  <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[8px] font-black px-2 py-0.5 rounded-full border border-emerald-500/20">
+                                    COCOK
+                                  </span>
+                                ) : shift.difference > 0 ? (
+                                  <span className="bg-emerald-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full">
+                                    LEBIH (+{formatRupiah(shift.difference)})
+                                  </span>
+                                ) : (
+                                  <span className="bg-red-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full animate-pulse">
+                                    SELISIH ({formatRupiah(shift.difference)})
+                                  </span>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => handleDeleteShiftHistory(shift.id)}
+                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all cursor-pointer no-print"
+                                title="Hapus Riwayat Shift"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
                             </div>
                           </div>
 

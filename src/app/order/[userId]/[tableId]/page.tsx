@@ -406,14 +406,6 @@ export default function CustomerOrderPage(props: {
       toast.error("Harap masukkan nama Anda.");
       return;
     }
-    if (claimPromo && !whatsappNumber.trim()) {
-      toast.error("Harap masukkan nomor WhatsApp untuk klaim promo.");
-      return;
-    }
-    if (claimPromo && !emailAddress.trim()) {
-      toast.error("Harap masukkan alamat Email untuk klaim promo.");
-      return;
-    }
     if (cart.length === 0) {
       toast.error("Keranjang belanja kosong.");
       return;
@@ -455,6 +447,10 @@ export default function CustomerOrderPage(props: {
       const result = await response.json();
 
       if (response.ok && result.success) {
+        const hasPromo = result.savedBill.items.some((item: any) => item.productId === "promo_jasmine_tea");
+        if (claimPromo && !hasPromo) {
+          toast.warning("Pesanan dikirim tanpa promo gratis (pastikan No. WhatsApp & Email aktif belum pernah diklaim sebelumnya).", { duration: 6000 });
+        }
         setLastBillName(result.savedBill.name);
         setOrderSuccess(true);
         setCart([]);
@@ -1140,7 +1136,6 @@ export default function CustomerOrderPage(props: {
                         </label>
                         <input
                           type="tel"
-                          required={claimPromo}
                           placeholder="Contoh: 08123456789"
                           value={whatsappNumber}
                           onChange={(e) => setWhatsappNumber(e.target.value)}
@@ -1154,7 +1149,6 @@ export default function CustomerOrderPage(props: {
                         </label>
                         <input
                           type="email"
-                          required={claimPromo}
                           placeholder="Contoh: nama@gmail.com"
                           value={emailAddress}
                           onChange={(e) => setEmailAddress(e.target.value)}

@@ -92,10 +92,31 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
   const [selectedQrTable, setSelectedQrTable] = useState('');
   const [isQrPrinting, setIsQrPrinting] = useState(false);
 
+  // Promo Claims Database States
+  const [promoClaims, setPromoClaims] = useState<{ id: string; customerName: string; whatsapp: string; tableName: string; createdAt: string }[]>([]);
+  const [claimsSearchQuery, setClaimsSearchQuery] = useState('');
+  const [isLoadingClaims, setIsLoadingClaims] = useState(false);
+
+  const fetchPromoClaims = async () => {
+    setIsLoadingClaims(true);
+    try {
+      const res = await fetch('/api/settings/promo-claims');
+      const data = await res.json();
+      if (data.success && data.claims) {
+        setPromoClaims(data.claims);
+      }
+    } catch (err) {
+      console.error("Failed to load promo claims", err);
+    } finally {
+      setIsLoadingClaims(false);
+    }
+  };
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setOrigin(window.location.origin);
     }
+    fetchPromoClaims();
   }, []);
 
   const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -334,6 +355,17 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
       setIsQrPrinting(false);
       playBeep(1200, 0.15);
     }, 1500);
+  };
+
+  const handleCopyAllWhatsapp = () => {
+    if (promoClaims.length === 0) {
+      alert("Database WhatsApp kosong.");
+      return;
+    }
+    const uniqueNumbers = Array.from(new Set(promoClaims.map(c => c.whatsapp)));
+    const copyText = uniqueNumbers.join(', ');
+    navigator.clipboard.writeText(copyText);
+    alert(`Berhasil menyalin ${uniqueNumbers.length} nomor WhatsApp unik ke papan klip!`);
   };
 
   // Live dynamic demo QRIS code generator
@@ -691,6 +723,115 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                   );
                 })}
               </div>
+            </div>
+          </div>
+
+          {/* DATABASE WHATSAPP PELANGGAN (PROMO QR) CARD */}
+          <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-5 mt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-red-500/10 text-red-500 rounded-xl">
+                  <Smartphone className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-foreground dark:text-white uppercase tracking-wider">Database WhatsApp Pelanggan (Promo QR)</h3>
+                  <p className="text-[10px] text-slate-555 dark:text-slate-400 mt-0.5">Kontak WhatsApp dari klaim Gratis Jasmine Tea saat Self-Order</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCopyAllWhatsapp}
+                disabled={promoClaims.length === 0}
+                className="bg-emerald-650/15 border border-emerald-500/25 text-emerald-650 hover:bg-emerald-600/25 dark:text-emerald-300 dark:hover:bg-emerald-600/30 rounded-xl text-[10px] py-1.5 px-3 font-black text-center cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0"
+              >
+                Salin Semua No. WA ({promoClaims.length})
+              </button>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative">
+              <input
+                type="text"
+                value={claimsSearchQuery}
+                onChange={(e) => setClaimsSearchQuery(e.target.value)}
+                placeholder="Cari nama, no. WhatsApp, atau nomor meja..."
+                className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl py-2.5 pl-10 pr-4 text-xs text-foreground dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/40"
+              />
+              <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
+              {claimsSearchQuery && (
+                <button
+                  onClick={() => setClaimsSearchQuery('')}
+                  className="absolute right-3.5 top-3 text-[10px] font-bold text-slate-400 hover:text-red-500"
+                >
+                  Batal
+                </button>
+              )}
+            </div>
+
+            {/* Leads List */}
+            <div className="border-t border-black/5 dark:border-white/5 pt-4">
+              {isLoadingClaims ? (
+                <div className="py-12 text-center text-xs font-bold text-slate-400">
+                  <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-red-500" />
+                  Memuat database pelanggan...
+                </div>
+              ) : promoClaims.length === 0 ? (
+                <div className="py-12 text-center bg-black/5 dark:bg-black/30 border border-dashed border-black/10 dark:border-white/5 rounded-2xl">
+                  <Smartphone className="w-8 h-8 text-slate-450 dark:text-slate-600 mx-auto mb-2" />
+                  <span className="text-xs font-bold text-slate-400 block">Belum Ada Klaim Promo</span>
+                  <p className="text-[10px] text-slate-555 dark:text-slate-500 mt-1 max-w-[250px] mx-auto leading-relaxed">
+                    Kontak WhatsApp pelanggan yang mengklaim Jasmine Tea gratis saat self-order akan otomatis muncul di sini.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1 no-scrollbar">
+                  {promoClaims.filter(c => 
+                    c.customerName.toLowerCase().includes(claimsSearchQuery.toLowerCase()) ||
+                    c.whatsapp.includes(claimsSearchQuery) ||
+                    c.tableName.toLowerCase().includes(claimsSearchQuery.toLowerCase())
+                  ).length === 0 ? (
+                    <div className="py-6 text-center text-xs text-slate-400">
+                      Tidak ada hasil pencarian yang cocok.
+                    </div>
+                  ) : (
+                    promoClaims.filter(c => 
+                      c.customerName.toLowerCase().includes(claimsSearchQuery.toLowerCase()) ||
+                      c.whatsapp.includes(claimsSearchQuery) ||
+                      c.tableName.toLowerCase().includes(claimsSearchQuery.toLowerCase())
+                    ).map((claim) => (
+                      <div key={claim.id} className="bg-black/5 dark:bg-black/30 border border-black/5 dark:border-white/5 rounded-2xl p-3 flex justify-between items-center gap-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-foreground dark:text-white">
+                              {claim.customerName}
+                            </span>
+                            <span className="text-[8px] font-black bg-red-500/10 text-red-500 dark:text-red-400 px-1.5 py-0.5 rounded-full border border-red-500/15 uppercase font-mono">
+                              Meja {claim.tableName}
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono block mt-1">
+                            WA: {claim.whatsapp}
+                          </span>
+                          <span className="text-[8px] text-slate-400 dark:text-slate-500 block mt-0.5">
+                            Klaim: {new Date(claim.createdAt).toLocaleString('id-ID')}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(claim.whatsapp);
+                            alert(`Nomor WA ${claim.whatsapp} berhasil disalin!`);
+                          }}
+                          className="py-1 px-2.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-slate-800 dark:text-white rounded-lg text-[9px] font-bold text-center cursor-pointer transition-all"
+                        >
+                          Salin No. WA
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

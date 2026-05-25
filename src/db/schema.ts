@@ -102,3 +102,13 @@ export const savedBills = pgTable("saved_bills", {
   items: jsonb("items").$type<any[]>().notNull(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull(),
 });
+
+export const customerPromoClaims = pgTable("customer_promo_claims", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  customerName: text("customer_name").notNull(),
+  whatsapp: text("whatsapp").notNull(),
+  promoType: text("promo_type").notNull().default("Free Jasmine Tea"),
+  tableName: text("table_name").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull(),
+});

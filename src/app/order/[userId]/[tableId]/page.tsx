@@ -66,6 +66,8 @@ export default function CustomerOrderPage(props: {
   // Cart review & Checkout states
   const [cartOpen, setCartOpen] = useState(false);
   const [customerName, setCustomerName] = useState("");
+  const [claimPromo, setClaimPromo] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState("");
   const [placingOrder, setPlacingOrder] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [lastBillName, setLastBillName] = useState("");
@@ -402,6 +404,10 @@ export default function CustomerOrderPage(props: {
       toast.error("Harap masukkan nama Anda.");
       return;
     }
+    if (claimPromo && !whatsappNumber.trim()) {
+      toast.error("Harap masukkan nomor WhatsApp untuk klaim promo.");
+      return;
+    }
     if (cart.length === 0) {
       toast.error("Keranjang belanja kosong.");
       return;
@@ -419,6 +425,8 @@ export default function CustomerOrderPage(props: {
           userId,
           tableName: tableId,
           customerName: customerName.trim(),
+          claimPromo,
+          whatsappNumber: claimPromo ? whatsappNumber.trim() : undefined,
           items: cart.map((item) => ({
             productId: item.productId,
             quantity: item.quantity,
@@ -443,6 +451,8 @@ export default function CustomerOrderPage(props: {
         setLastBillName(result.savedBill.name);
         setOrderSuccess(true);
         setCart([]);
+        setClaimPromo(false);
+        setWhatsappNumber("");
         setCartOpen(false);
       } else {
         throw new Error(result.error || "Gagal mengirimkan order");
@@ -1077,7 +1087,7 @@ export default function CustomerOrderPage(props: {
               </div>
             </div>
 
-            {/* Bottom summary and place order form */}
+             {/* Bottom summary and place order form */}
             <div className="border-t border-white/5 pt-4">
               <div className="flex justify-between items-center text-sm font-extrabold mb-4 pb-3 border-b border-dashed border-white/5">
                 <span className="text-slate-400">Total Harga</span>
@@ -1097,6 +1107,38 @@ export default function CustomerOrderPage(props: {
                     onChange={(e) => setCustomerName(e.target.value)}
                     className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 placeholder-slate-600"
                   />
+                </div>
+
+                {/* Promo Checkbox & WhatsApp Input */}
+                <div className="bg-yellow-500/5 border border-yellow-500/15 rounded-2xl p-3.5 my-1">
+                  <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={claimPromo}
+                      onChange={(e) => setClaimPromo(e.target.checked)}
+                      className="w-4 h-4 rounded text-red-600 bg-white/5 border-white/10 focus:ring-0 focus:ring-offset-0 mt-0.5 cursor-pointer accent-red-600"
+                    />
+                    <div>
+                      <span className="text-xs font-extrabold text-white block">Klaim GRATIS Qalla Tea (Jasmine) 🍃</span>
+                      <span className="text-[10px] text-yellow-500 font-bold block mt-0.5 leading-tight">Cukup masukkan No. WhatsApp Anda untuk segelas Jasmine Tea dingin!</span>
+                    </div>
+                  </label>
+
+                  {claimPromo && (
+                    <div className="mt-3 border-t border-white/5 pt-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                      <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-1.5">
+                        Nomor WhatsApp (Aktif)
+                      </label>
+                      <input
+                        type="tel"
+                        required={claimPromo}
+                        placeholder="Contoh: 08123456789"
+                        value={whatsappNumber}
+                        onChange={(e) => setWhatsappNumber(e.target.value)}
+                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 placeholder-slate-600"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <button

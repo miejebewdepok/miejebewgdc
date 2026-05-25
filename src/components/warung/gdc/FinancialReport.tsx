@@ -666,28 +666,28 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       </div>
 
       {/* Tab Navigation */}
-      <div className="w-full flex justify-start border-b border-slate-200 dark:border-white/10 gap-4 sm:gap-6 overflow-x-auto no-scrollbar whitespace-nowrap pt-2.5 pb-0 px-4 md:px-0 -mx-4 md:mx-0 no-print shadow-sm">
+      <div className="w-full grid grid-cols-3 md:flex items-end border-b border-slate-200 dark:border-white/10 gap-1 md:gap-6 pt-2.5 pb-0 no-print shadow-sm">
         <button 
           onClick={() => setActiveTab('sales')}
-          className={`pb-3.5 pt-2 text-xs sm:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap ${
+          className={`pb-3 pt-2 text-[11px] xs:text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
             activeTab === 'sales' 
               ? 'border-red-500 text-red-600 dark:text-red-400' 
               : 'border-transparent text-slate-400 dark:text-slate-400/80 hover:text-slate-800 dark:hover:text-slate-200'
           }`}
         >
           <TrendingUp className="w-3.5 h-3.5" />
-          <span>Ringkasan Penjualan</span>
+          <span>Sales</span>
         </button>
         <button 
           onClick={() => setActiveTab('expenses')}
-          className={`pb-3.5 pt-2 text-xs sm:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 relative shrink-0 whitespace-nowrap ${
+          className={`pb-3 pt-2 text-[11px] xs:text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 relative whitespace-nowrap ${
             activeTab === 'expenses' 
               ? 'border-red-500 text-red-600 dark:text-red-400' 
               : 'border-transparent text-slate-400 dark:text-slate-400/80 hover:text-slate-800 dark:hover:text-slate-200'
           }`}
         >
           <BookOpen className="w-3.5 h-3.5" />
-          <span>Buku Kas Kecil</span>
+          <span>Petty Cash</span>
           {filteredExpenses.length > 0 && (
             <span className="absolute -top-1 -right-2 text-[9px] bg-red-500 text-white font-black px-1.5 py-0.5 rounded-full scale-75 animate-bounce">
               {filteredExpenses.length}
@@ -696,14 +696,14 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
         </button>
         <button 
           onClick={() => setActiveTab('shift')}
-          className={`pb-3.5 pt-2 text-xs sm:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap ${
+          className={`pb-3 pt-2 text-[11px] xs:text-xs md:text-sm font-extrabold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap ${
             activeTab === 'shift' 
               ? 'border-red-500 text-red-600 dark:text-red-400' 
               : 'border-transparent text-slate-400 dark:text-slate-400/80 hover:text-slate-800 dark:hover:text-slate-200'
           }`}
         >
           <Wallet className="w-3.5 h-3.5" />
-          <span>Shift & Laci Kasir</span>
+          <span>Shifts</span>
           {shiftActive && (
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
           )}

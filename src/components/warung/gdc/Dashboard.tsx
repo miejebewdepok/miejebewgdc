@@ -320,47 +320,6 @@ export default function Dashboard({
         {/* Column Right (Col 5): Category visual lists & Navigation shortcut */}
         <div className="lg:col-span-5 flex flex-col gap-5">
           
-          {/* Quick Shortcuts Bento */}
-          <div className="glass-morphism rounded-[32px] p-6">
-            <h3 className="text-sm font-bold text-foreground dark:text-white uppercase tracking-wider mb-4 pb-2 border-b border-black/5 dark:border-white/5 flex items-center gap-2">
-              <ChevronRight className="w-4 h-4 text-red-500" /> Navigasi Cepat
-            </h3>
-
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={() => setActiveTab('pos')}
-                className="w-full flex items-center justify-between p-3 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 hover:border-red-500/30 dark:hover:border-red-500/30 text-left transition-all duration-200 cursor-pointer"
-              >
-                <div>
-                  <span className="text-xs font-bold text-foreground dark:text-white block">Kasir POS</span>
-                  <span className="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Buka halaman transaksi belanja</span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400" />
-              </button>
-
-              <button
-                onClick={() => setActiveTab('manage')}
-                className="w-full flex items-center justify-between p-3 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 hover:border-red-500/30 dark:hover:border-red-500/30 text-left transition-all duration-200 cursor-pointer"
-              >
-                <div>
-                  <span className="text-xs font-bold text-foreground dark:text-white block">Manajemen Menu</span>
-                  <span className="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Tambah & atur ketersediaan produk</span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400" />
-              </button>
-
-              <button
-                onClick={() => setActiveTab('settings')}
-                className="w-full flex items-center justify-between p-3 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 hover:border-red-500/30 dark:hover:border-red-500/30 text-left transition-all duration-200 cursor-pointer"
-              >
-                <div>
-                  <span className="text-xs font-bold text-foreground dark:text-white block">Pengaturan Resto</span>
-                  <span className="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Ganti QRIS & Atur Pajak</span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400" />
-              </button>
-            </div>
-          </div>
 
           {/* Tagihan Tertunda (Pending Bills Queue) Bento */}
           <div className="glass-morphism rounded-[32px] p-6">

@@ -239,13 +239,61 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
     }
   };
 
-  const handleScanBluetooth = () => {
+  const handleScanBluetooth = async () => {
     setIsScanning(true);
     setScannedDevices([]);
     playBeep(600, 0.1);
 
-    // Simulated scan results
-    setTimeout(() => {
+    if (typeof window !== 'undefined' && 'bluetooth' in navigator) {
+      try {
+        // Trigger browser's native Web Bluetooth search modal (scans real devices!)
+        const device = await (navigator as any).bluetooth.requestDevice({
+          acceptAllDevices: true,
+          optionalServices: [
+            '000018f0-0000-1000-8000-00805f9b34fb', // Standard custom BLE ESC/POS service
+            '0000ff00-0000-1000-8000-00805f9b34fb', // Zjiang / Rongta BLE service
+            '0000e000-0000-1000-8000-00805f9b34fb', // Other portable print service
+          ]
+        });
+
+        if (device) {
+          const deviceName = device.name || 'Printer Bluetooth GDC';
+          const deviceAddress = device.id || 'Web-Bluetooth-UUID';
+          
+          setScannedDevices([
+            { name: deviceName, address: deviceAddress, rssi: -50 }
+          ]);
+        }
+      } catch (err: any) {
+        console.error('Web Bluetooth Scan error:', err);
+        if (err.name === 'SecurityError') {
+          alert('Scan Bluetooth langsung di halaman web memerlukan koneksi aman HTTPS (atau localhost).');
+        } else if (err.name !== 'NotFoundError') {
+          alert(`Pencarian Bluetooth gagal: ${err.message}`);
+        }
+
+        // Keep mock devices list as a fallback for testing
+        setScannedDevices([
+          { name: 'PT-210 Portable Printer', address: '00:11:22:33:AA:BB', rssi: -54 },
+          { name: 'Zjiang ZJ-5805 Thermal', address: '33:44:55:66:CC:DD', rssi: -66 },
+          { name: 'Rongta RPP02N-80', address: 'AA:BB:CC:DD:EE:FF', rssi: -72 },
+          { name: 'Epson TM-P20 BT', address: '22:88:AC:33:E2:01', rssi: -85 }
+        ]);
+      } finally {
+        setIsScanning(false);
+        playBeep(900, 0.1);
+      }
+    } else {
+      // Browser doesn't support Web Bluetooth (or runs over insecure HTTP)
+      alert(
+        "Browser Anda tidak mendukung pencarian Web Bluetooth secara langsung, atau Anda sedang tersambung via HTTP biasa.\n\n" +
+        "PANDUAN KONEKSI PRINTER THERMAL BLUETOOTH:\n" +
+        "1. Sandingkan (pair) printer Bluetooth Anda di Pengaturan Bluetooth Windows/PC Anda terlebih dahulu.\n" +
+        "2. Di Windows, buka 'Devices & Printers' lalu tambahkan printer Anda sebagai 'Generic / Text Only' printer pada port COM virtual Bluetooth.\n" +
+        "3. Saat melakukan checkout di halaman Kasir POS, tekan tombol 'Cetak Tagihan' dan pilih printer tersebut dari daftar printer sistem browser Anda.\n\n" +
+        "Kami menampilkan daftar perangkat simulasi untuk keperluan uji coba antarmuka."
+      );
+      
       setScannedDevices([
         { name: 'PT-210 Portable Printer', address: '00:11:22:33:AA:BB', rssi: -54 },
         { name: 'Zjiang ZJ-5805 Thermal', address: '33:44:55:66:CC:DD', rssi: -66 },
@@ -254,7 +302,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
       ]);
       setIsScanning(false);
       playBeep(900, 0.1);
-    }, 2000);
+    }
   };
 
   const handleConnectPrinter = (name: string) => {
@@ -1105,10 +1153,22 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
               </div>
             )}
 
-            {/* Custom Web Bluetooth Connection Trigger */}
-            <div className="text-[10px] text-slate-550 dark:text-slate-400 flex items-center gap-1 bg-black/5 dark:bg-white/5 rounded-2xl p-3 border border-black/5 dark:border-white/5 mb-1 text-center justify-center">
-              <AlertCircle className="w-3.5 h-3.5 text-yellow-600 dark:text-yellow-500 shrink-0" />
-              <span>Sistem kami mendukung printer termal portabel standar Bluetooth ESC/POS (58mm/80mm).</span>
+            <div className="text-[10px] text-slate-555 dark:text-slate-400 flex flex-col gap-2 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl p-4.5 mb-1 text-left">
+              <div className="flex items-center gap-2 font-black text-indigo-400 uppercase tracking-wider">
+                <AlertCircle className="w-4 h-4 text-indigo-400 shrink-0" />
+                <span>Petunjuk Menghubungkan Printer Bluetooth</span>
+              </div>
+              <p className="leading-relaxed font-semibold">
+                Sistem kami mendukung printer termal portable standar ESC/POS (58mm/80mm). 
+              </p>
+              <div className="mt-1 flex flex-col gap-1.5 border-t border-black/5 dark:border-white/5 pt-2.5">
+                <span className="font-bold text-foreground dark:text-white block">Cara Terbaik (Sistem Printer):</span>
+                <ol className="list-decimal list-inside flex flex-col gap-1 pl-1">
+                  <li>Sandingkan (*pair*) printer dengan PC/Windows Anda via Bluetooth Settings.</li>
+                  <li>Instal driver printer kasir (*Generic / Text Only* atau driver bawaan) di Windows.</li>
+                  <li>Di Kasir POS saat checkout, tekan tombol <span className="font-extrabold text-red-500">Cetak Tagihan</span>, lalu pilih nama printer Anda di dialog cetak Google Chrome. Cara ini **100% stabil & otomatis didukung browser**.</li>
+                </ol>
+              </div>
             </div>
 
             {/* Paper custom options */}

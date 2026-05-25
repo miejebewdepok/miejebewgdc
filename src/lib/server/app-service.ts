@@ -553,50 +553,73 @@ export async function createTransaction(
     throw new Error("Keranjang masih kosong.");
   }
 
-  const productIds = payload.items.map((item) => item.productId);
-  const productRows = await db
+  const productIds = payload.items.map((item) => item.productId).filter(id => id !== "promo_jasmine_tea");
+  const productRows = productIds.length > 0 ? await db
     .select()
     .from(products)
-    .where(and(eq(products.userId, userId), inArray(products.id, productIds)));
+    .where(and(eq(products.userId, userId), inArray(products.id, productIds))) : [];
 
   const productMap = new Map(productRows.map((product) => [product.id, product]));
   const lineItems = payload.items.map((item) => {
-    const product = productMap.get(item.productId);
-    if (!product) {
-      throw new Error("Salah satu produk tidak ditemukan.");
+    let product: any;
+    if (item.productId === "promo_jasmine_tea") {
+      product = {
+        id: "promo_jasmine_tea",
+        userId,
+        name: "Qalla Tea (Jasmine Tea) [PROMO]",
+        category: "Qalla Tea",
+        buyPrice: 0,
+        sellPrice: 0,
+        stock: 9999,
+        minimumStock: -1,
+        description: "Promo Jasmine Tea gratis",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    } else {
+      const p = productMap.get(item.productId);
+      if (!p) {
+        throw new Error("Salah satu produk tidak ditemukan.");
+      }
+      product = p;
     }
 
     if (product.stock < item.quantity) {
       throw new Error(`Stok ${product.name} tidak cukup.`);
     }
 
-    // Calculate price with surcharge for levels 4-5 and toppings (+2000 each, promo: 3 toppings = 5000, 7 toppings = 10000)
-    const spicySurcharge = (item.spicyLevel === 4 || item.spicyLevel === 5) ? 2000 : 0;
-    const toppingsCount = item.toppings ? item.toppings.length : 0;
-    const toppingsSurcharge = toppingsCount === 3 
-      ? 5000 
-      : toppingsCount === 7 
-      ? 10000 
-      : toppingsCount * 2000;
-      
-    let fillingSurcharge = 0;
-    if (product.category === 'Kebab') {
-      if (item.size === 'REGULER') {
-        if (item.filling === 'Beef') fillingSurcharge = 2000;
-      } else if (item.size === 'LARGE') {
-        if (item.filling === 'Beef Slice' || item.filling === 'Beef' || item.filling === 'Chicken Katsu') fillingSurcharge = 5000;
+    let unitPrice = 0;
+    if (item.productId === "promo_jasmine_tea") {
+      unitPrice = 0;
+    } else {
+      // Calculate price with surcharge for levels 4-5 and toppings (+2000 each, promo: 3 toppings = 5000, 7 toppings = 10000)
+      const spicySurcharge = (item.spicyLevel === 4 || item.spicyLevel === 5) ? 2000 : 0;
+      const toppingsCount = item.toppings ? item.toppings.length : 0;
+      const toppingsSurcharge = toppingsCount === 3 
+        ? 5000 
+        : toppingsCount === 7 
+        ? 10000 
+        : toppingsCount * 2000;
+        
+      let fillingSurcharge = 0;
+      if (product.category === 'Kebab') {
+        if (item.size === 'REGULER') {
+          if (item.filling === 'Beef') fillingSurcharge = 2000;
+        } else if (item.size === 'LARGE') {
+          if (item.filling === 'Beef Slice' || item.filling === 'Beef' || item.filling === 'Chicken Katsu') fillingSurcharge = 5000;
+          else if (item.filling === 'Special') fillingSurcharge = 10000;
+        }
+      } else {
+        if (item.filling === 'Beef Patty' || item.filling === 'Chicken Katsu') fillingSurcharge = 5000;
         else if (item.filling === 'Special') fillingSurcharge = 10000;
       }
-    } else {
-      if (item.filling === 'Beef Patty' || item.filling === 'Chicken Katsu') fillingSurcharge = 5000;
-      else if (item.filling === 'Special') fillingSurcharge = 10000;
-    }
 
-    const unitPrice = product.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge;
+      unitPrice = product.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge;
+    }
 
     // Construct a beautiful name incorporating spicy level and toppings
     const extras: string[] = [];
-    if (item.spicyLevel !== undefined) {
+    if (item.productId !== "promo_jasmine_tea" && item.spicyLevel !== undefined) {
       if (product.category === 'Kebab' || product.category === 'Lumpia Beef') {
          if (item.spicyLevel === 0) extras.push("Tidak Pedas");
          else if (item.spicyLevel === 1) extras.push("Sedang");
@@ -605,13 +628,13 @@ export async function createTransaction(
          extras.push(`Level ${item.spicyLevel}`);
       }
     }
-    if (item.size) {
+    if (item.productId !== "promo_jasmine_tea" && item.size) {
       extras.push(`Ukuran: ${item.size}`);
     }
-    if (item.filling) {
+    if (item.productId !== "promo_jasmine_tea" && item.filling) {
       extras.push(`Varian Isi: ${item.filling}`);
     }
-    if (item.toppings && item.toppings.length > 0) {
+    if (item.productId !== "promo_jasmine_tea" && item.toppings && item.toppings.length > 0) {
       const counts: Record<string, number> = {};
       for (const t of item.toppings) {
         counts[t] = (counts[t] || 0) + 1;
@@ -663,6 +686,7 @@ export async function createTransaction(
     );
 
     for (const item of lineItems) {
+      if (item.product.id === "promo_jasmine_tea") continue;
       await tx
         .update(products)
         .set({
@@ -682,6 +706,7 @@ export async function createTransaction(
 
   // Trigger low-stock alerts in background
   for (const item of lineItems) {
+    if (item.product.id === "promo_jasmine_tea") continue;
     const remainingStock = item.product.stock - item.quantity;
     if (remainingStock <= item.product.minimumStock) {
       void sendStockAlert(item.product.name, remainingStock, item.product.minimumStock)

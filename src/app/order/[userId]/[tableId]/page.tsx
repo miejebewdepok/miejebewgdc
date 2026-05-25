@@ -14,7 +14,9 @@ import {
   ArrowRight, 
   Loader2, 
   Store,
-  ChevronRight
+  ChevronRight,
+  Gift,
+  Lock
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 
@@ -439,6 +441,13 @@ export default function CustomerOrderPage(props: {
   const subtotal = useMemo(() => {
     return cart.reduce((sum, item) => sum + item.sellPrice * item.quantity, 0);
   }, [cart]);
+
+  // Auto-reset claim promo state if subtotal drops below Rp 15.000
+  useEffect(() => {
+    if (subtotal < 15000) {
+      setClaimPromo(false);
+    }
+  }, [subtotal]);
 
   // Order submission
   const handlePlaceOrder = async (e: React.FormEvent) => {
@@ -1216,50 +1225,124 @@ export default function CustomerOrderPage(props: {
                 </div>
 
                 {/* Promo Checkbox & WhatsApp Input */}
-                <div className="bg-yellow-500/5 border border-yellow-500/15 rounded-2xl p-3.5 my-1">
-                  <label className="flex items-start gap-2.5 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={claimPromo}
-                      onChange={(e) => setClaimPromo(e.target.checked)}
-                      className="w-4 h-4 rounded text-red-600 bg-white/5 border-white/10 focus:ring-0 focus:ring-offset-0 mt-0.5 cursor-pointer accent-red-600"
-                    />
-                    <div>
-                      <span className="text-xs font-extrabold text-white block">Klaim GRATIS Qalla Tea (Jasmine) 🍃</span>
-                      <span className="text-[10px] text-yellow-500 font-bold block mt-0.5 leading-tight">Cukup masukkan No. WhatsApp dan Email Anda untuk segelas Jasmine Tea!</span>
-                    </div>
-                  </label>
+                {(() => {
+                  const MIN_PROMO_SUBTOTAL = 15000;
+                  const isPromoUnlocked = subtotal >= MIN_PROMO_SUBTOTAL;
+                  const percent = Math.min(100, (subtotal / MIN_PROMO_SUBTOTAL) * 100);
+                  const remaining = MIN_PROMO_SUBTOTAL - subtotal;
 
-                  {claimPromo && (
-                    <div className="mt-3 border-t border-white/5 pt-3 animate-in fade-in slide-in-from-top-1 duration-200 flex flex-col gap-3">
-                      <div>
-                        <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-1.5">
-                          Nomor WhatsApp (Aktif)
-                        </label>
-                        <input
-                          type="tel"
-                          placeholder="Contoh: 08123456789"
-                          value={whatsappNumber}
-                          onChange={(e) => setWhatsappNumber(e.target.value)}
-                          className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 placeholder-slate-600"
-                        />
+                  return (
+                    <div className={`border rounded-2xl p-4 my-1 transition-all duration-300 ${
+                      isPromoUnlocked 
+                        ? "bg-emerald-500/5 border-emerald-500/20 shadow-lg shadow-emerald-500/5" 
+                        : "bg-yellow-500/5 border-yellow-500/10"
+                    }`}>
+                      {/* Progress Header */}
+                      <div className="mb-3">
+                        <div className="flex justify-between items-center mb-1.5">
+                          <div className="flex items-center gap-2">
+                            {isPromoUnlocked ? (
+                              <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 animate-bounce">
+                                <Sparkles className="w-3 h-3" />
+                              </div>
+                            ) : (
+                              <div className="w-5 h-5 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500">
+                                <Gift className="w-3 h-3" />
+                              </div>
+                            )}
+                            <span className="text-[10px] font-black tracking-wide text-white uppercase">
+                              Promo Qalla Tea Gratis
+                            </span>
+                          </div>
+                          <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
+                            isPromoUnlocked 
+                              ? "bg-emerald-500/20 text-emerald-400" 
+                              : "bg-yellow-500/20 text-yellow-500"
+                          }`}>
+                            Min. Rp 15.000
+                          </span>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mb-2">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-500 ease-out ${
+                              isPromoUnlocked 
+                                ? "bg-gradient-to-r from-emerald-500 to-teal-400" 
+                                : "bg-gradient-to-r from-amber-500 to-orange-400"
+                            }`}
+                            style={{ width: `${percent}%` }}
+                          />
+                        </div>
+
+                        {/* Progress Text */}
+                        <div className="flex justify-between items-center text-[9px] font-bold">
+                          {isPromoUnlocked ? (
+                            <span className="text-emerald-400 flex items-center gap-1">
+                              🎉 Syarat minimum pembelian terpenuhi!
+                            </span>
+                          ) : (
+                            <span className="text-yellow-500">
+                              Kurang <span className="font-mono text-white">{formatRupiah(remaining)}</span> lagi untuk teh gratis.
+                            </span>
+                          )}
+                          <span className="text-slate-400 font-mono">{formatRupiah(subtotal)} / {formatRupiah(MIN_PROMO_SUBTOTAL)}</span>
+                        </div>
                       </div>
 
-                      <div>
-                        <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-1.5">
-                          Alamat Email / Gmail
-                        </label>
-                        <input
-                          type="email"
-                          placeholder="Contoh: nama@gmail.com"
-                          value={emailAddress}
-                          onChange={(e) => setEmailAddress(e.target.value)}
-                          className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 placeholder-slate-600"
-                        />
-                      </div>
+                      {/* Checkbox Trigger */}
+                      <label className={`flex items-start gap-3 select-none ${isPromoUnlocked ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}>
+                        <div className="relative flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={claimPromo && isPromoUnlocked}
+                            disabled={!isPromoUnlocked}
+                            onChange={(e) => setClaimPromo(e.target.checked)}
+                            className="w-4 h-4 rounded text-emerald-600 bg-white/5 border-white/10 focus:ring-0 focus:ring-offset-0 mt-0.5 cursor-pointer accent-emerald-600 disabled:cursor-not-allowed"
+                          />
+                        </div>
+                        <div>
+                          <span className="text-xs font-extrabold text-white block">
+                            Klaim GRATIS Qalla Tea (Jasmine) 🍃
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-medium block mt-0.5 leading-tight">
+                            Masukkan No. WhatsApp dan Email untuk klaim promo.
+                          </span>
+                        </div>
+                      </label>
+
+                      {claimPromo && isPromoUnlocked && (
+                        <div className="mt-3 border-t border-white/5 pt-3 animate-in fade-in slide-in-from-top-1 duration-200 flex flex-col gap-3">
+                          <div>
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">
+                              Nomor WhatsApp (Aktif)
+                            </label>
+                            <input
+                              type="tel"
+                              placeholder="Contoh: 08123456789"
+                              value={whatsappNumber}
+                              onChange={(e) => setWhatsappNumber(e.target.value)}
+                              className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 placeholder-slate-600"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">
+                              Alamat Email / Gmail
+                            </label>
+                            <input
+                              type="email"
+                              placeholder="Contoh: nama@gmail.com"
+                              value={emailAddress}
+                              onChange={(e) => setEmailAddress(e.target.value)}
+                              className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 placeholder-slate-600"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                  );
+                })()}
               </div>
             </div>
 

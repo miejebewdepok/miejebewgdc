@@ -27,8 +27,11 @@ export async function POST(request: NextRequest) {
 
     let finalItems = [...items];
 
-    // If customer claimed promo, check if they qualify (both WhatsApp and Email must be filled, valid, and not previously used)
-    if (claimPromo && whatsappNumber?.trim() && emailAddress?.trim()) {
+    // Calculate subtotal to verify minimum purchase requirement of Rp 15.000 for promo
+    const orderSubtotal = items.reduce((sum, item) => sum + (item.sellPrice || 0) * (item.quantity || 0), 0);
+
+    // If customer claimed promo, check if they qualify (subtotal >= 15000, both WhatsApp and Email must be filled, valid, and not previously used)
+    if (claimPromo && orderSubtotal >= 15000 && whatsappNumber?.trim() && emailAddress?.trim()) {
       const waClean = whatsappNumber.trim();
       const emailClean = emailAddress.trim();
 

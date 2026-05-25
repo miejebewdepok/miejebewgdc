@@ -178,7 +178,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
               <div className="relative w-full sm:max-w-xs">
                 <input
                   type="text"
-                  placeholder="Cari nota, nama meja, metode..."
+                  placeholder="Cari nota, nama Self Order, metode..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl py-2 pl-10 pr-4 text-xs text-foreground dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/50"
@@ -377,7 +377,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                     </div>
                     <div className="flex justify-between">
                       <span>Pelanggan:</span>
-                      <span className="text-foreground dark:text-white font-bold">{selectedTx.customerName}</span>
+                      <span className="text-foreground dark:text-white font-bold">{(selectedTx.customerName || '').replace(/\bmeja\b/gi, 'Order').replace(/\bself\s*order\b/gi, 'Order')}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span>Metode:</span>
@@ -511,7 +511,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                   </tr>
                   <tr>
                     <td className="text-slate-500">Pelanggan:</td>
-                    <td className="text-right font-bold text-slate-800">{selectedTx.customerName || 'Umum'}</td>
+                    <td className="text-right font-bold text-slate-800">{(selectedTx.customerName || 'Umum').replace(/\bmeja\b/gi, 'Order').replace(/\bself\s*order\b/gi, 'Order')}</td>
                   </tr>
                   <tr>
                     <td className="text-slate-500">Metode:</td>

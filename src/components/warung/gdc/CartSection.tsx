@@ -196,7 +196,7 @@ export default function CartSection({
             <input
               type="text"
               required
-              placeholder="e.g. Meja 12, Siska"
+              placeholder="e.g. Self Order 12, Siska"
               value={billName}
               onChange={(e) => setBillName(e.target.value)}
               className="flex-1 bg-sidebar-accent/50 dark:bg-white/5 border border-sidebar-border dark:border-white/10 rounded-xl py-1.5 px-3 text-xs text-foreground dark:text-white focus:outline-none focus:ring-1 focus:ring-yellow-500"

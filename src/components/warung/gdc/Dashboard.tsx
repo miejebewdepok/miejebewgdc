@@ -379,7 +379,7 @@ export default function Dashboard({
               <div className="py-6 text-center bg-black/5 dark:bg-black/10 rounded-2xl border border-dashed border-black/10 dark:border-white/5">
                 <Bookmark className="w-8 h-8 text-slate-600 mx-auto mb-2" />
                 <span className="text-xs text-slate-600 dark:text-slate-400 font-medium block">Tidak Ada Tagihan Ditunda</span>
-                <p className="text-[10px] text-slate-500 mt-1 max-w-xs mx-auto">Anda bisa menunda pesanan meja saat checkout lalu menyelesaikannya di sini atau di kasir.</p>
+                <p className="text-[10px] text-slate-500 mt-1 max-w-xs mx-auto">Anda bisa menunda pesanan Self Order saat checkout lalu menyelesaikannya di sini atau di kasir.</p>
               </div>
             ) : (
               <div className="flex flex-col gap-3 max-h-[220px] overflow-y-auto pr-1">

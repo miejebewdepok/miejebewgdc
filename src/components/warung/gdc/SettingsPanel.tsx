@@ -664,7 +664,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
               <div className="p-2 bg-red-500/10 text-red-500 rounded-xl">
                 <QrCode className="w-4 h-4" />
               </div>
-              <h3 className="text-sm font-bold text-foreground dark:text-white uppercase tracking-wider">QR Meja Setup (Self-Ordering)</h3>
+              <h3 className="text-sm font-bold text-foreground dark:text-white uppercase tracking-wider">QR Self Order Setup</h3>
             </div>
 
             <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-650 dark:text-emerald-400 p-3.5 rounded-2xl text-[11px] font-sans">
@@ -672,14 +672,14 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
               <div>
                 <span className="font-extrabold block">Trend Pemesanan Mandiri</span>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                  Pelanggan cukup scan QR Code di meja makan untuk membuka menu public digital, memesan, & tagihan otomatis terkirim langsung ke dasbor kasir POS Anda!
+                  Pelanggan cukup scan QR Code di Self Order untuk membuka menu public digital, memesan, & tagihan otomatis terkirim langsung ke dasbor kasir POS Anda!
                 </p>
               </div>
             </div>
 
             <div>
               <label className="text-xs text-slate-550 dark:text-slate-400 block mb-1.5 font-bold uppercase tracking-wider">
-                Jumlah Meja Makan Restoran
+                Jumlah Self Order Restoran
               </label>
               <input
                 type="number"
@@ -694,7 +694,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
 
             <div className="border-t border-black/5 dark:border-white/5 pt-4">
               <span className="text-[10px] text-slate-550 dark:text-slate-400 font-extrabold uppercase block mb-3">
-                Daftar Tautan Link & QR Meja
+                Daftar Tautan Link & QR Self Order
               </span>
               <div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1 no-scrollbar">
                 {Array.from({ length: tableCount }).map((_, idx) => {
@@ -717,7 +717,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                           type="button"
                           onClick={() => {
                             navigator.clipboard.writeText(tableUrl);
-                            alert(`Link Meja ${tableNum} berhasil disalin!`);
+                            alert(`Link Self Order ${tableNum} berhasil disalin!`);
                           }}
                           className="flex-1 md:flex-none py-1.5 px-3 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-slate-800 dark:text-white rounded-xl text-[10px] font-bold text-center cursor-pointer transition-all"
                         >
@@ -775,7 +775,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                 type="text"
                 value={claimsSearchQuery}
                 onChange={(e) => setClaimsSearchQuery(e.target.value)}
-                placeholder="Cari nama, nomor WhatsApp, email, atau meja..."
+                placeholder="Cari nama, nomor WhatsApp, email, atau Self Order..."
                 className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl py-2.5 pl-10 pr-4 text-xs text-foreground dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/40"
               />
               <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
@@ -829,7 +829,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                               {claim.customerName}
                             </span>
                             <span className="text-[8px] font-black bg-red-500/10 text-red-500 dark:text-red-400 px-1.5 py-0.5 rounded-full border border-red-500/15 uppercase font-mono shrink-0">
-                              Meja {claim.tableName.replace(/^meja[\s\-_]*/i, "")}
+                              Self Order {claim.tableName.replace(/^(meja|order|self-order)[\s\-_]*/i, "")}
                             </span>
                           </div>
                           <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono block mt-1 truncate">
@@ -1202,7 +1202,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
             <div>
               <div className="flex justify-between items-center pb-4 border-b border-white/5 mb-4">
                 <span className="text-xs text-slate-400 font-black tracking-widest uppercase flex items-center gap-1">
-                  <Printer className="w-4 h-4 text-indigo-400 animate-pulse" /> Virtual Printer Output (QR Meja)
+                  <Printer className="w-4 h-4 text-indigo-400 animate-pulse" /> Virtual Printer Output (QR Self Order)
                 </span>
                 
                 <button
@@ -1230,7 +1230,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                     <div className="font-extrabold text-sm uppercase mb-1">{settings.storeName || "MIE JEBEW GDC"}</div>
                     <div className="text-[9px] mb-2">{settings.storeAddress || "Alamat Outlet"}</div>
                     <div className="border-t border-b border-dashed border-slate-400 py-1 w-full my-2 font-bold uppercase tracking-wider">
-                      {selectedQrTable}
+                      ORDER {selectedQrTable.replace(/^(meja|order|self-order)[\s\-_]*/i, "")}
                     </div>
                     <div className="text-[8px] text-slate-600 mb-3 px-2 leading-relaxed">
                       Scan QR Code di bawah untuk melihat menu & memesan langsung secara mandiri dari handphone Anda.
@@ -1264,7 +1264,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
             </div>
 
             <p className="text-[10px] text-slate-400 text-center mt-6">
-              Potong slip QR meja ini dan tempelkan di <span className="font-bold text-white uppercase">{selectedQrTable}</span>.
+              Potong slip QR Self Order ini dan tempelkan di <span className="font-bold text-white uppercase">{selectedQrTable}</span>.
             </p>
           </div>
         </div>

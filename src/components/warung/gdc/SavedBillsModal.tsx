@@ -23,8 +23,8 @@ export default function SavedBillsModal({
   };
   const getCleanBillName = (name: string) => {
     return (name || "")
-      .replace(/meja\s*meja\s*[-_\s]*/gi, "")
-      .replace(/meja\s*[-_\s]*/gi, "");
+      .replace(/(self\s*order|selforder|meja)\s*(self\s*order|selforder|meja)\s*[-_\s]*/gi, "")
+      .replace(/(self\s*order|selforder|meja)\s*[-_\s]*/gi, "");
   };
 
   return (
@@ -36,7 +36,7 @@ export default function SavedBillsModal({
           <h2 className="text-xl font-extrabold text-foreground dark:text-white uppercase tracking-tight flex items-center gap-2">
             <Clock className="text-red-500 w-5 h-5" /> Antrean Bill Tertunda (Hold List)
           </h2>
-          <p className="text-slate-500 dark:text-slate-400 text-xs">Simpan sementara pesanan antrean meja pelanggan, lalu pulihkan kapan saja</p>
+          <p className="text-slate-500 dark:text-slate-400 text-xs">Simpan sementara pesanan antrean Self Order pelanggan, lalu pulihkan kapan saja</p>
         </div>
 
         {/* Saved list scrollable */}

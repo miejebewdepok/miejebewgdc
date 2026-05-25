@@ -601,9 +601,9 @@ export function AppStateProvider({
     // Extract customer name / table from bill name and save to localStorage
     if (typeof window !== "undefined") {
       let nameToStore = billToLoad.name;
-      // If it starts with a number followed by " - ", e.g. "5 - Andi", convert it to "Meja 5 - Andi"
+      // If it starts with a number followed by " - ", e.g. "5 - Andi", convert it to "Self Order 5 - Andi"
       if (/^\d+\s*-\s*/.test(nameToStore)) {
-        nameToStore = "Meja " + nameToStore;
+        nameToStore = "Self Order " + nameToStore;
       }
       localStorage.setItem("miejebew_checkout_customer_name", nameToStore);
     }

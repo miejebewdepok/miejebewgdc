@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const cleanTable = tableName.replace(/^meja[\s\-_]*/i, "");
+    const cleanTable = tableName.replace(/^(meja|order|self-order)[\s\-_]*/i, "");
     const name = `${cleanTable} - ${customerName}`;
     const bill = await createSavedBill(userId, name, finalItems);
 
@@ -143,6 +143,6 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    return handleRouteError(error, "Gagal mengirimkan pesanan meja.");
+    return handleRouteError(error, "Gagal mengirimkan pesanan.");
   }
 }

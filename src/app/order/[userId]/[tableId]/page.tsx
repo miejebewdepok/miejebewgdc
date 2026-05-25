@@ -70,7 +70,20 @@ export default function CustomerOrderPage(props: {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [lastBillName, setLastBillName] = useState("");
 
-  const toppingsList = ["Pangsit Goreng", "Pangsit Basah", "Siomay", "Bakso", "Beef Slice", "Keju Slice", "Telur"];
+  const toppingsList = [
+    "Bakso",
+    "Bakso Ikan",
+    "Sosis",
+    "Nugget",
+    "Kornet",
+    "Otak-Otak",
+    "Tahu Aci",
+    "Scallop",
+    "Cireng",
+    "Beef Slice",
+    "Keju Slice",
+    "Telur"
+  ];
 
   // Load products catalog from public API
   useEffect(() => {
@@ -709,35 +722,37 @@ export default function CustomerOrderPage(props: {
                 </div>
               )}
 
-              {/* Toppings selector */}
-              <div className="my-5 border-t border-white/5 pt-4">
-                <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-2">
-                  Toppings Tambahan
-                </label>
-                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1 no-scrollbar">
-                  {toppingsList.map((t) => {
-                    const isPremium = ["Beef Slice", "Keju Slice", "Telur"].includes(t);
-                    const premiumPrice = t === "Beef Slice" ? 2500 : t === "Telur" ? 4000 : 3000;
-                    return (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => handleToggleTopping(t)}
-                        className={`p-2.5 border rounded-xl text-left text-xs font-semibold flex flex-col justify-between h-14 transition-all cursor-pointer ${
-                          selectedToppings.includes(t)
-                            ? "bg-yellow-500/10 border-yellow-500 text-yellow-500 shadow-sm"
-                            : "bg-white/5 border-white/5 text-slate-400 hover:text-white"
-                        }`}
-                      >
-                        <span className="block leading-none truncate w-full">{t}</span>
-                        <span className="text-[9.5px] font-mono font-bold leading-none mt-1 select-none">
-                          {isPremium ? `+${formatRupiah(premiumPrice)}` : "+Rp 2.000"}
-                        </span>
-                      </button>
-                    );
-                  })}
+              {/* Toppings selector (Only for non-Kebab, non-Lumpia Beef) */}
+              {customizingProduct.category !== "Kebab" && customizingProduct.category !== "Lumpia Beef" && (
+                <div className="my-5 border-t border-white/5 pt-4">
+                  <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-2">
+                    Toppings Tambahan
+                  </label>
+                  <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1 no-scrollbar">
+                    {toppingsList.map((t) => {
+                      const isPremium = ["Beef Slice", "Keju Slice", "Telur"].includes(t);
+                      const premiumPrice = t === "Beef Slice" ? 2500 : t === "Telur" ? 4000 : 3000;
+                      return (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => handleToggleTopping(t)}
+                          className={`p-2.5 border rounded-xl text-left text-xs font-semibold flex flex-col justify-between h-14 transition-all cursor-pointer ${
+                            selectedToppings.includes(t)
+                              ? "bg-yellow-500/10 border-yellow-500 text-yellow-500 shadow-sm"
+                              : "bg-white/5 border-white/5 text-slate-400 hover:text-white"
+                          }`}
+                        >
+                          <span className="block leading-none truncate w-full">{t}</span>
+                          <span className="text-[9.5px] font-mono font-bold leading-none mt-1 select-none">
+                            {isPremium ? `+${formatRupiah(premiumPrice)}` : "+Rp 2.000"}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Confirm buttons */}

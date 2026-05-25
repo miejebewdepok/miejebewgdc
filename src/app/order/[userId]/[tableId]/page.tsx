@@ -174,17 +174,51 @@ export default function CustomerOrderPage(props: {
 
   // Grouped products lists
   const foodProducts = useMemo(() => {
+    const getFoodWeight = (cat: string) => {
+      switch (cat) {
+        case "Mie Pedas":
+          return 1;
+        case "Lumpia Beef":
+          return 2;
+        case "Kebab":
+          return 3;
+        case "Snack":
+          return 4;
+        default:
+          return 5;
+      }
+    };
+
     return products.filter((p) => !isDrinkCategory(p.category)).sort((a, b) => {
-      const isAMie = a.category === "Mie Pedas";
-      const isBMie = b.category === "Mie Pedas";
-      if (isAMie && !isBMie) return -1;
-      if (!isAMie && isBMie) return 1;
-      return 0;
+      const weightA = getFoodWeight(a.category);
+      const weightB = getFoodWeight(b.category);
+      if (weightA !== weightB) {
+        return weightA - weightB;
+      }
+      return a.name.localeCompare(b.name);
     });
   }, [products]);
 
   const drinkProducts = useMemo(() => {
-    return products.filter((p) => isDrinkCategory(p.category));
+    const getDrinkWeight = (cat: string) => {
+      switch (cat) {
+        case "Qalla Tea":
+          return 1;
+        case "Qalla Coffee":
+          return 2;
+        default:
+          return 3;
+      }
+    };
+
+    return products.filter((p) => isDrinkCategory(p.category)).sort((a, b) => {
+      const weightA = getDrinkWeight(a.category);
+      const weightB = getDrinkWeight(b.category);
+      if (weightA !== weightB) {
+        return weightA - weightB;
+      }
+      return a.name.localeCompare(b.name);
+    });
   }, [products]);
 
   const formatRupiah = (val: number) => {

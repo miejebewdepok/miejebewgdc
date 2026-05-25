@@ -215,7 +215,23 @@ export default function CustomerOrderPage(props: {
   }, [products]);
 
   const drinkProducts = useMemo(() => {
+    const getDrinkWeight = (cat: string) => {
+      switch (cat) {
+        case "Qalla Tea":
+          return 1;
+        case "Qalla Coffee":
+          return 2;
+        default:
+          return 3;
+      }
+    };
+
     return products.filter((p) => isDrinkCategory(p.category)).sort((a, b) => {
+      const weightA = getDrinkWeight(a.category);
+      const weightB = getDrinkWeight(b.category);
+      if (weightA !== weightB) {
+        return weightA - weightB;
+      }
       if (a.sellPrice !== b.sellPrice) {
         return a.sellPrice - b.sellPrice;
       }

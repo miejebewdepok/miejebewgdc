@@ -245,46 +245,14 @@ export default function CheckoutModal({
   return (
     <>
       <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center sm:p-4 select-none">
-        <div className="glass-morphism-intense w-full max-w-4xl rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[95svh] sm:h-[580px] relative">
-
-          {/* ── MOBILE TAB BAR (hidden md+) ── */}
-          {!isCompleted && (
-            <div className="md:hidden flex shrink-0 border-b border-black/10 dark:border-white/10">
-              <button
-                type="button"
-                onClick={() => setMobileTab('payment')}
-                className={`flex-1 py-3.5 text-xs font-black uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 ${
-                  mobileTab === 'payment'
-                    ? 'text-red-500 border-b-2 border-red-500'
-                    : 'text-slate-400 dark:text-slate-500'
-                }`}
-              >
-                <Banknote className="w-3.5 h-3.5" /> Pembayaran
-              </button>
-              <button
-                type="button"
-                onClick={() => setMobileTab('receipt')}
-                className={`flex-1 py-3.5 text-xs font-black uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 ${
-                  mobileTab === 'receipt'
-                    ? 'text-red-500 border-b-2 border-red-500'
-                    : 'text-slate-400 dark:text-slate-500'
-                }`}
-              >
-                <FileText className="w-3.5 h-3.5" /> Preview Struk
-              </button>
-            </div>
-          )}
+        <div className="glass-morphism-intense w-full max-w-lg rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[95svh] sm:h-[580px] relative">
 
           {/* ── CONTENT AREA ── */}
-          <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
+          <div className="flex-1 flex flex-col overflow-hidden min-h-0">
 
-            {/* LEFT: Payment Form — always visible on desktop; on mobile only when mobileTab=payment */}
+            {/* LEFT: Payment Form — always visible on desktop and mobile */}
             {!isCompleted ? (
-              <div
-                className={`flex-1 flex flex-col justify-between p-5 sm:p-6 overflow-y-auto border-r border-black/10 dark:border-white/5 ${
-                  mobileTab === 'receipt' ? 'hidden md:flex' : 'flex'
-                }`}
-              >
+              <div className="flex-1 flex flex-col justify-between p-5 sm:p-6 overflow-y-auto">
                 <div>
                   {/* Header */}
                   <div className="flex items-center justify-between mb-4 border-b border-black/5 dark:border-white/5 pb-3">
@@ -468,18 +436,6 @@ export default function CheckoutModal({
                 </div>
               </div>
             )}
-
-            <aside
-              className={`w-full md:w-80 bg-white p-5 sm:p-6 flex flex-col z-20 shrink-0 text-slate-900 md:rounded-r-3xl border-l border-slate-100 overflow-y-auto ${
-                isCompleted 
-                  ? 'hidden md:flex' 
-                  : mobileTab === 'payment' 
-                  ? 'hidden md:flex' 
-                  : 'flex'
-              }`}
-            >
-              <ReceiptContent />
-            </aside>
           </div>
 
           {/* Close Button */}

@@ -1414,8 +1414,8 @@ export default function CustomerOrderPage(props: {
                         {/* Progress Status Text */}
                         <div className="text-[9px] font-bold mt-1">
                           {isVipUnlocked ? (
-                            <span className="text-indigo-400 flex items-center gap-1">
-                              🌟 VIP Terbuka! Teh gratis pasti didapatkan bebas dari pembatasan duplicate check!
+                            <span className="text-indigo-400 flex items-center gap-1 font-extrabold">
+                              🌟 VIP UNLOCKED: Free Qalla Tea Activated!
                             </span>
                           ) : isPromoUnlocked ? (
                             <span className="text-emerald-400">
@@ -1429,91 +1429,88 @@ export default function CustomerOrderPage(props: {
                         </div>
                       </div>
 
-                      {/* Checkbox Trigger */}
-                      <label className={`flex items-start gap-3 select-none mt-3 ${isPromoUnlocked ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}>
-                        <div className="relative flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={claimPromo && isPromoUnlocked}
-                            disabled={!isPromoUnlocked}
-                            onChange={(e) => setClaimPromo(e.target.checked)}
-                            className={`w-4 h-4 rounded bg-white/5 border-white/10 focus:ring-0 focus:ring-offset-0 mt-0.5 cursor-pointer disabled:cursor-not-allowed ${
-                              isVipUnlocked ? "accent-indigo-600 text-indigo-600" : "accent-emerald-600 text-emerald-600"
-                            }`}
-                          />
-                        </div>
-                        <div>
-                          <span className="text-xs font-extrabold text-white block">
-                            Klaim GRATIS Qalla Tea (Jasmine) 🍃
-                          </span>
-                          <span className="text-[9px] text-slate-400 font-medium block mt-0.5 leading-tight">
-                            Masukkan No. WhatsApp dan Email untuk klaim promo.
-                          </span>
-                        </div>
-                      </label>
-
-                      {claimPromo && isPromoUnlocked && (
-                        <div className="mt-3 border-t border-white/5 pt-3 animate-in fade-in slide-in-from-top-1 duration-200 flex flex-col gap-3">
-                          <div>
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1.5 flex justify-between">
-                              <span>Nomor WhatsApp (Aktif)</span>
-                              {whatsappUsed && whatsappNumber.trim().length >= 9 && (
-                                <span className={isVipUnlocked ? "text-indigo-400 font-extrabold animate-pulse" : "text-rose-455 font-extrabold animate-pulse"}>
-                                  {isVipUnlocked ? "✓ VIP Bypass" : "⚠️ Sudah Digunakan"}
-                                </span>
-                              )}
-                            </label>
-                            <input
-                              type="tel"
-                              placeholder="Contoh: 08123456789"
-                              value={whatsappNumber}
-                              onChange={(e) => setWhatsappNumber(e.target.value)}
-                              className={`w-full bg-white/5 border rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 placeholder-slate-600 ${
-                                whatsappUsed && whatsappNumber.trim().length >= 9
-                                  ? isVipUnlocked
-                                    ? "border-indigo-500/30 focus:ring-indigo-500"
-                                    : "border-rose-500/30 focus:ring-rose-500"
-                                  : "border-white/5 focus:ring-emerald-500"
-                              }`}
-                            />
+                      {isVipUnlocked ? (
+                        /* VIP Reward Active Banner - No Inputs Needed */
+                        <div className="mt-3 border-t border-white/5 pt-3.5 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-300">
+                          <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 mb-2 animate-bounce">
+                            <Sparkles className="w-5 h-5" />
                           </div>
+                          <h4 className="text-xs font-black text-indigo-400 uppercase tracking-widest">🌟 VIP Promo Active</h4>
+                          <p className="text-[10px] text-slate-350 font-bold max-w-[285px] leading-relaxed mt-1">
+                            Free Jasmine Tea has been automatically added to your cart! No phone number or email required.
+                          </p>
+                        </div>
+                      ) : (
+                        /* Normal Checkbox & Inputs */
+                        <>
+                          <label className={`flex items-start gap-3 select-none mt-3 ${isPromoUnlocked ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}>
+                            <div className="relative flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={claimPromo && isPromoUnlocked}
+                                disabled={!isPromoUnlocked}
+                                onChange={(e) => setClaimPromo(e.target.checked)}
+                                className="w-4 h-4 rounded text-emerald-600 bg-white/5 border-white/10 focus:ring-0 focus:ring-offset-0 mt-0.5 cursor-pointer accent-emerald-600 disabled:cursor-not-allowed"
+                              />
+                            </div>
+                            <div>
+                              <span className="text-xs font-extrabold text-white block">
+                                Klaim GRATIS Qalla Tea (Jasmine) 🍃
+                              </span>
+                              <span className="text-[9px] text-slate-400 font-medium block mt-0.5 leading-tight">
+                                Masukkan No. WhatsApp dan Email untuk klaim promo.
+                              </span>
+                            </div>
+                          </label>
 
-                          <div>
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1.5 flex justify-between">
-                              <span>Alamat Email / Gmail</span>
-                              {emailUsed && emailAddress.trim().includes("@") && (
-                                <span className={isVipUnlocked ? "text-indigo-400 font-extrabold animate-pulse" : "text-rose-455 font-extrabold animate-pulse"}>
-                                  {isVipUnlocked ? "✓ VIP Bypass" : "⚠️ Sudah Digunakan"}
-                                </span>
-                              )}
-                            </label>
-                            <input
-                              type="email"
-                              placeholder="Contoh: nama@gmail.com"
-                              value={emailAddress}
-                              onChange={(e) => setEmailAddress(e.target.value)}
-                              className={`w-full bg-white/5 border rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 placeholder-slate-600 ${
-                                emailUsed && emailAddress.trim().includes("@")
-                                  ? isVipUnlocked
-                                    ? "border-indigo-500/30 focus:ring-indigo-500"
-                                    : "border-rose-500/30 focus:ring-rose-500"
-                                  : "border-white/5 focus:ring-emerald-500"
-                              }`}
-                            />
-                          </div>
+                          {claimPromo && isPromoUnlocked && (
+                            <div className="mt-3 border-t border-white/5 pt-3 animate-in fade-in slide-in-from-top-1 duration-200 flex flex-col gap-3">
+                              <div>
+                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1.5 flex justify-between">
+                                  <span>Nomor WhatsApp (Aktif)</span>
+                                  {whatsappUsed && whatsappNumber.trim().length >= 9 && (
+                                    <span className="text-rose-455 font-extrabold animate-pulse">
+                                      ⚠️ Sudah Digunakan
+                                    </span>
+                                  )}
+                                </label>
+                                <input
+                                  type="tel"
+                                  placeholder="Contoh: 08123456789"
+                                  value={whatsappNumber}
+                                  onChange={(e) => setWhatsappNumber(e.target.value)}
+                                  className={`w-full bg-white/5 border rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 placeholder-slate-600 ${
+                                    whatsappUsed && whatsappNumber.trim().length >= 9
+                                      ? "border-rose-500/30 focus:ring-rose-500"
+                                      : "border-white/5 focus:ring-emerald-500"
+                                  }`}
+                                />
+                              </div>
 
-                          {/* Real-time Warning Banners */}
-                          {hasDuplicate && (
-                            <>
-                              {isVipUnlocked ? (
-                                <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-[10px] text-indigo-300 font-extrabold flex items-start gap-2 animate-in fade-in duration-300">
-                                  <Sparkles className="w-3.5 h-3.5 shrink-0 mt-0.5 text-indigo-400 animate-pulse" />
-                                  <div>
-                                    <span className="block text-white font-extrabold mb-0.5">🌟 VIP Status Aktif!</span>
-                                    <span>Nomor WA/Email ini sudah terdaftar, namun Anda tetap mendapatkan teh gratis karena subtotal belanja di atas Rp 50.000!</span>
-                                  </div>
-                                </div>
-                              ) : (
+                              <div>
+                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1.5 flex justify-between">
+                                  <span>Alamat Email / Gmail</span>
+                                  {emailUsed && emailAddress.trim().includes("@") && (
+                                    <span className="text-rose-455 font-extrabold animate-pulse">
+                                      ⚠️ Sudah Digunakan
+                                    </span>
+                                  )}
+                                </label>
+                                <input
+                                  type="email"
+                                  placeholder="Contoh: nama@gmail.com"
+                                  value={emailAddress}
+                                  onChange={(e) => setEmailAddress(e.target.value)}
+                                  className={`w-full bg-white/5 border rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 placeholder-slate-600 ${
+                                    emailUsed && emailAddress.trim().includes("@")
+                                      ? "border-rose-500/30 focus:ring-rose-500"
+                                      : "border-white/5 focus:ring-emerald-500"
+                                  }`}
+                                />
+                              </div>
+
+                              {/* Real-time Warning Banners */}
+                              {hasDuplicate && (
                                 <div className="p-2.5 bg-rose-500/10 border border-rose-500/20 rounded-xl text-[10px] text-rose-300 font-bold flex flex-col gap-1 animate-in fade-in duration-300">
                                   <div className="flex items-start gap-2 text-white font-extrabold">
                                     <X className="w-3.5 h-3.5 shrink-0 mt-0.5 text-rose-500" />
@@ -1527,9 +1524,9 @@ export default function CustomerOrderPage(props: {
                                   </div>
                                 </div>
                               )}
-                            </>
+                            </div>
                           )}
-                        </div>
+                        </>
                       )}
                     </div>
                   );

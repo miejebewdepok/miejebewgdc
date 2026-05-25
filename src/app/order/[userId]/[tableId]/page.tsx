@@ -36,6 +36,8 @@ interface CartItem {
   toppings: string[];
   product: Product;
   sellPrice: number; // configured sell price including surcharges
+  filling?: string;
+  size?: string;
 }
 
 export default function CustomerOrderPage(props: {
@@ -58,6 +60,8 @@ export default function CustomerOrderPage(props: {
   const [customizingProduct, setCustomizingProduct] = useState<Product | null>(null);
   const [spicyLevel, setSpicyLevel] = useState<number>(0);
   const [selectedToppings, setSelectedToppings] = useState<string[]>([]);
+  const [selectedSize, setSelectedSize] = useState<string>("REGULER");
+  const [selectedFilling, setSelectedFilling] = useState<string>("Beef Slice");
   
   // Cart review & Checkout states
   const [cartOpen, setCartOpen] = useState(false);
@@ -141,12 +145,13 @@ export default function CustomerOrderPage(props: {
   };
 
   // Surcharge calculator matching cashier logic
-  const calculateConfiguredPrice = (product: Product, level: number, toppings: string[]) => {
-    const isBypassed = ["Snack", "Camilan", "Qalla Coffee", "Qalla Tea", "Minuman Dingin", "Minuman"].includes(product.category);
+  const calculateConfiguredPrice = (product: Product, level: number, toppings: string[], filling?: string, size?: string) => {
+    const isBypassed = ["Snack", "Qalla Coffee", "Qalla Tea"].includes(product.category);
     if (isBypassed) return product.sellPrice;
 
-    // Spicy surcharge for lvl 4 & 5
-    const spicySurcharge = (level === 4 || level === 5) ? 2000 : 0;
+    // Spicy surcharge ONLY for non-Kebab, non-Lumpia Beef, non-bypassed
+    const isSpicySurcharged = !["Kebab", "Lumpia Beef", "Snack", "Qalla Coffee", "Qalla Tea"].includes(product.category);
+    const spicySurcharge = (isSpicySurcharged && (level === 4 || level === 5)) ? 2000 : 0;
 
     // Toppings surcharge logic
     const specialToppings = toppings.filter((t) => ["Beef Slice", "Keju Slice", "Telur"].includes(t));
@@ -166,12 +171,25 @@ export default function CustomerOrderPage(props: {
       else if (t === "Keju Slice") specialSurcharge += 3000;
     });
 
-    return product.sellPrice + spicySurcharge + stdSurcharge + specialSurcharge;
+    let fillingSurcharge = 0;
+    if (product.category === 'Kebab') {
+      if (size === 'REGULER') {
+        if (filling === 'Beef') fillingSurcharge = 2000;
+      } else if (size === 'LARGE') {
+        if (filling === 'Special') fillingSurcharge = 10000;
+        else fillingSurcharge = 5000;
+      }
+    } else if (product.category === 'Lumpia Beef') {
+      if (filling === 'Beef Patty' || filling === 'Chicken Katsu') fillingSurcharge = 5000;
+      else if (filling === 'Special') fillingSurcharge = 10000;
+    }
+
+    return product.sellPrice + spicySurcharge + stdSurcharge + specialSurcharge + fillingSurcharge;
   };
 
   // Add to cart trigger
   const handleAddClick = (product: Product) => {
-    const isBypassed = ["Snack", "Camilan", "Qalla Coffee", "Qalla Tea", "Minuman Dingin", "Minuman"].includes(product.category);
+    const isBypassed = ["Snack", "Qalla Coffee", "Qalla Tea"].includes(product.category);
     if (isBypassed) {
       // Direct add to cart bypass customization
       const cartItemId = `${product.id}-lvl0-`;
@@ -202,6 +220,15 @@ export default function CustomerOrderPage(props: {
       setCustomizingProduct(product);
       setSpicyLevel(0);
       setSelectedToppings([]);
+      // Default filling and size for Kebab / Lumpia Beef
+      setSelectedSize("REGULER");
+      if (product.category === "Kebab") {
+        setSelectedFilling("Beef Slice");
+      } else if (product.category === "Lumpia Beef") {
+        setSelectedFilling("Beef Slice");
+      } else {
+        setSelectedFilling("");
+      }
     }
   };
 
@@ -210,9 +237,12 @@ export default function CustomerOrderPage(props: {
     if (!customizingProduct) return;
     const product = customizingProduct;
     
-    const configuredPrice = calculateConfiguredPrice(product, spicyLevel, selectedToppings);
+    const fillingToPass = product.category === "Kebab" || product.category === "Lumpia Beef" ? selectedFilling : undefined;
+    const sizeToPass = product.category === "Kebab" ? selectedSize : undefined;
+
+    const configuredPrice = calculateConfiguredPrice(product, spicyLevel, selectedToppings, fillingToPass, sizeToPass);
     const toppingsKey = [...selectedToppings].sort().join(",");
-    const cartItemId = `${product.id}-lvl${spicyLevel}-${toppingsKey}`;
+    const cartItemId = `${product.id}-lvl${spicyLevel}-${toppingsKey}${fillingToPass ? `-${fillingToPass}` : ""}${sizeToPass ? `-${sizeToPass}` : ""}`;
 
     setCart((current) => {
       const existingIndex = current.findIndex((item) => item.id === cartItemId);
@@ -233,6 +263,8 @@ export default function CustomerOrderPage(props: {
           toppings: selectedToppings,
           product,
           sellPrice: configuredPrice,
+          filling: fillingToPass,
+          size: sizeToPass
         },
       ];
     });
@@ -297,6 +329,8 @@ export default function CustomerOrderPage(props: {
             spicyLevel: item.spicyLevel,
             toppings: item.toppings,
             sellPrice: item.sellPrice,
+            filling: item.filling,
+            size: item.size,
             product: {
               id: item.product.id,
               name: item.product.name,
@@ -550,6 +584,131 @@ export default function CustomerOrderPage(props: {
                 )}
               </div>
 
+              {/* Size Selection (Only for Kebab) */}
+              {customizingProduct.category === "Kebab" && (
+                <div className="my-5 border-t border-white/5 pt-4">
+                  <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-2.5">
+                    Ukuran Kebab
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {["REGULER", "LARGE"].map((sz) => {
+                      const isSelected = selectedSize === sz;
+                      const surcharge = sz === "LARGE" ? 5000 : 0;
+                      return (
+                        <button
+                          key={sz}
+                          type="button"
+                          onClick={() => {
+                            setSelectedSize(sz);
+                            if (sz === "REGULER" && (selectedFilling === "Chicken Katsu" || selectedFilling === "Special")) {
+                              setSelectedFilling("Beef");
+                            } else if (sz === "LARGE" && selectedFilling === "Beef Slice") {
+                              setSelectedFilling("Beef");
+                            }
+                          }}
+                          className={`py-2.5 border rounded-xl text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
+                            isSelected
+                              ? "bg-red-600 border-red-500 text-white shadow-md shadow-red-600/25"
+                              : "bg-white/5 border-white/5 text-slate-450 hover:text-white"
+                          }`}
+                        >
+                          <span>{sz}</span>
+                          {surcharge > 0 && (
+                            <span className="text-[8px] text-yellow-500 font-mono mt-0.5">
+                              +Rp 5.000
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Filling Selection (Kebab) */}
+              {customizingProduct.category === "Kebab" && (
+                <div className="my-5 border-t border-white/5 pt-4">
+                  <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-2.5">
+                    Varian Isi Kebab
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { label: "Beef Slice", reqLarge: false, reqReguler: true },
+                      { label: "Beef", reqLarge: false, reqReguler: false },
+                      { label: "Chicken Katsu", reqLarge: true, reqReguler: false },
+                      { label: "Special", reqLarge: true, reqReguler: false },
+                    ].map((filling) => {
+                      const isSelected = selectedFilling === filling.label;
+                      const isDisabled = (filling.reqLarge && selectedSize === "REGULER") || (filling.reqReguler && selectedSize === "LARGE");
+                      let surcharge = 0;
+                      if (selectedSize === "REGULER" && filling.label === "Beef") surcharge = 2000;
+                      if (selectedSize === "LARGE" && filling.label === "Special") surcharge = 5000;
+
+                      if (isDisabled) return null;
+
+                      return (
+                        <button
+                          key={filling.label}
+                          type="button"
+                          onClick={() => setSelectedFilling(filling.label)}
+                          className={`py-2.5 border rounded-xl text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
+                            isSelected
+                              ? "bg-red-600 border-red-500 text-white shadow-md shadow-red-600/25"
+                              : "bg-white/5 border-white/5 text-slate-450 hover:text-white"
+                          }`}
+                        >
+                          <span>{filling.label}</span>
+                          {surcharge > 0 && (
+                            <span className="text-[8px] text-yellow-500 font-mono mt-0.5">
+                              +{formatRupiah(surcharge)}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Filling Selection (Lumpia Beef) */}
+              {customizingProduct.category === "Lumpia Beef" && (
+                <div className="my-5 border-t border-white/5 pt-4">
+                  <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-2.5">
+                    Varian Isi Lumpia Beef
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { label: "Beef Slice", surcharge: 0 },
+                      { label: "Kornet", surcharge: 0 },
+                      { label: "Beef Patty", surcharge: 5000 },
+                      { label: "Chicken Katsu", surcharge: 5000 },
+                      { label: "Special", surcharge: 10000 },
+                    ].map((filling) => {
+                      const isSelected = selectedFilling === filling.label;
+                      return (
+                        <button
+                          key={filling.label}
+                          type="button"
+                          onClick={() => setSelectedFilling(filling.label)}
+                          className={`py-2.5 border rounded-xl text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
+                            isSelected
+                              ? "bg-red-600 border-red-500 text-white shadow-md shadow-red-600/25"
+                              : "bg-white/5 border-white/5 text-slate-450 hover:text-white"
+                          }`}
+                        >
+                          <span>{filling.label}</span>
+                          {filling.surcharge > 0 && (
+                            <span className="text-[8px] text-yellow-500 font-mono mt-0.5">
+                              +{formatRupiah(filling.surcharge)}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Toppings selector */}
               <div className="my-5 border-t border-white/5 pt-4">
                 <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-2">
@@ -586,7 +745,13 @@ export default function CustomerOrderPage(props: {
               <div>
                 <span className="text-[10px] text-slate-450 uppercase font-black tracking-wider block">Harga Item</span>
                 <span className="text-sm font-mono font-black text-yellow-500">
-                  {formatRupiah(calculateConfiguredPrice(customizingProduct, spicyLevel, selectedToppings))}
+                  {formatRupiah(calculateConfiguredPrice(
+                    customizingProduct, 
+                    spicyLevel, 
+                    selectedToppings,
+                    customizingProduct.category === "Kebab" || customizingProduct.category === "Lumpia Beef" ? selectedFilling : undefined,
+                    customizingProduct.category === "Kebab" ? selectedSize : undefined
+                  ))}
                 </span>
               </div>
               <button
@@ -629,9 +794,21 @@ export default function CustomerOrderPage(props: {
                     <div className="overflow-hidden flex-1">
                       <h4 className="text-xs font-bold text-white truncate">{item.product.name}</h4>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        <span className="text-[8px] font-black bg-red-500/10 text-red-400 px-1 py-0.5 rounded uppercase font-mono">
-                          Lvl {item.spicyLevel}
-                        </span>
+                        {item.product.category !== "Snack" && item.product.category !== "Qalla Coffee" && item.product.category !== "Qalla Tea" && (
+                          <span className="text-[8px] font-black bg-red-500/10 text-red-400 px-1 py-0.5 rounded uppercase font-mono">
+                            Lvl {item.spicyLevel}
+                          </span>
+                        )}
+                        {item.size && (
+                          <span className="text-[8px] font-black bg-cyan-500/10 text-cyan-400 px-1 py-0.5 rounded uppercase font-mono">
+                            {item.size}
+                          </span>
+                        )}
+                        {item.filling && (
+                          <span className="text-[8px] font-black bg-emerald-500/10 text-emerald-400 px-1 py-0.5 rounded uppercase font-mono">
+                            {item.filling}
+                          </span>
+                        )}
                         {item.toppings.length > 0 && (
                           <span className="text-[8px] font-black bg-yellow-500/10 text-yellow-400 px-1 py-0.5 rounded uppercase max-w-[150px] truncate" title={item.toppings.join(", ")}>
                             {item.toppings.join(", ")}

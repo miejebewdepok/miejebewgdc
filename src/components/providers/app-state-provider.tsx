@@ -581,11 +581,13 @@ export function AppStateProvider({
     if (!billToLoad) return;
 
     const cartItemsToLoad = billToLoad.items.map((item: any) => ({
-      id: item.id || `${item.productId}-lvl${item.spicyLevel || 0}-${(item.toppings || []).sort().join(",")}`,
+      id: item.id || `${item.productId}-lvl${item.spicyLevel || 0}-${(item.toppings || []).sort().join(",")}${item.filling ? `-${item.filling}` : ""}${item.size ? `-${item.size}` : ""}`,
       productId: item.productId,
       quantity: item.quantity,
       spicyLevel: item.spicyLevel ?? 0,
-      toppings: item.toppings ?? []
+      toppings: item.toppings ?? [],
+      filling: item.filling,
+      size: item.size
     }));
 
     // Delete it from the server

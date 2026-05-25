@@ -571,29 +571,57 @@ export default function CustomerOrderPage(props: {
 
               {/* Spicy level selector */}
               <div className="my-5">
-                <label className="text-[9px] font-black text-slate-450 uppercase tracking-wider block mb-2.5">
+                <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-2.5">
                   Tingkat Kepedasan
                 </label>
-                <div className="grid grid-cols-6 gap-2">
-                  {[0, 1, 2, 3, 4, 5].map((lvl) => (
-                    <button
-                      key={lvl}
-                      type="button"
-                      onClick={() => setSpicyLevel(lvl)}
-                      className={`py-2.5 border rounded-xl text-xs font-bold font-mono transition-all cursor-pointer ${
-                        spicyLevel === lvl
-                          ? "bg-red-600 border-red-500 text-white shadow-md shadow-red-600/25"
-                          : "bg-white/5 border-white/5 text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      {lvl}
-                    </button>
-                  ))}
-                </div>
-                {(spicyLevel === 4 || spicyLevel === 5) && (
-                  <span className="text-[9px] text-yellow-500 font-bold block mt-1.5">
-                    * Level 4 & 5 ada biaya tambahan +Rp 2.000
-                  </span>
+                {customizingProduct.category === "Kebab" || customizingProduct.category === "Lumpia Beef" ? (
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { label: "Tidak Pedas", lvl: 0 },
+                      { label: "Sedang", lvl: 1 },
+                      { label: "Pedas", lvl: 2 },
+                    ].map((opt) => {
+                      const isSelected = spicyLevel === opt.lvl;
+                      return (
+                        <button
+                          key={opt.lvl}
+                          type="button"
+                          onClick={() => setSpicyLevel(opt.lvl)}
+                          className={`py-3 border rounded-xl text-[11px] font-bold transition-all cursor-pointer text-center ${
+                            isSelected
+                              ? "bg-red-600 border-red-500 text-white shadow-md shadow-red-600/25 font-black"
+                              : "bg-white/5 border-white/5 text-slate-400 hover:text-white"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-6 gap-2">
+                      {[0, 1, 2, 3, 4, 5].map((lvl) => (
+                        <button
+                          key={lvl}
+                          type="button"
+                          onClick={() => setSpicyLevel(lvl)}
+                          className={`py-2.5 border rounded-xl text-xs font-bold font-mono transition-all cursor-pointer ${
+                            spicyLevel === lvl
+                              ? "bg-red-600 border-red-500 text-white shadow-md shadow-red-600/25"
+                              : "bg-white/5 border-white/5 text-slate-400 hover:text-white"
+                          }`}
+                        >
+                          {lvl}
+                        </button>
+                      ))}
+                    </div>
+                    {(spicyLevel === 4 || spicyLevel === 5) && (
+                      <span className="text-[9px] text-yellow-500 font-bold block mt-1.5">
+                        * Level 4 & 5 ada biaya tambahan +Rp 2.000
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -744,7 +772,9 @@ export default function CustomerOrderPage(props: {
                           }`}
                         >
                           <span className="block leading-none truncate w-full">{t}</span>
-                          <span className="text-[9.5px] font-mono font-bold leading-none mt-1 select-none">
+                          <span className={`text-[9.5px] font-mono font-bold leading-none mt-1 select-none ${
+                            isPremium ? "text-yellow-400 font-extrabold" : "text-slate-500"
+                          }`}>
                             {isPremium ? `+${formatRupiah(premiumPrice)}` : "+Rp 2.000"}
                           </span>
                         </button>

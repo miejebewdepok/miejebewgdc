@@ -48,6 +48,7 @@ export default function CustomerOrderPage(props: {
   const userId = resolvedParams.userId;
   const rawTableId = resolvedParams.tableId;
   const tableId = decodeURIComponent(rawTableId);
+  const tableNumOnly = tableId.replace(/^meja[\s\-_]*/i, "");
 
   // States
   const [loading, setLoading] = useState(true);
@@ -493,7 +494,7 @@ export default function CustomerOrderPage(props: {
         <div className="bg-white/5 border border-white/5 rounded-2xl p-4.5 my-6 w-full max-w-xs text-left backdrop-blur-xl">
           <div className="flex justify-between items-center border-b border-white/5 pb-2.5 mb-2.5">
             <span className="text-[10px] text-slate-450 uppercase font-black tracking-wider">Nomor Meja</span>
-            <span className="text-sm font-extrabold text-red-500">{tableId}</span>
+            <span className="text-sm font-extrabold text-red-500">{tableNumOnly}</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-[10px] text-slate-455 uppercase font-black tracking-wider">Identitas Bill</span>
@@ -534,7 +535,7 @@ export default function CustomerOrderPage(props: {
           </div>
         </div>
         <div className="px-3 py-1 bg-red-500/10 border border-red-500/25 rounded-full text-[9px] font-black text-red-400 uppercase tracking-widest">
-          Meja: {tableId}
+          Meja: {tableNumOnly}
         </div>
       </header>
 

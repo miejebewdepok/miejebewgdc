@@ -21,6 +21,11 @@ export default function SavedBillsModal({
       maximumFractionDigits: 0
     }).format(val);
   };
+  const getCleanBillName = (name: string) => {
+    return (name || "")
+      .replace(/meja\s*meja\s*[-_\s]*/gi, "")
+      .replace(/meja\s*[-_\s]*/gi, "");
+  };
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden p-1 select-none">
@@ -57,7 +62,7 @@ export default function SavedBillsModal({
                     <div>
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-sm font-extrabold text-foreground dark:text-white group-hover:text-red-650 dark:group-hover:text-red-400 transition-colors">
-                          {bill.name}
+                          {getCleanBillName(bill.name)}
                         </span>
                         
                         <button

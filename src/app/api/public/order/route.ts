@@ -59,7 +59,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const name = `Meja ${tableName} - ${customerName}`;
+    const cleanTable = tableName.replace(/^meja[\s\-_]*/i, "");
+    const name = `${cleanTable} - ${customerName}`;
     const bill = await createSavedBill(userId, name, finalItems);
 
     return NextResponse.json({

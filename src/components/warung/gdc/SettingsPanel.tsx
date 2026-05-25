@@ -687,14 +687,14 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
               <div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1 no-scrollbar">
                 {Array.from({ length: tableCount }).map((_, idx) => {
                   const tableNum = idx + 1;
-                  const tableName = `Meja-${tableNum}`;
+                  const tableName = `${tableNum}`;
                   const tableUrl = `${origin}/order/${userId}/${tableName}`;
 
                   return (
                     <div key={tableName} className="bg-black/5 dark:bg-black/30 border border-black/5 dark:border-white/5 rounded-2xl p-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                       <div className="overflow-hidden flex-1 w-full">
-                        <span className="text-xs font-bold text-foreground dark:text-white block">
-                          Meja {tableNum}
+                        <span className="text-xs font-bold text-foreground dark:text-white">
+                          # {tableNum}
                         </span>
                         <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono truncate block w-full" title={tableUrl}>
                           {tableUrl}
@@ -705,7 +705,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                           type="button"
                           onClick={() => {
                             navigator.clipboard.writeText(tableUrl);
-                            alert(`Link ${tableName} berhasil disalin!`);
+                            alert(`Link Meja ${tableNum} berhasil disalin!`);
                           }}
                           className="flex-1 md:flex-none py-1.5 px-3 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-slate-800 dark:text-white rounded-xl text-[10px] font-bold text-center cursor-pointer transition-all"
                         >

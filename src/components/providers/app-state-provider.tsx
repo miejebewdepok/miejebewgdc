@@ -158,6 +158,7 @@ export function AppStateProvider({
           if (response.savedBills.length > current.savedBills.length) {
             // Play Gojek/Shopee style cheerful marimba arpeggio tune (rich bell tone + loud gain + autoplay bypass)
             // Play Upgraded Exciting Beat and Indonesian Female Voice Overlay (repeats exactly 5 times)
+            // Play Upgraded Exciting K-Pop Style Beat and Indonesian Female Voice Overlay (repeats exactly 5 times)
             const playOrderIncomingMelody = () => {
               const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
               if (!AudioContext) return;
@@ -172,78 +173,172 @@ export function AppStateProvider({
                   ctx.resume();
                 }
 
-                // 1. Synthesize a single exciting beat + arpeggiated chimes pattern
+                // Pre-generate a white noise buffer for crisp K-Pop handclaps
+                const sampleRate = ctx.sampleRate;
+                const bufferSize = sampleRate * 0.15; // 150ms clap burst
+                const noiseBuffer = ctx.createBuffer(1, bufferSize, sampleRate);
+                const data = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                  data[i] = Math.random() * 2 - 1;
+                }
+
+                // 1. Synthesize a single exciting K-Pop bubblegum beat + chord progression pattern
                 const playBeatSequence = (startTimeOffset: number) => {
-                  // Synthetic kick drum (deep thumping bass beat)
+                  // Synthetic kick drum (bouncy pop bass drum)
                   const playKick = (time: number) => {
                     try {
                       const osc = ctx.createOscillator();
                       const gain = ctx.createGain();
                       osc.type = "sine";
-                      osc.frequency.setValueAtTime(150, ctx.currentTime + startTimeOffset + time);
-                      osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + startTimeOffset + time + 0.15);
+                      osc.frequency.setValueAtTime(140, ctx.currentTime + startTimeOffset + time);
+                      osc.frequency.exponentialRampToValueAtTime(45, ctx.currentTime + startTimeOffset + time + 0.12);
                       
-                      gain.gain.setValueAtTime(0.8, ctx.currentTime + startTimeOffset + time);
-                      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTimeOffset + time + 0.15);
+                      gain.gain.setValueAtTime(0.9, ctx.currentTime + startTimeOffset + time);
+                      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTimeOffset + time + 0.12);
                       
                       osc.connect(gain);
                       gain.connect(ctx.destination);
                       osc.start(ctx.currentTime + startTimeOffset + time);
-                      osc.stop(ctx.currentTime + startTimeOffset + time + 0.16);
+                      osc.stop(ctx.currentTime + startTimeOffset + time + 0.13);
                     } catch (err) {
-                      console.error("Kick synth error", err);
+                      console.error("Kick error", err);
                     }
                   };
 
-                  // Sparkling crystal chimes
-                  const playChime = (freq: number, time: number, dur: number, gainVal: number) => {
+                  // Crisp retro K-Pop Handclap ("Tish!")
+                  const playClap = (time: number) => {
                     try {
+                      const noiseSource = ctx.createBufferSource();
+                      noiseSource.buffer = noiseBuffer;
+                      
+                      // Bandpass filter to sculpt white noise into a tight handclap (1300Hz)
+                      const filter = ctx.createBiquadFilter();
+                      filter.type = "bandpass";
+                      filter.frequency.value = 1300;
+                      filter.Q.value = 4.0;
+                      
+                      const gain = ctx.createGain();
+                      gain.gain.setValueAtTime(0.35, ctx.currentTime + startTimeOffset + time);
+                      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTimeOffset + time + 0.09);
+                      
+                      noiseSource.connect(filter);
+                      filter.connect(gain);
+                      gain.connect(ctx.destination);
+                      noiseSource.start(ctx.currentTime + startTimeOffset + time);
+                    } catch (err) {
+                      console.error("Clap error", err);
+                    }
+                  };
+
+                  // Bubblegum K-Pop Lead Synthesizer (square wave + lowpass sweep + warm triangle backing)
+                  const playSynthNode = (freq: number, time: number, dur: number, gainVal: number) => {
+                    try {
+                      // Square wave for retro/cute K-Pop lead
                       const osc1 = ctx.createOscillator();
+                      const filter1 = ctx.createBiquadFilter();
                       const gain1 = ctx.createGain();
-                      osc1.type = "triangle";
+                      
+                      osc1.type = "square";
                       osc1.frequency.setValueAtTime(freq, ctx.currentTime + startTimeOffset + time);
+                      
+                      filter1.type = "lowpass";
+                      filter1.frequency.setValueAtTime(3500, ctx.currentTime + startTimeOffset + time);
+                      filter1.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + startTimeOffset + time + dur);
+                      
                       gain1.gain.setValueAtTime(0.001, ctx.currentTime + startTimeOffset + time);
-                      gain1.gain.exponentialRampToValueAtTime(gainVal, ctx.currentTime + startTimeOffset + time + 0.02);
+                      gain1.gain.exponentialRampToValueAtTime(gainVal * 0.45, ctx.currentTime + startTimeOffset + time + 0.02);
                       gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTimeOffset + time + dur);
-                      osc1.connect(gain1);
+                      
+                      osc1.connect(filter1);
+                      filter1.connect(gain1);
                       gain1.connect(ctx.destination);
+                      
                       osc1.start(ctx.currentTime + startTimeOffset + time);
                       osc1.stop(ctx.currentTime + startTimeOffset + time + dur);
 
+                      // Triangle wave harmony octave for body and sweetness
                       const osc2 = ctx.createOscillator();
                       const gain2 = ctx.createGain();
-                      osc2.type = "sine";
-                      osc2.frequency.setValueAtTime(freq * 2, ctx.currentTime + startTimeOffset + time);
+                      osc2.type = "triangle";
+                      osc2.frequency.setValueAtTime(freq / 2, ctx.currentTime + startTimeOffset + time);
+                      
                       gain2.gain.setValueAtTime(0.001, ctx.currentTime + startTimeOffset + time);
-                      gain2.gain.exponentialRampToValueAtTime(gainVal * 0.4, ctx.currentTime + startTimeOffset + time + 0.02);
+                      gain2.gain.exponentialRampToValueAtTime(gainVal * 0.35, ctx.currentTime + startTimeOffset + time + 0.02);
                       gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTimeOffset + time + dur);
+                      
                       osc2.connect(gain2);
                       gain2.connect(ctx.destination);
+                      
                       osc2.start(ctx.currentTime + startTimeOffset + time);
                       osc2.stop(ctx.currentTime + startTimeOffset + time + dur);
                     } catch (err) {
-                      console.error("Chime synth error", err);
+                      console.error("Synth node error", err);
                     }
                   };
 
-                  // Bar beat 1: Main kick beat + rising excited chime arpeggio
+                  // Driving K-Pop Synth Bassline (deep sine)
+                  const playBassLine = (freq: number, time: number, dur: number) => {
+                    try {
+                      const osc = ctx.createOscillator();
+                      const gain = ctx.createGain();
+                      osc.type = "sine";
+                      osc.frequency.setValueAtTime(freq, ctx.currentTime + startTimeOffset + time);
+                      
+                      gain.gain.setValueAtTime(0.001, ctx.currentTime + startTimeOffset + time);
+                      gain.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime + startTimeOffset + time + 0.03);
+                      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTimeOffset + time + dur);
+                      
+                      osc.connect(gain);
+                      gain.connect(ctx.destination);
+                      
+                      osc.start(ctx.currentTime + startTimeOffset + time);
+                      osc.stop(ctx.currentTime + startTimeOffset + time + dur);
+                    } catch (err) {
+                      console.error("Bass error", err);
+                    }
+                  };
+
+                  // --- RHYTHM COMPOSITION & SEQUENCER (1.8s loop at ~133 BPM, 4 beats of ~0.45s) ---
+                  
+                  // Beat 1: Driving Kick + F-Major Chord (F5: 698.46Hz, A5: 880.00Hz, C6: 1046.50Hz) + Bass F3 (174.61Hz)
                   playKick(0.0);
-                  playChime(523.25, 0.0, 0.15, 0.4);   // C5
-                  playChime(659.25, 0.08, 0.15, 0.4);  // E5
-                  playChime(783.99, 0.16, 0.15, 0.4);  // G5
-                  playChime(1046.50, 0.24, 0.25, 0.5); // C6
+                  playBassLine(174.61, 0.0, 0.20);
+                  playSynthNode(698.46, 0.0, 0.18, 0.35); // F5
+                  playSynthNode(880.00, 0.0, 0.18, 0.35); // A5
+                  playSynthNode(1046.50, 0.0, 0.18, 0.35); // C6
 
-                  // Bar beat 2: Double kick drum syncopation + high chime answer
+                  // Syncopated Bass / Beat 1.5: Bass F3 + Bouncy Melody Lead G6 (1567.98Hz)
+                  playBassLine(174.61, 0.22, 0.15);
+                  playSynthNode(1567.98, 0.22, 0.15, 0.35); // G6
+
+                  // Beat 2: Driving Kick + Sharp Handclap + Bass F3 + Melody Lead A6 (1760.00Hz)
                   playKick(0.45);
-                  playKick(0.60);
-                  playChime(1318.51, 0.45, 0.15, 0.3); // E6
-                  playChime(1567.98, 0.60, 0.20, 0.3); // G6
+                  playClap(0.45);
+                  playBassLine(174.61, 0.45, 0.20);
+                  playSynthNode(1760.00, 0.45, 0.18, 0.40); // A6
 
-                  // Bar beat 3: Solid thumping kick + high energetic resolve
-                  playKick(1.00);
-                  playChime(1046.50, 1.00, 0.15, 0.3); // C6
-                  playChime(783.99, 1.10, 0.15, 0.3);  // G5
-                  playChime(1318.51, 1.20, 0.30, 0.4); // E6
+                  // Beat 2.5: Melody Peak C7 (2093.00Hz) (Sparkling high notes popular in K-pop hooks)
+                  playSynthNode(2093.00, 0.67, 0.18, 0.45); // C7
+
+                  // Beat 3: Driving Kick + C-Major Chord (G5: 783.99Hz, C6: 1046.50Hz, E6: 1318.51Hz) + Bass C3 (130.81Hz)
+                  playKick(0.90);
+                  playBassLine(130.81, 0.90, 0.20);
+                  playSynthNode(783.99, 0.90, 0.18, 0.35);  // G5
+                  playSynthNode(1046.50, 0.90, 0.18, 0.35); // C6
+                  playSynthNode(1318.51, 0.90, 0.18, 0.35); // E6
+
+                  // Syncopated Bass / Beat 3.5: Bass C3 + Melody Lead D6 (1174.66Hz)
+                  playBassLine(130.81, 1.12, 0.15);
+                  playSynthNode(1174.66, 1.12, 0.15, 0.35); // D6
+
+                  // Beat 4: Driving Kick + Sharp Handclap + Bass C3 + Melody Lead E6 (1318.51Hz)
+                  playKick(1.35);
+                  playClap(1.35);
+                  playBassLine(130.81, 1.35, 0.20);
+                  playSynthNode(1318.51, 1.35, 0.18, 0.40); // E6
+
+                  // Beat 4.5: Melodic Sweet Resolution G6 (1567.98Hz)
+                  playSynthNode(1567.98, 1.57, 0.18, 0.40); // G6
                 };
 
                 // 2. Play the Indonesian Female Voice overlay
@@ -272,7 +367,7 @@ export function AppStateProvider({
                   }, startTimeOffset * 1000 + 200); // Trigger 0.2s after the kick beat starts
                 };
 
-                // 3. Play the combined sequence exactly 5 times, spaced 1.8 seconds apart (9 seconds total)
+                // 3. Play the combined K-Pop loop sequence exactly 5 times, spaced 1.8 seconds apart (9 seconds total)
                 for (let i = 0; i < 5; i++) {
                   const offset = i * 1.8;
                   playBeatSequence(offset);

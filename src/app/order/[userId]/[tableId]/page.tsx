@@ -232,6 +232,9 @@ export default function CustomerOrderPage(props: {
       if (weightA !== weightB) {
         return weightA - weightB;
       }
+      if (a.sellPrice !== b.sellPrice) {
+        return a.sellPrice - b.sellPrice;
+      }
       return a.name.localeCompare(b.name);
     });
   }, [products]);

@@ -148,6 +148,20 @@ async function ensureTables() {
 
     ALTER TABLE transactions
       ADD COLUMN IF NOT EXISTS customer_name text NOT NULL DEFAULT 'Umum';
+
+    ALTER TABLE transactions 
+      ADD COLUMN IF NOT EXISTS amount_paid integer;
+
+    ALTER TABLE transactions 
+      ADD COLUMN IF NOT EXISTS change integer;
+
+    CREATE TABLE IF NOT EXISTS saved_bills (
+      id text PRIMARY KEY,
+      user_id text NOT NULL,
+      name text NOT NULL,
+      items jsonb NOT NULL,
+      created_at timestamptz NOT NULL
+    );
   `);
 }
 

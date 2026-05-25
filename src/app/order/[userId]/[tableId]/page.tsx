@@ -653,7 +653,7 @@ export default function CustomerOrderPage(props: {
                         <div
                           key={p.id}
                           onClick={() => !isOut && handleAddClick(p)}
-                          className={`bg-white/5 border border-white/5 rounded-3xl p-3 flex flex-col justify-between h-[215px] relative overflow-hidden transition-all duration-300 ${
+                          className={`bg-white/5 border border-white/5 rounded-3xl p-3 flex flex-col justify-between h-[225px] relative overflow-hidden transition-all duration-300 ${
                             isOut ? "opacity-45 cursor-not-allowed" : "cursor-pointer active:scale-[0.97] hover:border-white/10"
                           }`}
                         >
@@ -730,7 +730,7 @@ export default function CustomerOrderPage(props: {
                         <div
                           key={p.id}
                           onClick={() => !isOut && handleAddClick(p)}
-                          className={`bg-white/5 border border-white/5 rounded-3xl p-3 flex flex-col justify-between h-[215px] relative overflow-hidden transition-all duration-300 ${
+                          className={`bg-white/5 border border-white/5 rounded-3xl p-3 flex flex-col justify-between h-[225px] relative overflow-hidden transition-all duration-300 ${
                             isOut ? "opacity-45 cursor-not-allowed" : "cursor-pointer active:scale-[0.97] hover:border-white/10"
                           }`}
                         >

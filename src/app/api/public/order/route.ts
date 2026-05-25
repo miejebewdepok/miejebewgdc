@@ -4,6 +4,7 @@ import { handleRouteError } from "@/lib/server/route-error";
 import { db } from "@/db/client";
 import { customerPromoClaims } from "@/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
+import { validateWhatsappNumber } from "@/lib/server/whatsapp";
 import crypto from "crypto";
 
 export const runtime = "nodejs";
@@ -30,6 +31,22 @@ export async function POST(request: NextRequest) {
     if (claimPromo && whatsappNumber?.trim()) {
       const waClean = whatsappNumber.trim();
       const emailClean = emailAddress?.trim() || "";
+
+      // 0a. Validate WhatsApp format and check active lookup
+      const waValidation = await validateWhatsappNumber(waClean);
+      if (!waValidation.valid) {
+        return NextResponse.json({ 
+          error: waValidation.message || "Nomor WhatsApp tidak valid atau tidak aktif." 
+        }, { status: 400 });
+      }
+
+      // 0b. Validate Email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailClean || !emailRegex.test(emailClean)) {
+        return NextResponse.json({
+          error: "Alamat email tidak valid. Harap gunakan email/gmail aktif yang benar."
+        }, { status: 400 });
+      }
 
       // Normalize WA number formats to make bypasses impossible
       const digitsOnly = waClean.replace(/\D/g, "");

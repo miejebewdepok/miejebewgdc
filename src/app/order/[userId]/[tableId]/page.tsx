@@ -1128,7 +1128,7 @@ export default function CustomerOrderPage(props: {
                     />
                     <div>
                       <span className="text-xs font-extrabold text-white block">Klaim GRATIS Qalla Tea (Jasmine) 🍃</span>
-                      <span className="text-[10px] text-yellow-500 font-bold block mt-0.5 leading-tight">Cukup masukkan No. WhatsApp Anda untuk segelas Jasmine Tea dingin!</span>
+                      <span className="text-[10px] text-yellow-500 font-bold block mt-0.5 leading-tight">Cukup masukkan No. WhatsApp dan Email Anda untuk segelas Jasmine Tea!</span>
                     </div>
                   </label>
 

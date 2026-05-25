@@ -167,3 +167,83 @@ export async function sendDebtReminderAlert(
 
   return sendWhatsappMessage(toPhoneNumber, message);
 }
+
+/**
+ * Memeriksa apakah nomor WhatsApp valid dan aktif (jika menggunakan Fonnte).
+ * Jika menggunakan mock, kita lakukan validasi regex format Indonesia dan deteksi fraud sederhana.
+ */
+export async function validateWhatsappNumber(phone: string): Promise<{ valid: boolean; message?: string }> {
+  const target = phone.trim();
+  const digitsOnly = target.replace(/[^0-9]/g, "");
+
+  // 1. Validasi Regex untuk format nomor seluler Indonesia
+  // Awalan harus 08 atau 628 atau +628. Panjang digit harus 10 s.d 13.
+  let cleanNum = digitsOnly;
+  if (cleanNum.startsWith("0")) {
+    cleanNum = "62" + cleanNum.slice(1);
+  }
+
+  // Indonesian mobile numbers start with 628... and have 10-13 digits
+  const indoMobileRegex = /^628[1-9][0-9]{7,10}$/;
+  if (!indoMobileRegex.test(cleanNum)) {
+    return {
+      valid: false,
+      message: "Nomor WhatsApp tidak valid. Format nomor seluler Indonesia yang benar harus diawali 08xx atau 628xx dengan panjang 10-13 digit."
+    };
+  }
+
+  // Deteksi kecurangan: Angka berulang yang mencurigakan (misal: 6288888888888, 6281212121212)
+  if (/^628(\d)\1{6,9}$/.test(cleanNum)) {
+    return {
+      valid: false,
+      message: "Nomor WhatsApp mencurigakan (mengandung pola angka berulang)."
+    };
+  }
+  
+  // Pola berurutan seperti 123456 atau 654321
+  const sequentialPatterns = ["123456", "234567", "345678", "456789", "987654", "876543", "765432", "654321"];
+  for (const pattern of sequentialPatterns) {
+    if (cleanNum.includes(pattern)) {
+      return {
+        valid: false,
+        message: "Nomor WhatsApp mencurigakan (mengandung pola angka berurutan)."
+      };
+    }
+  }
+
+  // 2. Hubungi API Fonnte untuk verifikasi nomor aktif sesungguhnya jika provider diatur ke fonnte
+  const provider = (process.env.WHATSAPP_PROVIDER ?? "mock").toLowerCase();
+  const token = process.env.WHATSAPP_API_TOKEN ?? "";
+
+  if (provider === "fonnte" && token && token !== "mock-token") {
+    try {
+      const response = await fetch("https://api.fonnte.com/validate", {
+        method: "POST",
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          target: cleanNum,
+        }),
+      });
+
+      const data = await response.json().catch(() => null) as { status: boolean; registered?: string[]; not_registered?: string[] } | null;
+
+      if (response.ok && data?.status) {
+        const isRegistered = data.registered && data.registered.includes(cleanNum);
+        if (!isRegistered) {
+          return {
+            valid: false,
+            message: "Nomor WhatsApp ini tidak terdaftar atau tidak aktif di sistem WhatsApp."
+          };
+        }
+      }
+    } catch (error) {
+      console.error("[WHATSAPP-VALIDASI] Kesalahan jaringan saat validasi:", error);
+      // Fallback ke true agar jika Fonnte mati, transaksi pelanggan tidak terganggu (fail-safe)
+    }
+  }
+
+  return { valid: true };
+}

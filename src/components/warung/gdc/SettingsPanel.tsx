@@ -790,7 +790,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                 {Array.from({ length: tableCount }).map((_, idx) => {
                   const tableNum = idx + 1;
                   const tableName = `${tableNum}`;
-                  const tableUrl = `${origin}/order/${userId}/${tableName}`;
+                  const tableUrl = `${origin}/o/${tableName}`;
 
                   return (
                     <div key={tableName} className="bg-black/5 dark:bg-black/30 border border-black/5 dark:border-white/5 rounded-2xl p-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
@@ -1356,7 +1356,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                     {/* QR Image */}
                     <div className="w-36 h-36 bg-white border border-slate-200 p-2 flex items-center justify-center my-2 shadow-inner">
                       <img 
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${origin}/order/${userId}/${encodeURIComponent(selectedQrTable)}`)}`}
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${origin}/o/${encodeURIComponent(selectedQrTable)}`)}`}
                         alt="Order QR Code" 
                         className="w-full h-full object-contain"
                       />

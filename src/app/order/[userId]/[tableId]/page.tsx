@@ -1261,29 +1261,6 @@ export default function CustomerOrderPage(props: {
                   </div>
                 ))}
 
-                {/* If promo is claimed or VIP is unlocked, show the free tea in the cart list! */}
-                {((claimPromo && subtotal >= 15000) || subtotal >= 50000) && (
-                  <div className="p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl flex items-center justify-between gap-3 animate-in fade-in duration-300">
-                    <div className="overflow-hidden flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[8px] font-black bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded uppercase font-mono tracking-wider">
-                          Bonus Promo
-                        </span>
-                        {subtotal >= 50000 && (
-                          <span className="text-[8px] font-black bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded uppercase font-mono tracking-wider">
-                            VIP
-                          </span>
-                        )}
-                      </div>
-                      <h4 className="text-xs font-bold text-white truncate mt-1">Qalla Tea (Jasmine Tea) [PROMO]</h4>
-                      <span className="text-[10px] text-slate-400 block mt-0.5">Teh Jasmine dingin segar manis</span>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <span className="text-xs font-mono font-black text-emerald-400 block">Rp 0</span>
-                      <span className="text-[10px] text-slate-500 line-through font-mono block mt-0.5">Rp 4.000</span>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Place Order Fields */}

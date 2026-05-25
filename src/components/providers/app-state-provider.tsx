@@ -100,6 +100,12 @@ export function AppStateProvider({
             osc.stop(ctx.currentTime + 0.01);
           });
         }
+        // Speak a silent empty utterance to pre-unlock the speech synthesis engine
+        if ('speechSynthesis' in window) {
+          const silentUtterance = new SpeechSynthesisUtterance("");
+          silentUtterance.volume = 0;
+          window.speechSynthesis.speak(silentUtterance);
+        }
         window.removeEventListener('click', unlockAudio);
         window.removeEventListener('touchstart', unlockAudio);
       } catch (e) {
@@ -151,60 +157,129 @@ export function AppStateProvider({
           // Compare length of incoming bills with current bills to play audio alert
           if (response.savedBills.length > current.savedBills.length) {
             // Play Gojek/Shopee style cheerful marimba arpeggio tune (rich bell tone + loud gain + autoplay bypass)
+            // Play Upgraded Exciting Beat and Indonesian Female Voice Overlay (repeats exactly 5 times)
             const playOrderIncomingMelody = () => {
               const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
               if (!AudioContext) return;
               try {
+                // Cancel any ongoing speaking to clear previous speech queues
+                if ('speechSynthesis' in window) {
+                  window.speechSynthesis.cancel();
+                }
+
                 const ctx = new AudioContext();
                 if (ctx.state === 'suspended') {
                   ctx.resume();
                 }
-                const playChimeSequence = (startTimeOffset: number) => {
-                  const notes = [
-                    { freq: 523.25, time: 0.0, dur: 0.15 },   // C5
-                    { freq: 659.25, time: 0.06, dur: 0.15 },  // E5
-                    { freq: 783.99, time: 0.12, dur: 0.15 },  // G5
-                    { freq: 1046.50, time: 0.18, dur: 0.2 },  // C6
-                    { freq: 1318.51, time: 0.24, dur: 0.35 }   // E6
-                  ];
-                  notes.forEach((note) => {
-                    // Base tone (Triangle wave for punchy full body)
-                    const osc1 = ctx.createOscillator();
-                    const gain1 = ctx.createGain();
-                    osc1.type = "triangle";
-                    osc1.frequency.setValueAtTime(note.freq, ctx.currentTime + startTimeOffset + note.time);
-                    gain1.gain.setValueAtTime(0.001, ctx.currentTime + startTimeOffset + note.time);
-                    gain1.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime + startTimeOffset + note.time + 0.02); // 50% base gain (extremely clear)
-                    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTimeOffset + note.time + note.dur);
-                    osc1.connect(gain1);
-                    gain1.connect(ctx.destination);
-                    osc1.start(ctx.currentTime + startTimeOffset + note.time);
-                    osc1.stop(ctx.currentTime + startTimeOffset + note.time + note.dur);
 
-                    // High-harmonic tone (Sine wave octave harmonic for beautiful crystal marimba chime)
-                    const osc2 = ctx.createOscillator();
-                    const gain2 = ctx.createGain();
-                    osc2.type = "sine";
-                    osc2.frequency.setValueAtTime(note.freq * 2, ctx.currentTime + startTimeOffset + note.time);
-                    gain2.gain.setValueAtTime(0.001, ctx.currentTime + startTimeOffset + note.time);
-                    gain2.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + startTimeOffset + note.time + 0.02); // 30% bell sparkle
-                    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTimeOffset + note.time + note.dur);
-                    osc2.connect(gain2);
-                    gain2.connect(ctx.destination);
-                    osc2.start(ctx.currentTime + startTimeOffset + note.time);
-                    osc2.stop(ctx.currentTime + startTimeOffset + note.time + note.dur);
-                  });
+                // 1. Synthesize a single exciting beat + arpeggiated chimes pattern
+                const playBeatSequence = (startTimeOffset: number) => {
+                  // Synthetic kick drum (deep thumping bass beat)
+                  const playKick = (time: number) => {
+                    try {
+                      const osc = ctx.createOscillator();
+                      const gain = ctx.createGain();
+                      osc.type = "sine";
+                      osc.frequency.setValueAtTime(150, ctx.currentTime + startTimeOffset + time);
+                      osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + startTimeOffset + time + 0.15);
+                      
+                      gain.gain.setValueAtTime(0.8, ctx.currentTime + startTimeOffset + time);
+                      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTimeOffset + time + 0.15);
+                      
+                      osc.connect(gain);
+                      gain.connect(ctx.destination);
+                      osc.start(ctx.currentTime + startTimeOffset + time);
+                      osc.stop(ctx.currentTime + startTimeOffset + time + 0.16);
+                    } catch (err) {
+                      console.error("Kick synth error", err);
+                    }
+                  };
+
+                  // Sparkling crystal chimes
+                  const playChime = (freq: number, time: number, dur: number, gainVal: number) => {
+                    try {
+                      const osc1 = ctx.createOscillator();
+                      const gain1 = ctx.createGain();
+                      osc1.type = "triangle";
+                      osc1.frequency.setValueAtTime(freq, ctx.currentTime + startTimeOffset + time);
+                      gain1.gain.setValueAtTime(0.001, ctx.currentTime + startTimeOffset + time);
+                      gain1.gain.exponentialRampToValueAtTime(gainVal, ctx.currentTime + startTimeOffset + time + 0.02);
+                      gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTimeOffset + time + dur);
+                      osc1.connect(gain1);
+                      gain1.connect(ctx.destination);
+                      osc1.start(ctx.currentTime + startTimeOffset + time);
+                      osc1.stop(ctx.currentTime + startTimeOffset + time + dur);
+
+                      const osc2 = ctx.createOscillator();
+                      const gain2 = ctx.createGain();
+                      osc2.type = "sine";
+                      osc2.frequency.setValueAtTime(freq * 2, ctx.currentTime + startTimeOffset + time);
+                      gain2.gain.setValueAtTime(0.001, ctx.currentTime + startTimeOffset + time);
+                      gain2.gain.exponentialRampToValueAtTime(gainVal * 0.4, ctx.currentTime + startTimeOffset + time + 0.02);
+                      gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTimeOffset + time + dur);
+                      osc2.connect(gain2);
+                      gain2.connect(ctx.destination);
+                      osc2.start(ctx.currentTime + startTimeOffset + time);
+                      osc2.stop(ctx.currentTime + startTimeOffset + time + dur);
+                    } catch (err) {
+                      console.error("Chime synth error", err);
+                    }
+                  };
+
+                  // Bar beat 1: Main kick beat + rising excited chime arpeggio
+                  playKick(0.0);
+                  playChime(523.25, 0.0, 0.15, 0.4);   // C5
+                  playChime(659.25, 0.08, 0.15, 0.4);  // E5
+                  playChime(783.99, 0.16, 0.15, 0.4);  // G5
+                  playChime(1046.50, 0.24, 0.25, 0.5); // C6
+
+                  // Bar beat 2: Double kick drum syncopation + high chime answer
+                  playKick(0.45);
+                  playKick(0.60);
+                  playChime(1318.51, 0.45, 0.15, 0.3); // E6
+                  playChime(1567.98, 0.60, 0.20, 0.3); // G6
+
+                  // Bar beat 3: Solid thumping kick + high energetic resolve
+                  playKick(1.00);
+                  playChime(1046.50, 1.00, 0.15, 0.3); // C6
+                  playChime(783.99, 1.10, 0.15, 0.3);  // G5
+                  playChime(1318.51, 1.20, 0.30, 0.4); // E6
                 };
-                // Play sequence 7 times over 5.6 seconds for optimal audibility (around 5 seconds)
-                playChimeSequence(0.0);
-                playChimeSequence(0.8);
-                playChimeSequence(1.6);
-                playChimeSequence(2.4);
-                playChimeSequence(3.2);
-                playChimeSequence(4.0);
-                playChimeSequence(4.8);
+
+                // 2. Play the Indonesian Female Voice overlay
+                const speakVoiceOverlay = (startTimeOffset: number) => {
+                  setTimeout(() => {
+                    if (!('speechSynthesis' in window)) return;
+                    try {
+                      const utterance = new SpeechSynthesisUtterance("Ada pesanan diterima");
+                      utterance.lang = "id-ID";
+                      
+                      const voices = window.speechSynthesis.getVoices();
+                      const indonesianVoice = voices.find((v) => 
+                        (v.lang.toLowerCase().includes("id-id") || v.lang.toLowerCase().startsWith("id")) &&
+                        (v.name.toLowerCase().includes("female") || v.name.toLowerCase().includes("wanita") || v.name.toLowerCase().includes("google") || v.name.toLowerCase().includes("microsoft") || v.name.toLowerCase().includes("natural") || true)
+                      );
+                      if (indonesianVoice) {
+                        utterance.voice = indonesianVoice;
+                      }
+                      utterance.rate = 1.05; // Quick and professional tempo
+                      utterance.pitch = 1.15; // Bright, clear female pitch curve
+                      utterance.volume = 1.0; // Loud volume
+                      window.speechSynthesis.speak(utterance);
+                    } catch (speechErr) {
+                      console.error("Speech overlay error", speechErr);
+                    }
+                  }, startTimeOffset * 1000 + 200); // Trigger 0.2s after the kick beat starts
+                };
+
+                // 3. Play the combined sequence exactly 5 times, spaced 1.8 seconds apart (9 seconds total)
+                for (let i = 0; i < 5; i++) {
+                  const offset = i * 1.8;
+                  playBeatSequence(offset);
+                  speakVoiceOverlay(offset);
+                }
               } catch (e) {
-                console.error("Melody error", e);
+                console.error("Upgraded audio engine error", e);
               }
             };
             playOrderIncomingMelody();

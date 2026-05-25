@@ -110,6 +110,16 @@ export default function CustomerOrderPage(props: {
       .finally(() => setLoading(false));
   }, [userId]);
 
+  // Auto-reset success screen back to menu after 10 seconds so the next customer starts fresh
+  useEffect(() => {
+    if (orderSuccess) {
+      const timer = setTimeout(() => {
+        setOrderSuccess(false);
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [orderSuccess]);
+
   // Helper to dynamically classify if a category belongs to drinks
   const isDrinkCategory = (cat: string) => {
     const lower = (cat || "").toLowerCase();
@@ -454,6 +464,7 @@ export default function CustomerOrderPage(props: {
         setLastBillName(result.savedBill.name);
         setOrderSuccess(true);
         setCart([]);
+        setCustomerName("");
         setClaimPromo(false);
         setWhatsappNumber("");
         setEmailAddress("");

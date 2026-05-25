@@ -145,10 +145,14 @@ export function AppStateProvider({
                     osc.stop(ctx.currentTime + startTimeOffset + note.time + note.dur);
                   });
                 };
-                // Play sequence 3 times over 2.2 seconds for optimal audibility
+                // Play sequence 7 times over 5.6 seconds for optimal audibility (around 5 seconds)
                 playChimeSequence(0.0);
                 playChimeSequence(0.8);
                 playChimeSequence(1.6);
+                playChimeSequence(2.4);
+                playChimeSequence(3.2);
+                playChimeSequence(4.0);
+                playChimeSequence(4.8);
               } catch (e) {
                 console.error("Melody error", e);
               }

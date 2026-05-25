@@ -73,6 +73,7 @@ export default function CustomerOrderPage(props: {
   const [placingOrder, setPlacingOrder] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [lastBillName, setLastBillName] = useState("");
+  const [promoEarned, setPromoEarned] = useState(false);
 
   const toppingsList = [
     "Bakso",
@@ -462,6 +463,7 @@ export default function CustomerOrderPage(props: {
           toast.warning("Pesanan dikirim tanpa promo gratis (pastikan No. WhatsApp & Email aktif belum pernah diklaim sebelumnya).", { duration: 6000 });
         }
         setLastBillName(result.savedBill.name);
+        setPromoEarned(hasPromo);
         setOrderSuccess(true);
         setCart([]);
         setCustomerName("");
@@ -500,12 +502,50 @@ export default function CustomerOrderPage(props: {
           <Check className="w-8 h-8" />
         </div>
 
-        <h2 className="text-2xl font-black text-white tracking-tight uppercase">PESANAN TERKIRIM!</h2>
+        <h2 className="text-2xl font-black text-white tracking-tight uppercase leading-none">PESANAN TERKIRIM!</h2>
+        
+        {/* Distressed Stamp Seal Notification */}
+        {promoEarned ? (
+          <div className="my-5 transform rotate-[-6deg] animate-in zoom-in duration-300 flex flex-col items-center select-none font-sans">
+            <div className="border-4 border-dashed border-emerald-500 bg-emerald-950/30 text-emerald-400 px-5 py-3.5 rounded-[2rem] flex flex-col items-center gap-1 shadow-[0_0_20px_rgba(16,185,129,0.15)] font-mono max-w-[280px]">
+              <span className="text-[9px] font-black tracking-widest bg-emerald-500 text-slate-950 px-2.5 py-0.5 rounded-full uppercase leading-none mb-1">
+                ★ PROMO APPROVED ★
+              </span>
+              <span className="text-sm font-black tracking-tight text-center leading-none uppercase">
+                CONGRATULATIONS!
+              </span>
+              <span className="text-[11.5px] font-extrabold text-white text-center leading-tight">
+                FREE QALLA TEA GRANTED! 🍃
+              </span>
+              <span className="text-[8.5px] font-bold text-emerald-300/80 tracking-wide uppercase mt-0.5">
+                Refreshing Jasmine Tea Included
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="my-5 transform rotate-[5deg] animate-in zoom-in duration-300 flex flex-col items-center select-none font-sans">
+            <div className="border-4 border-dashed border-rose-500 bg-rose-950/30 text-rose-400 px-5 py-3.5 rounded-[2rem] flex flex-col items-center gap-1 shadow-[0_0_20px_rgba(244,63,94,0.15)] font-mono max-w-[280px]">
+              <span className="text-[9px] font-black tracking-widest bg-rose-500 text-slate-950 px-2.5 py-0.5 rounded-full uppercase leading-none mb-1">
+                ★ NO PROMO ★
+              </span>
+              <span className="text-sm font-black tracking-tight text-center leading-none uppercase">
+                ORDER PLACED
+              </span>
+              <span className="text-[11.5px] font-extrabold text-white text-center leading-tight">
+                NO FREE DRINK INCLUDED ❌
+              </span>
+              <span className="text-[8.5px] font-bold text-rose-300/80 tracking-wide uppercase mt-0.5">
+                Standard Menu Items Only
+              </span>
+            </div>
+          </div>
+        )}
+
         <p className="text-xs text-slate-400 mt-2 max-w-xs leading-relaxed">
           Pesanan Anda telah berhasil masuk ke antrean dapur kasir dengan rincian identitas:
         </p>
 
-        <div className="bg-white/5 border border-white/5 rounded-2xl p-4.5 my-6 w-full max-w-xs text-left backdrop-blur-xl">
+        <div className="bg-white/5 border border-white/5 rounded-2xl p-4.5 my-5 w-full max-w-xs text-left backdrop-blur-xl">
           <div className="flex justify-between items-center border-b border-white/5 pb-2.5 mb-2.5">
             <span className="text-[10px] text-slate-450 uppercase font-black tracking-wider">Nomor Order</span>
             <span className="text-sm font-extrabold text-red-500">{tableNumOnly}</span>

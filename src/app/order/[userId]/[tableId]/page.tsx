@@ -210,11 +210,27 @@ export default function CustomerOrderPage(props: {
       ? filtered
       : filtered.filter((p) => p.category === activeSubCategory);
 
+    const getSnackWeight = (name: string) => {
+      const lower = name.toLowerCase();
+      if (lower.includes("lumpia udang")) return 1;
+      if (lower.includes("udang keju")) return 2;
+      if (lower.includes("chicken katsu")) return 3;
+      if (lower.startsWith("risoles")) return 4;
+      return 5;
+    };
+
     return subFiltered.sort((a, b) => {
       const weightA = getFoodWeight(a.category);
       const weightB = getFoodWeight(b.category);
       if (weightA !== weightB) {
         return weightA - weightB;
+      }
+      if (a.category === "Snack" && b.category === "Snack") {
+        const sWeightA = getSnackWeight(a.name);
+        const sWeightB = getSnackWeight(b.name);
+        if (sWeightA !== sWeightB) {
+          return sWeightA - sWeightB;
+        }
       }
       return a.name.localeCompare(b.name);
     });

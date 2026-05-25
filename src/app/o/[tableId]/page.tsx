@@ -3,6 +3,8 @@ import { db } from "@/db/client";
 import { storeProfiles } from "@/db/schema";
 import { ilike } from "drizzle-orm";
 
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: Promise<{
     tableId: string;

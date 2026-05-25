@@ -132,7 +132,7 @@ export default function CustomerOrderPage(props: {
       case "Mie Pedas":
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-400 border border-red-500/15 uppercase tracking-wider font-mono">
-            🔥 Mie Poedas
+            🔥 Mie Pedas
           </span>
         );
       case "Kebab":

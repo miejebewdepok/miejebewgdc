@@ -94,6 +94,9 @@ export function AppStateProvider({
       } catch (e) {
         console.error("Failed to parse active cart", e);
       }
+    } else {
+      // Clear checkout name if there is no active cart
+      localStorage.removeItem("miejebew_checkout_customer_name");
     }
   }, []);
 
@@ -594,6 +597,16 @@ export function AppStateProvider({
     await requestJson(`/api/saved-bills/${id}`, {
       method: "DELETE",
     });
+
+    // Extract customer name / table from bill name and save to localStorage
+    if (typeof window !== "undefined") {
+      let nameToStore = billToLoad.name;
+      // If it starts with a number followed by " - ", e.g. "5 - Andi", convert it to "Meja 5 - Andi"
+      if (/^\d+\s*-\s*/.test(nameToStore)) {
+        nameToStore = "Meja " + nameToStore;
+      }
+      localStorage.setItem("miejebew_checkout_customer_name", nameToStore);
+    }
 
     setState((current) => ({
       ...current,

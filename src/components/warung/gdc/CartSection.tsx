@@ -27,6 +27,9 @@ export default function CartSection({
   const [billNamePrompt, setBillNamePrompt] = useState(false);
   const [billName, setBillName] = useState('');
 
+  // Read customer name from localStorage for loaded bills
+  const activeCustomer = typeof window !== "undefined" ? localStorage.getItem("miejebew_checkout_customer_name") : null;
+
   const formatRupiah = (val: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -61,7 +64,14 @@ export default function CartSection({
           <div className="p-1.5 bg-red-500/10 rounded-lg text-red-500">
             <Receipt className="w-4 h-4" />
           </div>
-          <h2 className="text-base font-extrabold text-foreground dark:text-slate-100 uppercase tracking-tight">Katalog Pesanan</h2>
+          <div>
+            <h2 className="text-base font-extrabold text-foreground dark:text-slate-100 uppercase tracking-tight">Katalog Pesanan</h2>
+            {activeCustomer && (
+              <span className="text-[10px] font-black text-red-500 dark:text-red-400 block leading-none mt-0.5 uppercase tracking-wide">
+                👤 {activeCustomer}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[10px] bg-red-600/10 dark:bg-red-600/25 border border-red-500/20 text-red-600 dark:text-red-300 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider font-mono">

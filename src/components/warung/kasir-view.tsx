@@ -338,6 +338,9 @@ export function KasirView() {
   function handleClearCart() {
     if (window.confirm("Batal pesanan ini?")) {
       cartLines.forEach(item => removeFromCart(item.id));
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("miejebew_checkout_customer_name");
+      }
     }
   }
 

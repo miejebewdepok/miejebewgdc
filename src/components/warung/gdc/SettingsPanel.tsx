@@ -93,7 +93,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
   const [isQrPrinting, setIsQrPrinting] = useState(false);
 
   // Promo Claims Database States
-  const [promoClaims, setPromoClaims] = useState<{ id: string; customerName: string; whatsapp: string; tableName: string; createdAt: string }[]>([]);
+  const [promoClaims, setPromoClaims] = useState<{ id: string; customerName: string; whatsapp: string; email?: string | null; tableName: string; createdAt: string }[]>([]);
   const [claimsSearchQuery, setClaimsSearchQuery] = useState('');
   const [isLoadingClaims, setIsLoadingClaims] = useState(false);
 
@@ -366,6 +366,18 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
     const copyText = uniqueNumbers.join(', ');
     navigator.clipboard.writeText(copyText);
     alert(`Berhasil menyalin ${uniqueNumbers.length} nomor WhatsApp unik ke papan klip!`);
+  };
+
+  const handleCopyAllEmails = () => {
+    if (promoClaims.length === 0) {
+      alert("Database Email kosong.");
+      return;
+    }
+    const validEmails = promoClaims.map(c => c.email).filter(Boolean) as string[];
+    const uniqueEmails = Array.from(new Set(validEmails));
+    const copyText = uniqueEmails.join(', ');
+    navigator.clipboard.writeText(copyText);
+    alert(`Berhasil menyalin ${uniqueEmails.length} email unik ke papan klip!`);
   };
 
   // Live dynamic demo QRIS code generator
@@ -724,29 +736,37 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                 })}
               </div>
             </div>
-          </div>
-
-          {/* DATABASE WHATSAPP PELANGGAN (PROMO QR) CARD */}
+                    {/* DATABASE WHATSAPP & EMAIL PELANGGAN (PROMO QR) CARD */}
           <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-5 mt-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-red-500/10 text-red-500 rounded-xl">
                   <Smartphone className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-foreground dark:text-white uppercase tracking-wider">Database WhatsApp Pelanggan (Promo QR)</h3>
-                  <p className="text-[10px] text-slate-555 dark:text-slate-400 mt-0.5">Kontak WhatsApp dari klaim Gratis Jasmine Tea saat Self-Order</p>
+                  <h3 className="text-sm font-bold text-foreground dark:text-white uppercase tracking-wider">Database Pelanggan (Promo QR)</h3>
+                  <p className="text-[10px] text-slate-555 dark:text-slate-400 mt-0.5">Kontak WhatsApp & Email dari klaim Jasmine Tea saat Self-Order</p>
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleCopyAllWhatsapp}
-                disabled={promoClaims.length === 0}
-                className="bg-emerald-650/15 border border-emerald-500/25 text-emerald-650 hover:bg-emerald-600/25 dark:text-emerald-300 dark:hover:bg-emerald-600/30 rounded-xl text-[10px] py-1.5 px-3 font-black text-center cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0"
-              >
-                Salin Semua No. WA ({promoClaims.length})
-              </button>
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={handleCopyAllWhatsapp}
+                  disabled={promoClaims.length === 0}
+                  className="bg-emerald-650/15 border border-emerald-500/25 text-emerald-650 hover:bg-emerald-600/25 dark:text-emerald-300 dark:hover:bg-emerald-600/30 rounded-xl text-[10px] py-1.5 px-3 font-black text-center cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0"
+                >
+                  Salin Semua WA ({promoClaims.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyAllEmails}
+                  disabled={promoClaims.length === 0}
+                  className="bg-indigo-500/15 border border-indigo-550/25 text-indigo-650 hover:bg-indigo-600/25 dark:text-indigo-400 dark:hover:bg-indigo-600/30 rounded-xl text-[10px] py-1.5 px-3 font-black text-center cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0"
+                >
+                  Salin Semua Email
+                </button>
+              </div>
             </div>
 
             {/* Search Input */}
@@ -755,7 +775,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                 type="text"
                 value={claimsSearchQuery}
                 onChange={(e) => setClaimsSearchQuery(e.target.value)}
-                placeholder="Cari nama, no. WhatsApp, atau nomor meja..."
+                placeholder="Cari nama, nomor WhatsApp, email, atau meja..."
                 className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl py-2.5 pl-10 pr-4 text-xs text-foreground dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/40"
               />
               <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
@@ -781,7 +801,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                   <Smartphone className="w-8 h-8 text-slate-450 dark:text-slate-600 mx-auto mb-2" />
                   <span className="text-xs font-bold text-slate-400 block">Belum Ada Klaim Promo</span>
                   <p className="text-[10px] text-slate-555 dark:text-slate-500 mt-1 max-w-[250px] mx-auto leading-relaxed">
-                    Kontak WhatsApp pelanggan yang mengklaim Jasmine Tea gratis saat self-order akan otomatis muncul di sini.
+                    Kontak WhatsApp & Email pelanggan yang mengklaim Jasmine Tea gratis saat self-order akan otomatis muncul di sini.
                   </p>
                 </div>
               ) : (
@@ -789,6 +809,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                   {promoClaims.filter(c => 
                     c.customerName.toLowerCase().includes(claimsSearchQuery.toLowerCase()) ||
                     c.whatsapp.includes(claimsSearchQuery) ||
+                    (c.email && c.email.toLowerCase().includes(claimsSearchQuery.toLowerCase())) ||
                     c.tableName.toLowerCase().includes(claimsSearchQuery.toLowerCase())
                   ).length === 0 ? (
                     <div className="py-6 text-center text-xs text-slate-400">
@@ -798,42 +819,60 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                     promoClaims.filter(c => 
                       c.customerName.toLowerCase().includes(claimsSearchQuery.toLowerCase()) ||
                       c.whatsapp.includes(claimsSearchQuery) ||
+                      (c.email && c.email.toLowerCase().includes(claimsSearchQuery.toLowerCase())) ||
                       c.tableName.toLowerCase().includes(claimsSearchQuery.toLowerCase())
                     ).map((claim) => (
                       <div key={claim.id} className="bg-black/5 dark:bg-black/30 border border-black/5 dark:border-white/5 rounded-2xl p-3 flex justify-between items-center gap-3">
-                        <div>
+                        <div className="overflow-hidden flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-foreground dark:text-white">
+                            <span className="text-xs font-bold text-foreground dark:text-white truncate max-w-[120px]" title={claim.customerName}>
                               {claim.customerName}
                             </span>
-                            <span className="text-[8px] font-black bg-red-500/10 text-red-500 dark:text-red-400 px-1.5 py-0.5 rounded-full border border-red-500/15 uppercase font-mono">
-                              Meja {claim.tableName}
+                            <span className="text-[8px] font-black bg-red-500/10 text-red-500 dark:text-red-400 px-1.5 py-0.5 rounded-full border border-red-500/15 uppercase font-mono shrink-0">
+                              Meja {claim.tableName.replace(/^meja[\s\-_]*/i, "")}
                             </span>
                           </div>
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono block mt-1">
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono block mt-1 truncate">
                             WA: {claim.whatsapp}
+                          </span>
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono block mt-0.5 truncate">
+                            Email: {claim.email || "-"}
                           </span>
                           <span className="text-[8px] text-slate-400 dark:text-slate-500 block mt-0.5">
                             Klaim: {new Date(claim.createdAt).toLocaleString('id-ID')}
                           </span>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(claim.whatsapp);
-                            alert(`Nomor WA ${claim.whatsapp} berhasil disalin!`);
-                          }}
-                          className="py-1 px-2.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-slate-800 dark:text-white rounded-lg text-[9px] font-bold text-center cursor-pointer transition-all"
-                        >
-                          Salin No. WA
-                        </button>
+                        <div className="flex flex-col gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(claim.whatsapp);
+                              alert(`Nomor WA ${claim.whatsapp} berhasil disalin!`);
+                            }}
+                            className="py-1 px-2.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-slate-800 dark:text-white rounded-lg text-[9px] font-bold text-center cursor-pointer transition-all"
+                          >
+                            Salin WA
+                          </button>
+                          {claim.email && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(claim.email || "");
+                                alert(`Email ${claim.email} berhasil disalin!`);
+                              }}
+                              className="py-1 px-2.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-650 dark:text-indigo-400 rounded-lg text-[9px] font-bold text-center cursor-pointer transition-all"
+                            >
+                              Salin Email
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))
                   )}
                 </div>
               )}
             </div>
-          </div>
+          </div>  </div>
 
         </div>
 

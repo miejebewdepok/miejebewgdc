@@ -3,19 +3,21 @@ import { createSavedBill } from "@/lib/server/app-service";
 import { handleRouteError } from "@/lib/server/route-error";
 import { db } from "@/db/client";
 import { customerPromoClaims } from "@/db/schema";
+import { and, eq, inArray } from "drizzle-orm";
 import crypto from "crypto";
 
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, tableName, customerName, items, claimPromo, whatsappNumber } = (await request.json()) as {
+    const { userId, tableName, customerName, items, claimPromo, whatsappNumber, emailAddress } = (await request.json()) as {
       userId: string;
       tableName: string;
       customerName: string;
       items: any[];
       claimPromo?: boolean;
       whatsappNumber?: string;
+      emailAddress?: string;
     };
 
     if (!userId || !tableName || !customerName || !items || items.length === 0) {
@@ -27,14 +29,64 @@ export async function POST(request: NextRequest) {
     // If customer claimed promo, save to DB and inject free Jasmine Tea item
     if (claimPromo && whatsappNumber?.trim()) {
       const waClean = whatsappNumber.trim();
+      const emailClean = emailAddress?.trim() || "";
+
+      // Normalize WA number formats to make bypasses impossible
+      const digitsOnly = waClean.replace(/\D/g, "");
+      const normalizedWa = digitsOnly.startsWith("0") ? "62" + digitsOnly.slice(1) : digitsOnly;
+      const zeroWa = normalizedWa.startsWith("62") ? "0" + normalizedWa.slice(2) : normalizedWa;
+      const plusWa = "+" + normalizedWa;
+
+      // We search for any of these variations in the database to prevent duplicate claims
+      const searchFormats = [waClean, digitsOnly, normalizedWa, zeroWa, plusWa].filter(Boolean);
+
+      // 1. Check if WhatsApp has already claimed
+      const existingWa = await db
+        .select()
+        .from(customerPromoClaims)
+        .where(
+          and(
+            eq(customerPromoClaims.userId, userId),
+            inArray(customerPromoClaims.whatsapp, searchFormats)
+          )
+        )
+        .limit(1);
+
+      if (existingWa.length > 0) {
+        return NextResponse.json({ 
+          error: "Nomor WhatsApp ini sudah pernah mengklaim promo Jasmine Tea gratis." 
+        }, { status: 400 });
+      }
+
+      // 2. Check if Email has already claimed
+      if (emailClean) {
+        const existingEmail = await db
+          .select()
+          .from(customerPromoClaims)
+          .where(
+            and(
+              eq(customerPromoClaims.userId, userId),
+              eq(customerPromoClaims.email, emailClean)
+            )
+          )
+          .limit(1);
+
+        if (existingEmail.length > 0) {
+          return NextResponse.json({ 
+            error: "Alamat email ini sudah pernah digunakan untuk mengklaim promo Jasmine Tea gratis." 
+          }, { status: 400 });
+        }
+      }
+
       const claimId = `claim_${crypto.randomUUID().slice(0, 8)}`;
 
-      // Save claim to database for marketing database
+      // Save claim to database for marketing database (using normalized WA format for future checks)
       await db.insert(customerPromoClaims).values({
         id: claimId,
         userId: userId,
         customerName: customerName.trim(),
-        whatsapp: waClean,
+        whatsapp: normalizedWa, // Store standardized number
+        email: emailClean || null,
         promoType: "Free Jasmine Tea",
         tableName: tableName,
         createdAt: new Date().toISOString(),

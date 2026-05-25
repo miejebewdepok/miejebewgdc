@@ -26,6 +26,7 @@ async function run() {
       "table_name" text NOT NULL,
       "created_at" timestamp with time zone NOT NULL
     );`);
+    await client.query(`ALTER TABLE "customer_promo_claims" ADD COLUMN IF NOT EXISTS "email" text;`);
     console.log("Success");
   } catch (e) {
     console.error(e);

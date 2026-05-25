@@ -108,6 +108,7 @@ export const customerPromoClaims = pgTable("customer_promo_claims", {
   userId: text("user_id").notNull(),
   customerName: text("customer_name").notNull(),
   whatsapp: text("whatsapp").notNull(),
+  email: text("email"),
   promoType: text("promo_type").notNull().default("Free Jasmine Tea"),
   tableName: text("table_name").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull(),

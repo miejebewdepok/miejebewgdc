@@ -69,6 +69,7 @@ export default function CustomerOrderPage(props: {
   const [customerName, setCustomerName] = useState("");
   const [claimPromo, setClaimPromo] = useState(false);
   const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [emailAddress, setEmailAddress] = useState("");
   const [placingOrder, setPlacingOrder] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [lastBillName, setLastBillName] = useState("");
@@ -409,6 +410,10 @@ export default function CustomerOrderPage(props: {
       toast.error("Harap masukkan nomor WhatsApp untuk klaim promo.");
       return;
     }
+    if (claimPromo && !emailAddress.trim()) {
+      toast.error("Harap masukkan alamat Email untuk klaim promo.");
+      return;
+    }
     if (cart.length === 0) {
       toast.error("Keranjang belanja kosong.");
       return;
@@ -428,6 +433,7 @@ export default function CustomerOrderPage(props: {
           customerName: customerName.trim(),
           claimPromo,
           whatsappNumber: claimPromo ? whatsappNumber.trim() : undefined,
+          emailAddress: claimPromo ? emailAddress.trim() : undefined,
           items: cart.map((item) => ({
             productId: item.productId,
             quantity: item.quantity,
@@ -454,6 +460,7 @@ export default function CustomerOrderPage(props: {
         setCart([]);
         setClaimPromo(false);
         setWhatsappNumber("");
+        setEmailAddress("");
         setCartOpen(false);
       } else {
         throw new Error(result.error || "Gagal mengirimkan order");
@@ -1126,18 +1133,34 @@ export default function CustomerOrderPage(props: {
                   </label>
 
                   {claimPromo && (
-                    <div className="mt-3 border-t border-white/5 pt-3 animate-in fade-in slide-in-from-top-1 duration-200">
-                      <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-1.5">
-                        Nomor WhatsApp (Aktif)
-                      </label>
-                      <input
-                        type="tel"
-                        required={claimPromo}
-                        placeholder="Contoh: 08123456789"
-                        value={whatsappNumber}
-                        onChange={(e) => setWhatsappNumber(e.target.value)}
-                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 placeholder-slate-600"
-                      />
+                    <div className="mt-3 border-t border-white/5 pt-3 animate-in fade-in slide-in-from-top-1 duration-200 flex flex-col gap-3">
+                      <div>
+                        <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-1.5">
+                          Nomor WhatsApp (Aktif)
+                        </label>
+                        <input
+                          type="tel"
+                          required={claimPromo}
+                          placeholder="Contoh: 08123456789"
+                          value={whatsappNumber}
+                          onChange={(e) => setWhatsappNumber(e.target.value)}
+                          className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 placeholder-slate-600"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-1.5">
+                          Alamat Email / Gmail
+                        </label>
+                        <input
+                          type="email"
+                          required={claimPromo}
+                          placeholder="Contoh: nama@gmail.com"
+                          value={emailAddress}
+                          onChange={(e) => setEmailAddress(e.target.value)}
+                          className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 placeholder-slate-600"
+                        />
+                      </div>
                     </div>
                   )}
                 </div>

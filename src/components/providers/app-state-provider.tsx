@@ -435,7 +435,21 @@ export function AppStateProvider({
   }, [isPending, router, sessionUserId]);
 
   const cartLines = state.cart.flatMap((line) => {
-    const product = state.products.find((item) => item.id === line.productId);
+    let product = state.products.find((item) => item.id === line.productId);
+    
+    // In-memory fallback mock for dynamic promo Jasmine Tea product
+    if (!product && line.productId === "promo_jasmine_tea") {
+      product = {
+        id: "promo_jasmine_tea",
+        name: "Qalla Tea (Jasmine Tea) [PROMO]",
+        category: "Qalla Tea",
+        sellPrice: 0,
+        stock: 999999,
+        minimumStock: 0,
+        imageUrl: "",
+      } as any;
+    }
+
     if (!product) {
       return [];
     }

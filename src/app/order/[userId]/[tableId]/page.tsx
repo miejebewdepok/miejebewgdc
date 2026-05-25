@@ -106,34 +106,86 @@ export default function CustomerOrderPage(props: {
       .finally(() => setLoading(false));
   }, [userId]);
 
-  // Derive unique categories from products (with 'Mie Pedas' first)
-  const categories = useMemo(() => {
-    const list = new Set<string>();
-    products.forEach((p) => {
-      if (p.category) list.add(p.category);
-    });
-    const sortedCats = Array.from(list).sort((a, b) => {
-      if (a === "Mie Pedas") return -1;
-      if (b === "Mie Pedas") return 1;
-      return a.localeCompare(b);
-    });
-    return ["Semua", ...sortedCats];
-  }, [products]);
+  // Helper to dynamically classify if a category belongs to drinks
+  const isDrinkCategory = (cat: string) => {
+    const lower = (cat || "").toLowerCase();
+    return (
+      lower.includes("minuman") ||
+      lower.includes("coffee") ||
+      lower.includes("tea") ||
+      lower.includes("kopi") ||
+      lower.includes("dingin") ||
+      lower.includes("jus") ||
+      lower.includes("water") ||
+      lower.includes("es") ||
+      lower.includes("qalla")
+    );
+  };
 
-  // Filtered products list (with 'Mie Pedas' prioritized first under "Semua")
-  const filteredProducts = useMemo(() => {
-    const list = activeCategory === "Semua"
-      ? products
-      : products.filter((p) => p.category === activeCategory);
-      
-    return [...list].sort((a, b) => {
+  // Simplified categories tabs list
+  const categories = ["Semua", "Makanan", "Minuman"];
+
+  const getSubCategoryBadge = (category: string) => {
+    switch (category) {
+      case "Mie Pedas":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-400 border border-red-500/15 uppercase tracking-wider font-mono">
+            🔥 Mie Poedas
+          </span>
+        );
+      case "Kebab":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-amber-500/20 to-yellow-600/20 text-amber-400 border border-amber-500/15 uppercase tracking-wider font-mono">
+            🌯 Kebab
+          </span>
+        );
+      case "Lumpia Beef":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/15 uppercase tracking-wider font-mono">
+            🌮 Lumpia Beef
+          </span>
+        );
+      case "Snack":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-400 border border-yellow-500/15 uppercase tracking-wider font-mono">
+            🍟 Snack
+          </span>
+        );
+      case "Qalla Coffee":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-orange-300/10 to-orange-400/15 text-orange-200 border border-orange-300/15 uppercase tracking-wider font-mono">
+            ☕ Qalla Coffee
+          </span>
+        );
+      case "Qalla Tea":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-400 border border-teal-500/15 uppercase tracking-wider font-mono">
+            🍃 Qalla Tea
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-white/5 text-slate-400 border border-white/5 uppercase tracking-wider font-mono">
+            ✨ {category}
+          </span>
+        );
+    }
+  };
+
+  // Grouped products lists
+  const foodProducts = useMemo(() => {
+    return products.filter((p) => !isDrinkCategory(p.category)).sort((a, b) => {
       const isAMie = a.category === "Mie Pedas";
       const isBMie = b.category === "Mie Pedas";
       if (isAMie && !isBMie) return -1;
       if (!isAMie && isBMie) return 1;
       return 0;
     });
-  }, [products, activeCategory]);
+  }, [products]);
+
+  const drinkProducts = useMemo(() => {
+    return products.filter((p) => isDrinkCategory(p.category));
+  }, [products]);
 
   const formatRupiah = (val: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -145,11 +197,8 @@ export default function CustomerOrderPage(props: {
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case "Mie Pedas":
-        return <Flame className="w-4 h-4 text-red-500 animate-pulse" />;
-      case "Dimsum":
-        return <Utensils className="w-4 h-4 text-yellow-400" />;
-      case "Minuman Dingin":
+      case "Makanan":
+        return <Utensils className="w-4 h-4 text-red-500" />;
       case "Minuman":
         return <Coffee className="w-4 h-4 text-cyan-400" />;
       default:
@@ -446,82 +495,189 @@ export default function CustomerOrderPage(props: {
       </header>
 
       {/* Category selector */}
-      <div className="sticky top-[53px] bg-slate-950/90 backdrop-blur-md py-3 px-4 border-b border-white/5 overflow-x-auto no-scrollbar whitespace-nowrap flex gap-2 z-20">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeCategory === cat
-                ? "bg-red-600 text-white shadow-md shadow-red-600/20 border border-red-500"
-                : "bg-white/5 border border-white/5 text-slate-450 hover:text-white"
-            }`}
-          >
-            {cat !== "Semua" && getCategoryIcon(cat)}
-            {cat}
-          </button>
-        ))}
+      <div className="sticky top-[53px] bg-slate-950/80 backdrop-blur-md py-3.5 px-4 border-b border-white/5 z-20">
+        <div className="w-full bg-white/5 p-1 rounded-2xl border border-white/5 grid grid-cols-3 gap-1 backdrop-blur-md">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`py-2 px-1 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer ${
+                activeCategory === cat
+                  ? "bg-red-600 text-white shadow-lg shadow-red-600/25 border border-red-500 scale-[1.02]"
+                  : "text-slate-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              {cat !== "Semua" && getCategoryIcon(cat)}
+              <span className="uppercase tracking-wider text-[10px]">{cat}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Menu Catalog Grid */}
-      <main className="p-4 flex flex-col gap-4">
-        {filteredProducts.length === 0 ? (
+      <main className="p-4 flex flex-col gap-6">
+        {products.length === 0 ? (
           <div className="py-24 text-center">
             <ShoppingBag className="w-12 h-12 text-slate-600 mx-auto mb-2" />
             <span className="text-sm font-bold text-slate-400 block">Katalog Menu Kosong</span>
-            <p className="text-xs text-slate-600 mt-1">Tidak ada produk aktif dalam kategori ini.</p>
+            <p className="text-xs text-slate-600 mt-1">Tidak ada produk aktif saat ini.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3.5">
-            {filteredProducts.map((p) => {
-              const isOut = !p.stock || p.stock <= 0;
-              return (
-                <div
-                  key={p.id}
-                  onClick={() => !isOut && handleAddClick(p)}
-                  className={`bg-white/5 border border-white/5 rounded-3xl p-3 flex flex-col justify-between h-[215px] relative overflow-hidden transition-all duration-300 ${
-                    isOut ? "opacity-45 cursor-not-allowed" : "cursor-pointer active:scale-98 hover:border-white/10"
-                  }`}
-                >
-                  <div>
-                    {/* Image frame */}
-                    <div className="w-full h-24 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden p-1 relative">
-                      {p.imageUrl ? (
-                        <img src={p.imageUrl} alt={p.name} className="max-w-full max-h-full object-contain rounded-xl" />
-                      ) : (
-                        <div className="opacity-10 scale-[2.2] absolute">
-                          {getCategoryIcon(p.category)}
-                        </div>
-                      )}
-                      {isOut && (
-                        <span className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center text-[9px] font-black text-rose-500 uppercase tracking-widest border border-rose-500/20 rounded-xl">
-                          Habis
-                        </span>
-                      )}
+          <>
+            {/* 1. Makanan Section */}
+            {(activeCategory === "Semua" || activeCategory === "Makanan") && (
+              <div>
+                <div className="sticky top-[114px] bg-slate-950/90 backdrop-blur-md py-2.5 z-10 flex items-center justify-between border-b border-white/5 mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6.5 h-6.5 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center justify-center">
+                      <Utensils className="w-3.5 h-3.5 text-red-500" />
                     </div>
-
-                    <span className="text-[7.5px] font-extrabold text-red-500 uppercase tracking-widest font-mono mt-2.5 block leading-none">
-                      {p.category}
-                    </span>
-                    <h3 className="text-xs font-extrabold text-white line-clamp-2 leading-tight mt-1">
-                      {p.name}
-                    </h3>
+                    <div>
+                      <h2 className="text-xs font-black text-white uppercase tracking-wider">Makanan Lezat</h2>
+                      <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Mie pedas, kebab, lumpia & cemilan</p>
+                    </div>
                   </div>
-
-                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
-                    <span className="text-xs font-mono font-black text-yellow-500">
-                      {formatRupiah(p.sellPrice)}
-                    </span>
-                    {!isOut && (
-                      <div className="w-5.5 h-5.5 bg-red-600 rounded-md flex items-center justify-center text-white text-[10px] font-black shadow-md">
-                        +
-                      </div>
-                    )}
-                  </div>
+                  <span className="text-[9px] font-bold text-slate-450 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/5 font-mono">
+                    {foodProducts.length} Menu
+                  </span>
                 </div>
-              );
-            })}
-          </div>
+
+                {foodProducts.length === 0 ? (
+                  <div className="py-12 text-center bg-white/2 border border-dashed border-white/5 rounded-3xl">
+                    <span className="text-xs font-bold text-slate-500">Menu Makanan Kosong</span>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3.5">
+                    {foodProducts.map((p) => {
+                      const isOut = !p.stock || p.stock <= 0;
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => !isOut && handleAddClick(p)}
+                          className={`bg-white/5 border border-white/5 rounded-3xl p-3 flex flex-col justify-between h-[215px] relative overflow-hidden transition-all duration-300 ${
+                            isOut ? "opacity-45 cursor-not-allowed" : "cursor-pointer active:scale-[0.97] hover:border-white/10"
+                          }`}
+                        >
+                          <div>
+                            {/* Image frame */}
+                            <div className="w-full h-24 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden p-1 relative">
+                              {p.imageUrl ? (
+                                <img src={p.imageUrl} alt={p.name} className="max-w-full max-h-full object-contain rounded-xl" />
+                              ) : (
+                                <div className="opacity-10 scale-[2.2] absolute">
+                                  {getCategoryIcon(p.category)}
+                                </div>
+                              )}
+                              {isOut && (
+                                <span className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center text-[9px] font-black text-rose-500 uppercase tracking-widest border border-rose-500/20 rounded-xl">
+                                  Habis
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="mt-2.5 block leading-none">
+                              {getSubCategoryBadge(p.category)}
+                            </div>
+                            <h3 className="text-xs font-extrabold text-white line-clamp-2 leading-tight mt-1.5">
+                              {p.name}
+                            </h3>
+                          </div>
+
+                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
+                            <span className="text-xs font-mono font-black text-yellow-500">
+                              {formatRupiah(p.sellPrice)}
+                            </span>
+                            {!isOut && (
+                              <div className="w-5.5 h-5.5 bg-red-600 rounded-md flex items-center justify-center text-white text-[10px] font-black shadow-md">
+                                +
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 2. Minuman Section */}
+            {(activeCategory === "Semua" || activeCategory === "Minuman") && (
+              <div className={activeCategory === "Semua" ? "mt-4" : ""}>
+                <div className="sticky top-[114px] bg-slate-950/90 backdrop-blur-md py-2.5 z-10 flex items-center justify-between border-b border-white/5 mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6.5 h-6.5 bg-cyan-500/10 border border-cyan-500/20 rounded-lg flex items-center justify-center">
+                      <Coffee className="w-3.5 h-3.5 text-cyan-400" />
+                    </div>
+                    <div>
+                      <h2 className="text-xs font-black text-white uppercase tracking-wider">Minuman Segar</h2>
+                      <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Kopi premium & teh menyegarkan</p>
+                    </div>
+                  </div>
+                  <span className="text-[9px] font-bold text-slate-455 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/5 font-mono">
+                    {drinkProducts.length} Menu
+                  </span>
+                </div>
+
+                {drinkProducts.length === 0 ? (
+                  <div className="py-12 text-center bg-white/2 border border-dashed border-white/5 rounded-3xl">
+                    <span className="text-xs font-bold text-slate-500">Menu Minuman Kosong</span>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3.5">
+                    {drinkProducts.map((p) => {
+                      const isOut = !p.stock || p.stock <= 0;
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => !isOut && handleAddClick(p)}
+                          className={`bg-white/5 border border-white/5 rounded-3xl p-3 flex flex-col justify-between h-[215px] relative overflow-hidden transition-all duration-300 ${
+                            isOut ? "opacity-45 cursor-not-allowed" : "cursor-pointer active:scale-[0.97] hover:border-white/10"
+                          }`}
+                        >
+                          <div>
+                            {/* Image frame */}
+                            <div className="w-full h-24 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden p-1 relative">
+                              {p.imageUrl ? (
+                                <img src={p.imageUrl} alt={p.name} className="max-w-full max-h-full object-contain rounded-xl" />
+                              ) : (
+                                <div className="opacity-10 scale-[2.2] absolute">
+                                  {getCategoryIcon(p.category)}
+                                </div>
+                              )}
+                              {isOut && (
+                                <span className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center text-[9px] font-black text-rose-500 uppercase tracking-widest border border-rose-500/20 rounded-xl">
+                                  Habis
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="mt-2.5 block leading-none">
+                              {getSubCategoryBadge(p.category)}
+                            </div>
+                            <h3 className="text-xs font-extrabold text-white line-clamp-2 leading-tight mt-1.5">
+                              {p.name}
+                            </h3>
+                          </div>
+
+                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
+                            <span className="text-xs font-mono font-black text-yellow-500">
+                              {formatRupiah(p.sellPrice)}
+                            </span>
+                            {!isOut && (
+                              <div className="w-5.5 h-5.5 bg-red-600 rounded-md flex items-center justify-center text-white text-[10px] font-black shadow-md">
+                                +
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
       </main>
 

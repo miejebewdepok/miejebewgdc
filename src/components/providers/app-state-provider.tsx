@@ -81,6 +81,39 @@ export function AppStateProvider({
   const { data: session, isPending } = useSession();
   const sessionUserId = session?.user?.id ?? null;
 
+  // Global browser audio unlock listener to bypass modern browser autoplay blocks
+  useEffect(() => {
+    const unlockAudio = () => {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContext) return;
+      try {
+        const ctx = new AudioContext();
+        if (ctx.state === 'suspended') {
+          ctx.resume().then(() => {
+            // Play a silent note to activate the audio hardware channel
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0, ctx.currentTime);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.01);
+          });
+        }
+        window.removeEventListener('click', unlockAudio);
+        window.removeEventListener('touchstart', unlockAudio);
+      } catch (e) {
+        console.error('Audio unlock failed', e);
+      }
+    };
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('touchstart', unlockAudio);
+    return () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
+    };
+  }, []);
+
   useEffect(() => {
     // Load active cart from localStorage
     const savedCart = localStorage.getItem("miejebew_active_cart_v1");
@@ -117,32 +150,49 @@ export function AppStateProvider({
         setState((current) => {
           // Compare length of incoming bills with current bills to play audio alert
           if (response.savedBills.length > current.savedBills.length) {
-            // Play Gojek/Shopee style cheerful marimba arpeggio tune
+            // Play Gojek/Shopee style cheerful marimba arpeggio tune (rich bell tone + loud gain + autoplay bypass)
             const playOrderIncomingMelody = () => {
               const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
               if (!AudioContext) return;
               try {
                 const ctx = new AudioContext();
+                if (ctx.state === 'suspended') {
+                  ctx.resume();
+                }
                 const playChimeSequence = (startTimeOffset: number) => {
                   const notes = [
-                    { freq: 523.25, time: 0.0, dur: 0.1 },   // C5
-                    { freq: 659.25, time: 0.08, dur: 0.1 },  // E5
-                    { freq: 783.99, time: 0.16, dur: 0.1 },  // G5
-                    { freq: 1046.50, time: 0.24, dur: 0.15 }, // C6
-                    { freq: 1318.51, time: 0.32, dur: 0.3 }   // E6
+                    { freq: 523.25, time: 0.0, dur: 0.15 },   // C5
+                    { freq: 659.25, time: 0.06, dur: 0.15 },  // E5
+                    { freq: 783.99, time: 0.12, dur: 0.15 },  // G5
+                    { freq: 1046.50, time: 0.18, dur: 0.2 },  // C6
+                    { freq: 1318.51, time: 0.24, dur: 0.35 }   // E6
                   ];
                   notes.forEach((note) => {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = "sine";
-                    osc.frequency.setValueAtTime(note.freq, ctx.currentTime + startTimeOffset + note.time);
-                    gain.gain.setValueAtTime(0.001, ctx.currentTime + startTimeOffset + note.time);
-                    gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + startTimeOffset + note.time + 0.02);
-                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTimeOffset + note.time + note.dur);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(ctx.currentTime + startTimeOffset + note.time);
-                    osc.stop(ctx.currentTime + startTimeOffset + note.time + note.dur);
+                    // Base tone (Triangle wave for punchy full body)
+                    const osc1 = ctx.createOscillator();
+                    const gain1 = ctx.createGain();
+                    osc1.type = "triangle";
+                    osc1.frequency.setValueAtTime(note.freq, ctx.currentTime + startTimeOffset + note.time);
+                    gain1.gain.setValueAtTime(0.001, ctx.currentTime + startTimeOffset + note.time);
+                    gain1.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime + startTimeOffset + note.time + 0.02); // 50% base gain (extremely clear)
+                    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTimeOffset + note.time + note.dur);
+                    osc1.connect(gain1);
+                    gain1.connect(ctx.destination);
+                    osc1.start(ctx.currentTime + startTimeOffset + note.time);
+                    osc1.stop(ctx.currentTime + startTimeOffset + note.time + note.dur);
+
+                    // High-harmonic tone (Sine wave octave harmonic for beautiful crystal marimba chime)
+                    const osc2 = ctx.createOscillator();
+                    const gain2 = ctx.createGain();
+                    osc2.type = "sine";
+                    osc2.frequency.setValueAtTime(note.freq * 2, ctx.currentTime + startTimeOffset + note.time);
+                    gain2.gain.setValueAtTime(0.001, ctx.currentTime + startTimeOffset + note.time);
+                    gain2.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + startTimeOffset + note.time + 0.02); // 30% bell sparkle
+                    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTimeOffset + note.time + note.dur);
+                    osc2.connect(gain2);
+                    gain2.connect(ctx.destination);
+                    osc2.start(ctx.currentTime + startTimeOffset + note.time);
+                    osc2.stop(ctx.currentTime + startTimeOffset + note.time + note.dur);
                   });
                 };
                 // Play sequence 7 times over 5.6 seconds for optimal audibility (around 5 seconds)

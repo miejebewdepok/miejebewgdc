@@ -55,6 +55,7 @@ export default function CustomerOrderPage(props: {
   const [storeName, setStoreName] = useState("Mie Jebew GDC");
   const [products, setProducts] = useState<Product[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("Semua");
+  const [activeSubCategory, setActiveSubCategory] = useState<string>("Semua");
   const [cart, setCart] = useState<CartItem[]>([]);
   
   // Customizer modal state
@@ -204,7 +205,12 @@ export default function CustomerOrderPage(props: {
       }
     };
 
-    return products.filter((p) => !isDrinkCategory(p.category)).sort((a, b) => {
+    const filtered = products.filter((p) => !isDrinkCategory(p.category));
+    const subFiltered = activeSubCategory === "Semua"
+      ? filtered
+      : filtered.filter((p) => p.category === activeSubCategory);
+
+    return subFiltered.sort((a, b) => {
       const weightA = getFoodWeight(a.category);
       const weightB = getFoodWeight(b.category);
       if (weightA !== weightB) {
@@ -212,7 +218,7 @@ export default function CustomerOrderPage(props: {
       }
       return a.name.localeCompare(b.name);
     });
-  }, [products]);
+  }, [products, activeSubCategory]);
 
   const drinkProducts = useMemo(() => {
     const getDrinkWeight = (cat: string) => {
@@ -226,7 +232,12 @@ export default function CustomerOrderPage(props: {
       }
     };
 
-    return products.filter((p) => isDrinkCategory(p.category)).sort((a, b) => {
+    const filtered = products.filter((p) => isDrinkCategory(p.category));
+    const subFiltered = activeSubCategory === "Semua"
+      ? filtered
+      : filtered.filter((p) => p.category === activeSubCategory);
+
+    return subFiltered.sort((a, b) => {
       const weightA = getDrinkWeight(a.category);
       const weightB = getDrinkWeight(b.category);
       if (weightA !== weightB) {
@@ -237,7 +248,7 @@ export default function CustomerOrderPage(props: {
       }
       return a.name.localeCompare(b.name);
     });
-  }, [products]);
+  }, [products, activeSubCategory]);
 
   const formatRupiah = (val: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -597,12 +608,16 @@ export default function CustomerOrderPage(props: {
       </header>
 
       {/* Category selector */}
-      <div className="sticky top-[53px] bg-slate-950/80 backdrop-blur-md py-3.5 px-4 border-b border-white/5 z-20">
+      <div className="sticky top-[53px] bg-slate-950/80 backdrop-blur-md py-3.5 px-4 border-b border-white/5 z-20 flex flex-col gap-3">
+        {/* Main Categories Selector */}
         <div className="w-full bg-white/5 p-1 rounded-2xl border border-white/5 grid grid-cols-3 gap-1 backdrop-blur-md">
           {categories.map((cat) => (
             <button
               key={cat}
-              onClick={() => setActiveCategory(cat)}
+              onClick={() => {
+                setActiveCategory(cat);
+                setActiveSubCategory("Semua");
+              }}
               className={`py-2 px-1 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all duration-300 cursor-pointer ${
                 activeCategory === cat
                   ? "bg-red-600 text-white shadow-lg shadow-red-600/25 border border-red-500 scale-[1.02]"
@@ -614,6 +629,29 @@ export default function CustomerOrderPage(props: {
             </button>
           ))}
         </div>
+
+        {/* Sub Category Selector */}
+        {activeCategory !== "Semua" && (
+          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar scroll-smooth">
+            {(activeCategory === "Makanan"
+              ? ["Semua", "Mie Pedas", "Lumpia Beef", "Kebab", "Snack"]
+              : ["Semua", "Qalla Tea", "Qalla Coffee"]
+            ).map((subCat) => (
+              <button
+                key={subCat}
+                type="button"
+                onClick={() => setActiveSubCategory(subCat)}
+                className={`py-1.5 px-3.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-200 cursor-pointer whitespace-nowrap border ${
+                  activeSubCategory === subCat
+                    ? "bg-red-600/10 border-red-500/35 text-red-500 shadow-sm"
+                    : "bg-white/3 border-white/5 text-slate-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                {subCat === "Semua" ? `Semua ${activeCategory}` : subCat}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Menu Catalog Grid */}

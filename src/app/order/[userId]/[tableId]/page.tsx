@@ -89,19 +89,33 @@ export default function CustomerOrderPage(props: {
       .finally(() => setLoading(false));
   }, [userId]);
 
-  // Derive unique categories from products
+  // Derive unique categories from products (with 'Mie Pedas' first)
   const categories = useMemo(() => {
     const list = new Set<string>();
     products.forEach((p) => {
       if (p.category) list.add(p.category);
     });
-    return ["Semua", ...Array.from(list)];
+    const sortedCats = Array.from(list).sort((a, b) => {
+      if (a === "Mie Pedas") return -1;
+      if (b === "Mie Pedas") return 1;
+      return a.localeCompare(b);
+    });
+    return ["Semua", ...sortedCats];
   }, [products]);
 
-  // Filtered products list
+  // Filtered products list (with 'Mie Pedas' prioritized first under "Semua")
   const filteredProducts = useMemo(() => {
-    if (activeCategory === "Semua") return products;
-    return products.filter((p) => p.category === activeCategory);
+    const list = activeCategory === "Semua"
+      ? products
+      : products.filter((p) => p.category === activeCategory);
+      
+    return [...list].sort((a, b) => {
+      const isAMie = a.category === "Mie Pedas";
+      const isBMie = b.category === "Mie Pedas";
+      if (isAMie && !isBMie) return -1;
+      if (!isAMie && isBMie) return 1;
+      return 0;
+    });
   }, [products, activeCategory]);
 
   const formatRupiah = (val: number) => {

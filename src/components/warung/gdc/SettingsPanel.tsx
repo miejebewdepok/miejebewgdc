@@ -1,6 +1,6 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { Settings } from '@/lib/types';
+import { useAppState } from '@/components/providers/app-state-provider';
 import { 
   QrCode, 
   Printer, 
@@ -63,26 +63,40 @@ interface SettingsPanelProps {
 }
 
 export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPanelProps) {
+  const { userId } = useAppState();
   // Local state for forms
   const [isSaving, setIsSaving] = useState(false);
-  const [merchantName, setMerchantName] = useState(settings.merchantName);
-  const [merchantAddress, setMerchantAddress] = useState(settings.merchantAddress);
-  const [merchantPhone, setMerchantPhone] = useState(settings.merchantPhone);
-  const [taxRate, setTaxRate] = useState(settings.taxRate);
-  const [enableServiceCharge, setEnableServiceCharge] = useState(settings.enableServiceCharge);
-  const [serviceChargeRate, setServiceChargeRate] = useState(settings.serviceChargeRate);
+  const [merchantName, setMerchantName] = useState(settings.merchantName || '');
+  const [merchantAddress, setMerchantAddress] = useState(settings.merchantAddress || '');
+  const [merchantPhone, setMerchantPhone] = useState(settings.merchantPhone || '');
+  const [taxRate, setTaxRate] = useState(settings.taxRate ?? 0);
+  const [enableServiceCharge, setEnableServiceCharge] = useState(settings.enableServiceCharge ?? false);
+  const [serviceChargeRate, setServiceChargeRate] = useState(settings.serviceChargeRate ?? 0);
   
-  const [qrisName, setQrisName] = useState(settings.qrisName);
-  const [qrisType, setQrisType] = useState(settings.qrisType);
-  const [qrisStaticCodeUrl, setQrisStaticCodeUrl] = useState(settings.qrisStaticCodeUrl);
+  const [qrisName, setQrisName] = useState(settings.qrisName || '');
+  const [qrisType, setQrisType] = useState(settings.qrisType || 'static');
+  const [qrisStaticCodeUrl, setQrisStaticCodeUrl] = useState(settings.qrisStaticCodeUrl || '');
   const [qrisUploadUrl, setQrisUploadUrl] = useState(settings.qrisUploadUrl || '');
   
   const [userProfileName, setUserProfileName] = useState(settings.userProfileName || 'Andi Budiman');
   const [userProfileImage, setUserProfileImage] = useState(settings.userProfileImage || '');
 
-  const [printerPaperSize, setPrinterPaperSize] = useState(settings.printerPaperSize);
-  const [receiptHeader, setReceiptHeader] = useState(settings.receiptHeader);
-  const [receiptFooter, setReceiptFooter] = useState(settings.receiptFooter);
+  const [printerPaperSize, setPrinterPaperSize] = useState(settings.printerPaperSize || '58mm');
+  const [receiptHeader, setReceiptHeader] = useState(settings.receiptHeader || '');
+  const [receiptFooter, setReceiptFooter] = useState(settings.receiptFooter || '');
+
+  // QR Table Ordering States
+  const [tableCount, setTableCount] = useState(settings.tableCount ?? 10);
+  const [origin, setOrigin] = useState('');
+  const [showQrSlip, setShowQrSlip] = useState(false);
+  const [selectedQrTable, setSelectedQrTable] = useState('');
+  const [isQrPrinting, setIsQrPrinting] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin);
+    }
+  }, []);
 
   const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -124,7 +138,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
   const [isScanning, setIsScanning] = useState(false);
   const [scannedDevices, setScannedDevices] = useState<{ name: string; address: string; rssi: number }[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<string>(settings.printerConnected ? 'connected' : 'disconnected');
-  const [currentPrinterName, setCurrentPrinterName] = useState<string>(settings.printerName);
+  const [currentPrinterName, setCurrentPrinterName] = useState<string>(settings.printerName || '');
 
   // Test printer slip emulator
   const [isPrinting, setIsPrinting] = useState(false);
@@ -188,7 +202,8 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
         receiptFooter,
         userProfileName,
         userProfileImage,
-        qrisUploadUrl
+        qrisUploadUrl,
+        tableCount
       });
 
       // Notify with sound
@@ -307,6 +322,18 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
         playBeep(1200, 0.15);
       }
     }, 120);
+  };
+
+  const handlePrintQrCode = (tableName: string) => {
+    setSelectedQrTable(tableName);
+    setShowQrSlip(true);
+    setIsQrPrinting(true);
+    playPrintSound();
+
+    setTimeout(() => {
+      setIsQrPrinting(false);
+      playBeep(1200, 0.15);
+    }, 1500);
   };
 
   // Live dynamic demo QRIS code generator
@@ -585,6 +612,86 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
 
             </div>
 
+          </div>
+
+          {/* QR MEJA SETUP (SELF-ORDERING) CARD */}
+          <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-5">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-red-500/10 text-red-500 rounded-xl">
+                <QrCode className="w-4 h-4" />
+              </div>
+              <h3 className="text-sm font-bold text-foreground dark:text-white uppercase tracking-wider">QR Meja Setup (Self-Ordering)</h3>
+            </div>
+
+            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-650 dark:text-emerald-400 p-3.5 rounded-2xl text-[11px] font-sans">
+              <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 animate-pulse" />
+              <div>
+                <span className="font-extrabold block">Trend Pemesanan Mandiri</span>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                  Pelanggan cukup scan QR Code di meja makan untuk membuka menu public digital, memesan, & tagihan otomatis terkirim langsung ke dasbor kasir POS Anda!
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs text-slate-550 dark:text-slate-400 block mb-1.5 font-bold uppercase tracking-wider">
+                Jumlah Meja Makan Restoran
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="50"
+                value={tableCount}
+                onChange={(e) => setTableCount(Math.min(50, Math.max(1, parseInt(e.target.value) || 1)))}
+                className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl py-3 px-4 text-xs text-foreground dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/40 font-semibold"
+                placeholder="10"
+              />
+            </div>
+
+            <div className="border-t border-black/5 dark:border-white/5 pt-4">
+              <span className="text-[10px] text-slate-550 dark:text-slate-400 font-extrabold uppercase block mb-3">
+                Daftar Tautan Link & QR Meja
+              </span>
+              <div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1 no-scrollbar">
+                {Array.from({ length: tableCount }).map((_, idx) => {
+                  const tableNum = idx + 1;
+                  const tableName = `Meja-${tableNum}`;
+                  const tableUrl = `${origin}/order/${userId}/${tableName}`;
+
+                  return (
+                    <div key={tableName} className="bg-black/5 dark:bg-black/30 border border-black/5 dark:border-white/5 rounded-2xl p-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                      <div className="overflow-hidden flex-1 w-full">
+                        <span className="text-xs font-bold text-foreground dark:text-white block">
+                          Meja {tableNum}
+                        </span>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono truncate block w-full" title={tableUrl}>
+                          {tableUrl}
+                        </span>
+                      </div>
+                      <div className="flex gap-2 shrink-0 w-full md:w-auto">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(tableUrl);
+                            alert(`Link ${tableName} berhasil disalin!`);
+                          }}
+                          className="flex-1 md:flex-none py-1.5 px-3 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-slate-800 dark:text-white rounded-xl text-[10px] font-bold text-center cursor-pointer transition-all"
+                        >
+                          Salin Link
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handlePrintQrCode(tableName)}
+                          className="flex-1 md:flex-none py-1.5 px-3 bg-red-650/15 border border-red-500/25 text-red-650 hover:bg-red-600/25 dark:text-red-300 dark:hover:bg-red-600/30 rounded-xl text-[10px] font-black text-center cursor-pointer transition-all"
+                        >
+                          Cetak QR
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
         </div>
@@ -903,6 +1010,81 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
 
             <p className="text-[10px] text-slate-400 text-center mt-6">
               Test Slip mencerminkan ukuran kertas <span className="font-bold text-white uppercase">{printerPaperSize}</span> dengan integrasi nama outlet <span className="font-bold text-white">{settings.merchantName}</span>.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL / BOTTOM SLIDE EMULATOR FOR TABLE QR CODE PRINTED SLIP */}
+      {showQrSlip && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-feed">
+          <div className="bg-zinc-900 border border-white/10 w-full max-w-sm rounded-[32px] overflow-hidden shadow-2xl relative p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex justify-between items-center pb-4 border-b border-white/5 mb-4">
+                <span className="text-xs text-slate-400 font-black tracking-widest uppercase flex items-center gap-1">
+                  <Printer className="w-4 h-4 text-indigo-400 animate-pulse" /> Virtual Printer Output (QR Meja)
+                </span>
+                
+                <button
+                  type="button"
+                  disabled={isQrPrinting}
+                  onClick={() => setShowQrSlip(false)}
+                  className={`text-slate-400 bg-white/5 hover:bg-white/10 p-1 rounded-lg ${isQrPrinting ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
+                >
+                  Tutup Slip
+                </button>
+              </div>
+
+              {/* simulated physical printer plastic mouth */}
+              <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-2.5 pb-0 shadow-inner relative flex flex-col items-center">
+                <div className="w-[85%] h-1 bg-black rounded-full shadow-lg border border-zinc-800 relative z-10"></div>
+                <div className="bg-zinc-900/60 w-[90%] h-1 pb-1.5"></div>
+
+                {/* scrolling paper container */}
+                <div className="w-[80%] bg-white text-slate-900 p-4 pt-5 rounded-b-sm shadow-md transition-all duration-300 max-h-96 overflow-y-auto shrink-0 select-text outline-none relative mt-[-2px] border-b-4 border-dashed border-slate-300">
+                  
+                  {/* paper scanlines / shadow */}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-200/50 to-transparent h-12 pointer-events-none"></div>
+
+                  <div className="text-[10px] text-center flex flex-col items-center" style={{ fontFamily: 'monospace', lineHeight: 1.3 }}>
+                    <div className="font-extrabold text-sm uppercase mb-1">{settings.storeName || "MIE JEBEW GDC"}</div>
+                    <div className="text-[9px] mb-2">{settings.storeAddress || "Alamat Outlet"}</div>
+                    <div className="border-t border-b border-dashed border-slate-400 py-1 w-full my-2 font-bold uppercase tracking-wider">
+                      {selectedQrTable}
+                    </div>
+                    <div className="text-[8px] text-slate-600 mb-3 px-2 leading-relaxed">
+                      Scan QR Code di bawah untuk melihat menu & memesan langsung secara mandiri dari handphone Anda.
+                    </div>
+                    
+                    {/* QR Image */}
+                    <div className="w-36 h-36 bg-white border border-slate-200 p-2 flex items-center justify-center my-2 shadow-inner">
+                      <img 
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${origin}/order/${userId}/${encodeURIComponent(selectedQrTable)}`)}`}
+                        alt="Order QR Code" 
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+
+                    <div className="text-[9px] font-bold text-slate-800 uppercase tracking-widest mt-2">
+                      ~ SELF-ORDERING PLATFORM ~
+                    </div>
+                    <div className="text-[8px] text-slate-500 mt-1">
+                      Powered by WarungOS
+                    </div>
+                  </div>
+
+                  {isQrPrinting && (
+                    <div className="mt-3 text-center animate-pulse flex items-center justify-center gap-1 text-[9px] text-indigo-600 font-extrabold uppercase font-sans tracking-wider select-none">
+                      <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-ping"></span>
+                      Mencetak Termal... ZZZT ZZT
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <p className="text-[10px] text-slate-400 text-center mt-6">
+              Potong slip QR meja ini dan tempelkan di <span className="font-bold text-white uppercase">{selectedQrTable}</span>.
             </p>
           </div>
         </div>

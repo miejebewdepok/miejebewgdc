@@ -18,4 +18,5 @@ export const emptyAppState: AppState = {
     stockAlertThreshold: 5,
     enabledPayments: ["Tunai", "QRIS", "Transfer"],
   },
+  savedBills: [],
 };

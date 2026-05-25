@@ -18,6 +18,7 @@ type CartLine = {
 };
 
 type AppStateContextValue = AppState & {
+  userId: string | null;
   cartLines: CartLine[];
   cartTotal: number;
   lowStockProducts: Product[];
@@ -78,18 +79,9 @@ export function AppStateProvider({
   const router = useRouter();
   const [state, setState] = useState<AppState>(emptyAppState);
   const { data: session, isPending } = useSession();
-  const [savedBills, setSavedBills] = useState<SavedBill[]>([]);
+  const sessionUserId = session?.user?.id ?? null;
 
   useEffect(() => {
-    const saved = localStorage.getItem("miejebew_saved_bills_v1");
-    if (saved) {
-      try {
-        setSavedBills(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse saved bills", e);
-      }
-    }
-
     // Load active cart from localStorage
     const savedCart = localStorage.getItem("miejebew_active_cart_v1");
     if (savedCart) {
@@ -111,11 +103,53 @@ export function AppStateProvider({
     }
   }, [state.cart]);
 
-  const persistBills = (newBills: SavedBill[]) => {
-    setSavedBills(newBills);
-    localStorage.setItem("miejebew_saved_bills_v1", JSON.stringify(newBills));
-  };
-  const sessionUserId = session?.user?.id ?? null;
+  // Polling for saved bills to detect new table self-orders
+  useEffect(() => {
+    if (!sessionUserId) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const response = await requestJson<{ savedBills: SavedBill[] }>("/api/saved-bills");
+        
+        setState((current) => {
+          // Compare length of incoming bills with current bills to play audio alert
+          if (response.savedBills.length > current.savedBills.length) {
+            // Play double beep sound
+            const playAlert = (freq: number, duration: number) => {
+              const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+              if (AudioContext) {
+                try {
+                  const ctx = new AudioContext();
+                  const osc = ctx.createOscillator();
+                  const gain = ctx.createGain();
+                  osc.type = "sine";
+                  osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                  gain.gain.setValueAtTime(0.04, ctx.currentTime);
+                  osc.connect(gain);
+                  gain.connect(ctx.destination);
+                  osc.start();
+                  osc.stop(ctx.currentTime + duration);
+                } catch (e) {
+                  console.error(e);
+                }
+              }
+            };
+            playAlert(587.33, 0.15); // D5
+            setTimeout(() => playAlert(880, 0.2), 180); // A5
+          }
+
+          return {
+            ...current,
+            savedBills: response.savedBills,
+          };
+        });
+      } catch (err) {
+        console.error("Failed to poll saved bills", err);
+      }
+    }, 10000); // Poll every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [sessionUserId]);
 
   useEffect(() => {
     if (isPending) {
@@ -517,36 +551,33 @@ export function AppStateProvider({
     }));
   }
 
-  function saveBill(name: string) {
+  async function saveBill(name: string) {
     if (cartLines.length === 0) return;
 
-    const newBill: SavedBill = {
-      id: Math.random().toString(36).substring(2, 9),
-      name: name,
-      date: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      items: cartLines.map(line => ({
-        id: line.id,
-        productId: line.product.id,
-        quantity: line.quantity,
-        spicyLevel: line.spicyLevel,
-        toppings: line.toppings,
-        product: line.product,
-        sellPrice: line.product.sellPrice
-      }))
-    };
+    const newBillItems = cartLines.map(line => ({
+      id: line.id,
+      productId: line.product.id,
+      quantity: line.quantity,
+      spicyLevel: line.spicyLevel,
+      toppings: line.toppings,
+      product: line.product,
+      sellPrice: line.product.sellPrice
+    }));
 
-    const newBills = [newBill, ...savedBills];
-    persistBills(newBills);
+    const response = await requestJson<{ savedBill: SavedBill }>("/api/saved-bills", {
+      method: "POST",
+      body: JSON.stringify({ name, items: newBillItems }),
+    });
 
     setState((current) => ({
       ...current,
+      savedBills: [response.savedBill, ...current.savedBills],
       cart: []
     }));
   }
 
-  function loadBill(id: string) {
-    const billToLoad = savedBills.find(b => b.id === id);
+  async function loadBill(id: string) {
+    const billToLoad = state.savedBills.find(b => b.id === id);
     if (!billToLoad) return;
 
     const cartItemsToLoad = billToLoad.items.map((item: any) => ({
@@ -557,18 +588,27 @@ export function AppStateProvider({
       toppings: item.toppings ?? []
     }));
 
+    // Delete it from the server
+    await requestJson(`/api/saved-bills/${id}`, {
+      method: "DELETE",
+    });
+
     setState((current) => ({
       ...current,
-      cart: cartItemsToLoad
+      cart: cartItemsToLoad,
+      savedBills: current.savedBills.filter(b => b.id !== id)
     }));
-
-    const newBills = savedBills.filter(b => b.id !== id);
-    persistBills(newBills);
   }
 
-  function deleteBill(id: string) {
-    const newBills = savedBills.filter(b => b.id !== id);
-    persistBills(newBills);
+  async function deleteBill(id: string) {
+    await requestJson(`/api/saved-bills/${id}`, {
+      method: "DELETE",
+    });
+
+    setState((current) => ({
+      ...current,
+      savedBills: current.savedBills.filter(b => b.id !== id)
+    }));
   }
 
   async function addExpense(draft: { title: string; amount: number; category: string }) {
@@ -598,6 +638,7 @@ export function AppStateProvider({
     <AppStateContext.Provider
       value={{
         ...state,
+        userId: sessionUserId,
         cartLines,
         cartTotal,
         lowStockProducts,
@@ -618,7 +659,7 @@ export function AppStateProvider({
         deleteTransaction,
         deleteTransactionsBulk,
         updateTransaction,
-        savedBills,
+        savedBills: state.savedBills,
         saveBill,
         loadBill,
         deleteBill,

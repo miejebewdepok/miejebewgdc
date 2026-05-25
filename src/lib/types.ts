@@ -118,6 +118,7 @@ export interface Settings {
   userProfileName?: string;
   userProfileImage?: string;
   productOrder?: string[];
+  tableCount?: number;
 }
 
 export interface AppState {
@@ -128,6 +129,7 @@ export interface AppState {
   expenses: Expense[];
   paymentMethod: PaymentMethod;
   settings: Settings;
+  savedBills: SavedBill[];
 }
 
 export interface ProductDraft {

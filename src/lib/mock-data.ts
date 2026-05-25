@@ -322,4 +322,5 @@ export const seedState: AppState = {
   expenses,
   paymentMethod: "Tunai",
   settings,
+  savedBills: [],
 };

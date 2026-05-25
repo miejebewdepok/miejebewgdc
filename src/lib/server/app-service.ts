@@ -8,6 +8,7 @@ import {
   storeProfiles,
   transactionItems,
   transactions,
+  savedBills,
 } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { AppState, DebtDraft, PaymentMethod, ProductDraft, Settings, Transaction } from "@/lib/types";
@@ -245,6 +246,7 @@ function mapSettings(profile: typeof storeProfiles.$inferSelect): Settings {
     printerPaperSize: extra.printerPaperSize ?? "58mm",
     userProfileImage: extra.userProfileImage ?? "",
     productOrder: extra.productOrder ?? [],
+    tableCount: extra.tableCount ?? 10,
   };
 }
 
@@ -273,6 +275,7 @@ function normalizeSettings(settings: Settings): Settings {
     printerPaperSize: settings.printerPaperSize ?? "58mm",
     userProfileImage: settings.userProfileImage ?? "",
     productOrder: settings.productOrder ?? [],
+    tableCount: settings.tableCount ?? 10,
   };
 
   return {
@@ -333,6 +336,12 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
     .from(expenses)
     .where(eq(expenses.userId, userId))
     .orderBy(desc(expenses.createdAt));
+
+  const savedBillRows = await db
+    .select()
+    .from(savedBills)
+    .where(eq(savedBills.userId, userId))
+    .orderBy(desc(savedBills.createdAt));
 
   const productCategoryMap = new Map<string, string>();
   for (const product of productRows) {
@@ -397,6 +406,13 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
       category: expense.category as AppState["expenses"][number]["category"],
     })),
     settings: mapSettings(profile),
+    savedBills: savedBillRows.map((bill) => ({
+      id: bill.id,
+      name: bill.name,
+      createdAt: bill.createdAt,
+      date: bill.createdAt,
+      items: bill.items,
+    })),
   };
 }
 
@@ -954,8 +970,33 @@ export async function resetWorkspace(userId: string) {
   await db.delete(expenses).where(eq(expenses.userId, userId));
   await db.delete(products).where(eq(products.userId, userId));
   await db.delete(storeProfiles).where(eq(storeProfiles.userId, userId));
+  await db.delete(savedBills).where(eq(savedBills.userId, userId));
 
   await ensureWorkspace(userId, null);
 
   return getBootstrapState(userId);
+}
+
+export async function createSavedBill(userId: string, name: string, items: any[], optionalId?: string) {
+  await ensureAppReady();
+  const id = optionalId || Math.random().toString(36).substring(2, 9);
+  const timestamp = nowIso();
+  const [bill] = await db
+    .insert(savedBills)
+    .values({
+      id,
+      userId,
+      name,
+      items,
+      createdAt: timestamp,
+    })
+    .returning();
+  return bill;
+}
+
+export async function deleteSavedBill(userId: string, id: string) {
+  await ensureAppReady();
+  await db
+    .delete(savedBills)
+    .where(and(eq(savedBills.id, id), eq(savedBills.userId, userId)));
 }

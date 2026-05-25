@@ -94,3 +94,11 @@ export const aiMessages = pgTable("ai_messages", {
   toolResult: jsonb("tool_result").$type<unknown>(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull(),
 });
+
+export const savedBills = pgTable("saved_bills", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  name: text("name").notNull(),
+  items: jsonb("items").$type<any[]>().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull(),
+});

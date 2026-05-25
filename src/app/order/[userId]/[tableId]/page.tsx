@@ -1029,23 +1029,29 @@ export default function CustomerOrderPage(props: {
       {/* 2. Cart Drawer Sheet Overlay */}
       {cartOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex justify-end">
-          <div className="w-full max-w-md bg-slate-900 h-full p-5 flex flex-col justify-between border-l border-white/5 animate-in slide-in-from-right duration-300">
-            <div>
-              <div className="flex justify-between items-center border-b border-white/5 pb-3">
-                <div className="flex items-center gap-2">
-                  <ShoppingBag className="w-4 h-4 text-red-500" />
-                  <h3 className="text-sm font-black text-white uppercase">Keranjang Pemesanan</h3>
-                </div>
-                <button
-                  onClick={() => setCartOpen(false)}
-                  className="p-1 bg-white/5 rounded-lg text-slate-400 hover:text-white"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+          <form
+            onSubmit={handlePlaceOrder}
+            className="w-full max-w-md bg-slate-900 h-full flex flex-col justify-between border-l border-white/5 animate-in slide-in-from-right duration-300 overflow-hidden"
+          >
+            {/* Header - Fixed */}
+            <div className="flex justify-between items-center border-b border-white/5 p-5 pb-3 shrink-0">
+              <div className="flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-red-500" />
+                <h3 className="text-sm font-black text-white uppercase">Keranjang Pemesanan</h3>
               </div>
+              <button
+                type="button"
+                onClick={() => setCartOpen(false)}
+                className="p-1 bg-white/5 rounded-lg text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
+            {/* Scrollable Body - Cart items + Checkout details */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-5 no-scrollbar">
               {/* Items List */}
-              <div className="my-4 overflow-y-auto max-h-[50vh] flex flex-col gap-3 pr-1 no-scrollbar">
+              <div className="flex flex-col gap-3">
                 {cart.map((item) => (
                   <div
                     key={item.id}
@@ -1082,6 +1088,7 @@ export default function CustomerOrderPage(props: {
 
                     <div className="flex items-center gap-2 shrink-0">
                       <button
+                        type="button"
                         onClick={() => handleUpdateQuantity(item.id, -1)}
                         className="w-6.5 h-6.5 bg-white/5 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white flex items-center justify-center"
                       >
@@ -1091,6 +1098,7 @@ export default function CustomerOrderPage(props: {
                         {item.quantity}
                       </span>
                       <button
+                        type="button"
                         onClick={() => handleUpdateQuantity(item.id, 1)}
                         className="w-6.5 h-6.5 bg-white/5 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white flex items-center justify-center"
                       >
@@ -1100,18 +1108,11 @@ export default function CustomerOrderPage(props: {
                   </div>
                 ))}
               </div>
-            </div>
 
-             {/* Bottom summary and place order form */}
-            <div className="border-t border-white/5 pt-4">
-              <div className="flex justify-between items-center text-sm font-extrabold mb-4 pb-3 border-b border-dashed border-white/5">
-                <span className="text-slate-400">Total Harga</span>
-                <span className="text-yellow-500 font-mono text-base">{formatRupiah(subtotal)}</span>
-              </div>
-
-              <form onSubmit={handlePlaceOrder} className="flex flex-col gap-3">
+              {/* Place Order Fields */}
+              <div className="pt-4 border-t border-white/5 flex flex-col gap-3">
                 <div>
-                  <label className="text-[9px] font-black text-slate-450 uppercase tracking-wider block mb-1.5">
+                  <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-1.5">
                     Nama Pemesan (Untuk Antrean)
                   </label>
                   <input
@@ -1169,25 +1170,33 @@ export default function CustomerOrderPage(props: {
                     </div>
                   )}
                 </div>
-
-                <button
-                  type="submit"
-                  disabled={placingOrder}
-                  className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-wider shadow-lg shadow-red-600/25 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5"
-                >
-                  {placingOrder ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" /> Mengirimkan...
-                    </>
-                  ) : (
-                    <>
-                      <Check className="w-4 h-4" /> Kirim Pesanan Order
-                    </>
-                  )}
-                </button>
-              </form>
+              </div>
             </div>
-          </div>
+
+            {/* Footer - Fixed */}
+            <div className="border-t border-white/5 p-5 shrink-0 bg-slate-900">
+              <div className="flex justify-between items-center text-sm font-extrabold mb-4 pb-3 border-b border-dashed border-white/5">
+                <span className="text-slate-400">Total Harga</span>
+                <span className="text-yellow-500 font-mono text-base">{formatRupiah(subtotal)}</span>
+              </div>
+
+              <button
+                type="submit"
+                disabled={placingOrder}
+                className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-wider shadow-lg shadow-red-600/25 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                {placingOrder ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Mengirimkan...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" /> Kirim Pesanan Order
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </div>

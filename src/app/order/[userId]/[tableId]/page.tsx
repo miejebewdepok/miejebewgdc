@@ -73,6 +73,8 @@ export default function CustomerOrderPage(props: {
   const [claimPromo, setClaimPromo] = useState(false);
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [emailAddress, setEmailAddress] = useState("");
+  const [whatsappUsed, setWhatsappUsed] = useState(false);
+  const [emailUsed, setEmailUsed] = useState(false);
   const [placingOrder, setPlacingOrder] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [lastBillName, setLastBillName] = useState("");
@@ -123,6 +125,58 @@ export default function CustomerOrderPage(props: {
       return () => clearTimeout(timer);
     }
   }, [orderSuccess]);
+
+  // Real-time WhatsApp duplicate check
+  useEffect(() => {
+    if (!whatsappNumber.trim() || !userId) {
+      setWhatsappUsed(false);
+      return;
+    }
+    const cleanWa = whatsappNumber.trim();
+    if (cleanWa.length < 9) {
+      setWhatsappUsed(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      fetch(`/api/public/promo-validate?userId=${userId}&whatsapp=${encodeURIComponent(cleanWa)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setWhatsappUsed(data.whatsappUsed);
+          }
+        })
+        .catch(console.error);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [whatsappNumber, userId]);
+
+  // Real-time Email duplicate check
+  useEffect(() => {
+    if (!emailAddress.trim() || !userId) {
+      setEmailUsed(false);
+      return;
+    }
+    const cleanEmail = emailAddress.trim();
+    if (!cleanEmail.includes("@") || cleanEmail.length < 5) {
+      setEmailUsed(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      fetch(`/api/public/promo-validate?userId=${userId}&email=${encodeURIComponent(cleanEmail)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setEmailUsed(data.emailUsed);
+          }
+        })
+        .catch(console.error);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [emailAddress, userId]);
 
   // Helper to dynamically classify if a category belongs to drinks
   const isDrinkCategory = (cat: string) => {
@@ -1227,85 +1281,148 @@ export default function CustomerOrderPage(props: {
                 {/* Promo Checkbox & WhatsApp Input */}
                 {(() => {
                   const MIN_PROMO_SUBTOTAL = 15000;
+                  const VIP_PROMO_SUBTOTAL = 50000;
                   const isPromoUnlocked = subtotal >= MIN_PROMO_SUBTOTAL;
-                  const percent = Math.min(100, (subtotal / MIN_PROMO_SUBTOTAL) * 100);
-                  const remaining = MIN_PROMO_SUBTOTAL - subtotal;
+                  const isVipUnlocked = subtotal >= VIP_PROMO_SUBTOTAL;
+                  
+                  let percent = 0;
+                  if (subtotal <= MIN_PROMO_SUBTOTAL) {
+                    percent = (subtotal / MIN_PROMO_SUBTOTAL) * 40;
+                  } else if (subtotal <= VIP_PROMO_SUBTOTAL) {
+                    percent = 40 + ((subtotal - MIN_PROMO_SUBTOTAL) / (VIP_PROMO_SUBTOTAL - MIN_PROMO_SUBTOTAL)) * 60;
+                  } else {
+                    percent = 100;
+                  }
+
+                  const remainingNormal = MIN_PROMO_SUBTOTAL - subtotal;
+                  const remainingVip = VIP_PROMO_SUBTOTAL - subtotal;
+
+                  const hasDuplicate = (whatsappUsed && whatsappNumber.trim().length >= 9) || 
+                                      (emailUsed && emailAddress.trim().includes("@"));
 
                   return (
                     <div className={`border rounded-2xl p-4 my-1 transition-all duration-300 ${
-                      isPromoUnlocked 
-                        ? "bg-emerald-500/5 border-emerald-500/20 shadow-lg shadow-emerald-500/5" 
-                        : "bg-yellow-500/5 border-yellow-500/10"
+                      isVipUnlocked
+                        ? "bg-indigo-500/5 border-indigo-500/20 shadow-lg shadow-indigo-500/5"
+                        : isPromoUnlocked 
+                          ? "bg-emerald-500/5 border-emerald-500/20 shadow-lg shadow-emerald-500/5" 
+                          : "bg-yellow-500/5 border-yellow-500/10"
                     }`}>
                       {/* Progress Header */}
-                      <div className="mb-3">
-                        <div className="flex justify-between items-center mb-1.5">
-                          <div className="flex items-center gap-2">
-                            {isPromoUnlocked ? (
-                              <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 animate-bounce">
+                      <div className="mb-2">
+                        <div className="flex justify-between items-center mb-1">
+                          <div className="flex items-center gap-1.5">
+                            {isVipUnlocked ? (
+                              <div className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 animate-bounce">
                                 <Sparkles className="w-3 h-3" />
+                              </div>
+                            ) : isPromoUnlocked ? (
+                              <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                <Check className="w-3 h-3" />
                               </div>
                             ) : (
                               <div className="w-5 h-5 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500">
                                 <Gift className="w-3 h-3" />
                               </div>
                             )}
-                            <span className="text-[10px] font-black tracking-wide text-white uppercase">
-                              Promo Qalla Tea Gratis
+                            <span className="text-[10px] font-black tracking-wide text-white uppercase flex items-center gap-1">
+                              Promo Qalla Tea {isVipUnlocked && <span className="text-indigo-400 font-extrabold text-[8px] px-1 bg-indigo-500/20 rounded">VIP</span>}
                             </span>
                           </div>
-                          <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
-                            isPromoUnlocked 
-                              ? "bg-emerald-500/20 text-emerald-400" 
-                              : "bg-yellow-500/20 text-yellow-500"
-                          }`}>
-                            Min. Rp 15.000
-                          </span>
+                          
+                          <div className="flex gap-1">
+                            <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded-full ${
+                              isPromoUnlocked ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-800 text-slate-400"
+                            }`}>
+                              Min. 15k
+                            </span>
+                            <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded-full ${
+                              isVipUnlocked ? "bg-indigo-500/20 text-indigo-400 animate-pulse" : "bg-slate-800 text-slate-400"
+                            }`}>
+                              VIP 50k
+                            </span>
+                          </div>
                         </div>
 
-                        {/* Progress Bar */}
-                        <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mb-2">
+                        {/* Progress Bar with markers */}
+                        <div className="relative w-full h-2 bg-slate-800 rounded-full my-2.5">
+                          {/* Progress Fill */}
                           <div 
                             className={`h-full rounded-full transition-all duration-500 ease-out ${
-                              isPromoUnlocked 
-                                ? "bg-gradient-to-r from-emerald-500 to-teal-400" 
-                                : "bg-gradient-to-r from-amber-500 to-orange-400"
+                              isVipUnlocked 
+                                ? "bg-gradient-to-r from-emerald-500 via-teal-400 to-indigo-500" 
+                                : isPromoUnlocked 
+                                  ? "bg-gradient-to-r from-emerald-500 to-teal-400" 
+                                  : "bg-gradient-to-r from-amber-500 to-orange-400"
                             }`}
                             style={{ width: `${percent}%` }}
                           />
+
+                          {/* Marker Rp 15.000 (at 40%) */}
+                          <div className="absolute top-1/2 left-[40%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                            <div className={`w-3 h-3 rounded-full border flex items-center justify-center transition-all ${
+                              isPromoUnlocked 
+                                ? "bg-emerald-500 border-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.8)]" 
+                                : "bg-slate-900 border-slate-700"
+                            }`}>
+                              {isPromoUnlocked && <span className="text-[6px] text-white">✓</span>}
+                            </div>
+                          </div>
+
+                          {/* Marker Rp 50.000 (at 100%) */}
+                          <div className="absolute top-1/2 left-[100%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                            <div className={`w-3 h-3 rounded-full border flex items-center justify-center transition-all ${
+                              isVipUnlocked 
+                                ? "bg-indigo-500 border-indigo-400 shadow-[0_0_6px_rgba(99,102,241,0.8)]" 
+                                : "bg-slate-900 border-slate-700"
+                            }`}>
+                              {isVipUnlocked && <span className="text-[6px] text-white">★</span>}
+                            </div>
+                          </div>
                         </div>
 
-                        {/* Progress Text */}
-                        <div className="flex justify-between items-center text-[9px] font-bold">
-                          {isPromoUnlocked ? (
-                            <span className="text-emerald-400 flex items-center gap-1">
-                              🎉 Syarat minimum pembelian terpenuhi!
+                        {/* Progress Bar Labels */}
+                        <div className="flex justify-between items-center text-[8px] font-black text-slate-500 uppercase tracking-wider mb-2">
+                          <span>Rp 15.000</span>
+                          <span>Rp 50.000</span>
+                        </div>
+
+                        {/* Progress Status Text */}
+                        <div className="text-[9px] font-bold mt-1">
+                          {isVipUnlocked ? (
+                            <span className="text-indigo-400 flex items-center gap-1">
+                              🌟 VIP Terbuka! Teh gratis pasti didapatkan bebas dari pembatasan duplicate check!
+                            </span>
+                          ) : isPromoUnlocked ? (
+                            <span className="text-emerald-400">
+                              🎉 Promo Standar terbuka! Tambah <span className="font-mono text-white">{formatRupiah(remainingVip)}</span> lagi untuk klaim instan VIP (Pasti dapat).
                             </span>
                           ) : (
                             <span className="text-yellow-500">
-                              Kurang <span className="font-mono text-white">{formatRupiah(remaining)}</span> lagi untuk teh gratis.
+                              Kurang <span className="font-mono text-white">{formatRupiah(remainingNormal)}</span> lagi untuk teh gratis.
                             </span>
                           )}
-                          <span className="text-slate-400 font-mono">{formatRupiah(subtotal)} / {formatRupiah(MIN_PROMO_SUBTOTAL)}</span>
                         </div>
                       </div>
 
                       {/* Checkbox Trigger */}
-                      <label className={`flex items-start gap-3 select-none ${isPromoUnlocked ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}>
+                      <label className={`flex items-start gap-3 select-none mt-3 ${isPromoUnlocked ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}>
                         <div className="relative flex items-center">
                           <input
                             type="checkbox"
                             checked={claimPromo && isPromoUnlocked}
                             disabled={!isPromoUnlocked}
                             onChange={(e) => setClaimPromo(e.target.checked)}
-                            className="w-4 h-4 rounded text-emerald-600 bg-white/5 border-white/10 focus:ring-0 focus:ring-offset-0 mt-0.5 cursor-pointer accent-emerald-600 disabled:cursor-not-allowed"
+                            className={`w-4 h-4 rounded bg-white/5 border-white/10 focus:ring-0 focus:ring-offset-0 mt-0.5 cursor-pointer disabled:cursor-not-allowed ${
+                              isVipUnlocked ? "accent-indigo-600 text-indigo-600" : "accent-emerald-600 text-emerald-600"
+                            }`}
                           />
                         </div>
                         <div>
                           <span className="text-xs font-extrabold text-white block">
                             Klaim GRATIS Qalla Tea (Jasmine) 🍃
                           </span>
-                          <span className="text-[10px] text-slate-400 font-medium block mt-0.5 leading-tight">
+                          <span className="text-[9px] text-slate-400 font-medium block mt-0.5 leading-tight">
                             Masukkan No. WhatsApp dan Email untuk klaim promo.
                           </span>
                         </div>
@@ -1314,30 +1431,80 @@ export default function CustomerOrderPage(props: {
                       {claimPromo && isPromoUnlocked && (
                         <div className="mt-3 border-t border-white/5 pt-3 animate-in fade-in slide-in-from-top-1 duration-200 flex flex-col gap-3">
                           <div>
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">
-                              Nomor WhatsApp (Aktif)
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1.5 flex justify-between">
+                              <span>Nomor WhatsApp (Aktif)</span>
+                              {whatsappUsed && whatsappNumber.trim().length >= 9 && (
+                                <span className={isVipUnlocked ? "text-indigo-400 font-extrabold animate-pulse" : "text-rose-455 font-extrabold animate-pulse"}>
+                                  {isVipUnlocked ? "✓ VIP Bypass" : "⚠️ Sudah Digunakan"}
+                                </span>
+                              )}
                             </label>
                             <input
                               type="tel"
                               placeholder="Contoh: 08123456789"
                               value={whatsappNumber}
                               onChange={(e) => setWhatsappNumber(e.target.value)}
-                              className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 placeholder-slate-600"
+                              className={`w-full bg-white/5 border rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 placeholder-slate-600 ${
+                                whatsappUsed && whatsappNumber.trim().length >= 9
+                                  ? isVipUnlocked
+                                    ? "border-indigo-500/30 focus:ring-indigo-500"
+                                    : "border-rose-500/30 focus:ring-rose-500"
+                                  : "border-white/5 focus:ring-emerald-500"
+                              }`}
                             />
                           </div>
 
                           <div>
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">
-                              Alamat Email / Gmail
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1.5 flex justify-between">
+                              <span>Alamat Email / Gmail</span>
+                              {emailUsed && emailAddress.trim().includes("@") && (
+                                <span className={isVipUnlocked ? "text-indigo-400 font-extrabold animate-pulse" : "text-rose-455 font-extrabold animate-pulse"}>
+                                  {isVipUnlocked ? "✓ VIP Bypass" : "⚠️ Sudah Digunakan"}
+                                </span>
+                              )}
                             </label>
                             <input
                               type="email"
                               placeholder="Contoh: nama@gmail.com"
                               value={emailAddress}
                               onChange={(e) => setEmailAddress(e.target.value)}
-                              className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 placeholder-slate-600"
+                              className={`w-full bg-white/5 border rounded-2xl py-3 px-4 text-xs font-bold text-white focus:outline-none focus:ring-1 placeholder-slate-600 ${
+                                emailUsed && emailAddress.trim().includes("@")
+                                  ? isVipUnlocked
+                                    ? "border-indigo-500/30 focus:ring-indigo-500"
+                                    : "border-rose-500/30 focus:ring-rose-500"
+                                  : "border-white/5 focus:ring-emerald-500"
+                              }`}
                             />
                           </div>
+
+                          {/* Real-time Warning Banners */}
+                          {hasDuplicate && (
+                            <>
+                              {isVipUnlocked ? (
+                                <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-[10px] text-indigo-300 font-extrabold flex items-start gap-2 animate-in fade-in duration-300">
+                                  <Sparkles className="w-3.5 h-3.5 shrink-0 mt-0.5 text-indigo-400 animate-pulse" />
+                                  <div>
+                                    <span className="block text-white font-extrabold mb-0.5">🌟 VIP Status Aktif!</span>
+                                    <span>Nomor WA/Email ini sudah terdaftar, namun Anda tetap mendapatkan teh gratis karena subtotal belanja di atas Rp 50.000!</span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="p-2.5 bg-rose-500/10 border border-rose-500/20 rounded-xl text-[10px] text-rose-300 font-bold flex flex-col gap-1 animate-in fade-in duration-300">
+                                  <div className="flex items-start gap-2 text-white font-extrabold">
+                                    <X className="w-3.5 h-3.5 shrink-0 mt-0.5 text-rose-500" />
+                                    <span>⚠️ Kontak Sudah Pernah Digunakan</span>
+                                  </div>
+                                  <p className="pl-5.5 text-slate-300 leading-normal text-[9px]">
+                                    Nomor WhatsApp atau Email ini sudah pernah mengklaim promo. Anda tidak akan menerima teh gratis.
+                                  </p>
+                                  <div className="pl-5.5 mt-1 text-yellow-500 font-extrabold text-[9px]">
+                                    Buka Kunci VIP! Tambah belanjaan senilai <span className="font-mono text-white">{formatRupiah(remainingVip)}</span> lagi agar klaim tetap berhasil tanpa pembatasan.
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          )}
                         </div>
                       )}
                     </div>

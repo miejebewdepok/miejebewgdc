@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CartItem } from '@/lib/types';
 import { Trash2, Plus, Minus, Receipt, Save, RefreshCw, Flame, X } from 'lucide-react';
 
@@ -26,9 +26,14 @@ export default function CartSection({
 }: CartSectionProps) {
   const [billNamePrompt, setBillNamePrompt] = useState(false);
   const [billName, setBillName] = useState('');
+  const [activeCustomer, setActiveCustomer] = useState<string | null>(null);
 
-  // Read customer name from localStorage for loaded bills
-  const activeCustomer = typeof window !== "undefined" ? localStorage.getItem("miejebew_checkout_customer_name") : null;
+  // Sync active customer from localStorage safely to prevent hydration mismatches
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setActiveCustomer(localStorage.getItem("miejebew_checkout_customer_name"));
+    }
+  }, [cartItems]);
 
   const formatRupiah = (val: number) => {
     return new Intl.NumberFormat('id-ID', {

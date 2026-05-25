@@ -3,6 +3,7 @@ import { Bricolage_Grotesque, IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font
 import { Toaster } from "@/components/ui/sonner";
 import { AppStateProvider } from "@/components/providers/app-state-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import Script from "next/script";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -44,7 +45,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Mie Jebew GDC" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <script
+        <Script
+          id="register-sw"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {

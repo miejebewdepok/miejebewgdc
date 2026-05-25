@@ -51,8 +51,8 @@ export default function SavedBillsModal({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {savedBills.map((bill) => {
                 const subtotal = bill.items.reduce((sum: number, item: any) => sum + ((item.sellPrice || item.unitPrice || 0) * item.quantity), 0);
-                const tax = Math.round(subtotal * 0.1);
-                const total = subtotal + tax;
+                const tax = 0;
+                const total = subtotal;
 
                 return (
                   <div 

@@ -632,24 +632,33 @@ export default function CustomerOrderPage(props: {
 
         {/* Sub Category Selector */}
         {activeCategory !== "Semua" && (
-          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar scroll-smooth">
+          <div className={activeCategory === "Makanan" ? "grid grid-cols-4 gap-1.5" : "grid grid-cols-2 gap-2"}>
             {(activeCategory === "Makanan"
-              ? ["Semua", "Mie Pedas", "Lumpia Beef", "Kebab", "Snack"]
-              : ["Semua", "Qalla Tea", "Qalla Coffee"]
-            ).map((subCat) => (
-              <button
-                key={subCat}
-                type="button"
-                onClick={() => setActiveSubCategory(subCat)}
-                className={`py-1.5 px-3.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-200 cursor-pointer whitespace-nowrap border ${
-                  activeSubCategory === subCat
-                    ? "bg-red-600/10 border-red-500/35 text-red-500 shadow-sm"
-                    : "bg-white/3 border-white/5 text-slate-400 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                {subCat === "Semua" ? `Semua ${activeCategory}` : subCat}
-              </button>
-            ))}
+              ? ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack"]
+              : ["Qalla Tea", "Qalla Coffee"]
+            ).map((subCat) => {
+              const isSelected = activeSubCategory === subCat;
+              return (
+                <button
+                  key={subCat}
+                  type="button"
+                  onClick={() => {
+                    if (activeSubCategory === subCat) {
+                      setActiveSubCategory("Semua");
+                    } else {
+                      setActiveSubCategory(subCat);
+                    }
+                  }}
+                  className={`py-2 px-1 text-[9px] font-black uppercase tracking-wider transition-all duration-200 cursor-pointer text-center rounded-xl border leading-tight ${
+                    isSelected
+                      ? "bg-red-600 text-white border-red-500 shadow-md scale-[1.02]"
+                      : "bg-white/5 border-white/5 text-slate-400 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  {subCat}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
@@ -667,20 +676,12 @@ export default function CustomerOrderPage(props: {
             {/* 1. Makanan Section */}
             {(activeCategory === "Semua" || activeCategory === "Makanan") && (
               <div>
-                <div className="sticky top-[114px] bg-slate-950/90 backdrop-blur-md py-2.5 z-10 flex items-center justify-between border-b border-white/5 mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6.5 h-6.5 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center justify-center">
-                      <Utensils className="w-3.5 h-3.5 text-red-500" />
-                    </div>
-                    <div>
-                      <h2 className="text-xs font-black text-white uppercase tracking-wider">Makanan Lezat</h2>
-                      <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Mie pedas, kebab, lumpia & cemilan</p>
-                    </div>
+                {activeCategory === "Semua" && (
+                  <div className="flex items-center gap-2 py-2 border-b border-white/5 mb-4 select-none">
+                    <Utensils className="w-3.5 h-3.5 text-red-500" />
+                    <span className="text-xs font-black text-white uppercase tracking-wider">Makanan</span>
                   </div>
-                  <span className="text-[9px] font-bold text-slate-450 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/5 font-mono">
-                    {foodProducts.length} Menu
-                  </span>
-                </div>
+                )}
 
                 {foodProducts.length === 0 ? (
                   <div className="py-12 text-center bg-white/2 border border-dashed border-white/5 rounded-3xl">
@@ -744,20 +745,12 @@ export default function CustomerOrderPage(props: {
             {/* 2. Minuman Section */}
             {(activeCategory === "Semua" || activeCategory === "Minuman") && (
               <div className={activeCategory === "Semua" ? "mt-4" : ""}>
-                <div className="sticky top-[114px] bg-slate-950/90 backdrop-blur-md py-2.5 z-10 flex items-center justify-between border-b border-white/5 mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6.5 h-6.5 bg-cyan-500/10 border border-cyan-500/20 rounded-lg flex items-center justify-center">
-                      <Coffee className="w-3.5 h-3.5 text-cyan-400" />
-                    </div>
-                    <div>
-                      <h2 className="text-xs font-black text-white uppercase tracking-wider">Minuman Segar</h2>
-                      <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Kopi premium & teh menyegarkan</p>
-                    </div>
+                {activeCategory === "Semua" && (
+                  <div className="flex items-center gap-2 py-2 border-b border-white/5 mb-4 select-none">
+                    <Coffee className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className="text-xs font-black text-white uppercase tracking-wider">Minuman</span>
                   </div>
-                  <span className="text-[9px] font-bold text-slate-455 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/5 font-mono">
-                    {drinkProducts.length} Menu
-                  </span>
-                </div>
+                )}
 
                 {drinkProducts.length === 0 ? (
                   <div className="py-12 text-center bg-white/2 border border-dashed border-white/5 rounded-3xl">

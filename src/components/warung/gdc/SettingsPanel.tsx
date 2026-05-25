@@ -380,6 +380,48 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
     alert(`Berhasil menyalin ${uniqueEmails.length} email unik ke papan klip!`);
   };
 
+  const handleDeleteClaim = async (id: string, name: string) => {
+    if (!confirm(`Apakah Anda yakin ingin menghapus data klaim milik "${name}"? Pelanggan tersebut akan bisa mengklaim promo Jasmine Tea gratis kembali.`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/settings/promo-claims?id=${id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert("Data klaim berhasil dihapus!");
+        setPromoClaims(prev => prev.filter(c => c.id !== id));
+      } else {
+        alert(data.error || "Gagal menghapus data klaim.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Terjadi kesalahan koneksi saat menghapus data.");
+    }
+  };
+
+  const handleDeleteAllClaims = async () => {
+    if (!confirm("PENTING: Apakah Anda yakin ingin menghapus seluruh database nomor WhatsApp & Email klaim promo? Semua data akan terhapus secara permanen dan seluruh pelanggan akan bisa mengklaim kembali promo gratis.")) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/settings/promo-claims?all=true', {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert("Seluruh database klaim berhasil dikosongkan!");
+        setPromoClaims([]);
+      } else {
+        alert(data.error || "Gagal mengosongkan database.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Terjadi kesalahan koneksi saat mengosongkan database.");
+    }
+  };
+
   // Live dynamic demo QRIS code generator
   const [testAmount, setTestAmount] = useState('14500');
 
@@ -766,6 +808,14 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                 >
                   Salin Semua Email
                 </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteAllClaims}
+                  disabled={promoClaims.length === 0}
+                  className="bg-rose-600/10 border border-rose-500/25 text-rose-600 hover:bg-rose-600/20 dark:text-rose-450 dark:hover:bg-rose-600/30 rounded-xl text-[10px] py-1.5 px-3 font-black text-center cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0"
+                >
+                  Hapus Semua Data
+                </button>
               </div>
             </div>
 
@@ -865,6 +915,13 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                               Salin Email
                             </button>
                           )}
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteClaim(claim.id, claim.customerName)}
+                            className="py-1 px-2.5 bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 text-rose-600 dark:text-rose-450 rounded-lg text-[9px] font-black text-center cursor-pointer transition-all"
+                          >
+                            Hapus
+                          </button>
                         </div>
                       </div>
                     ))

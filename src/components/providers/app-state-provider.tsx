@@ -117,28 +117,43 @@ export function AppStateProvider({
         setState((current) => {
           // Compare length of incoming bills with current bills to play audio alert
           if (response.savedBills.length > current.savedBills.length) {
-            // Play double beep sound
-            const playAlert = (freq: number, duration: number) => {
+            // Play Gojek/Shopee style cheerful marimba arpeggio tune
+            const playOrderIncomingMelody = () => {
               const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-              if (AudioContext) {
-                try {
-                  const ctx = new AudioContext();
-                  const osc = ctx.createOscillator();
-                  const gain = ctx.createGain();
-                  osc.type = "sine";
-                  osc.frequency.setValueAtTime(freq, ctx.currentTime);
-                  gain.gain.setValueAtTime(0.04, ctx.currentTime);
-                  osc.connect(gain);
-                  gain.connect(ctx.destination);
-                  osc.start();
-                  osc.stop(ctx.currentTime + duration);
-                } catch (e) {
-                  console.error(e);
-                }
+              if (!AudioContext) return;
+              try {
+                const ctx = new AudioContext();
+                const playChimeSequence = (startTimeOffset: number) => {
+                  const notes = [
+                    { freq: 523.25, time: 0.0, dur: 0.1 },   // C5
+                    { freq: 659.25, time: 0.08, dur: 0.1 },  // E5
+                    { freq: 783.99, time: 0.16, dur: 0.1 },  // G5
+                    { freq: 1046.50, time: 0.24, dur: 0.15 }, // C6
+                    { freq: 1318.51, time: 0.32, dur: 0.3 }   // E6
+                  ];
+                  notes.forEach((note) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = "sine";
+                    osc.frequency.setValueAtTime(note.freq, ctx.currentTime + startTimeOffset + note.time);
+                    gain.gain.setValueAtTime(0.001, ctx.currentTime + startTimeOffset + note.time);
+                    gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + startTimeOffset + note.time + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTimeOffset + note.time + note.dur);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime + startTimeOffset + note.time);
+                    osc.stop(ctx.currentTime + startTimeOffset + note.time + note.dur);
+                  });
+                };
+                // Play sequence 3 times over 2.2 seconds for optimal audibility
+                playChimeSequence(0.0);
+                playChimeSequence(0.8);
+                playChimeSequence(1.6);
+              } catch (e) {
+                console.error("Melody error", e);
               }
             };
-            playAlert(587.33, 0.15); // D5
-            setTimeout(() => playAlert(880, 0.2), 180); // A5
+            playOrderIncomingMelody();
           }
 
           return {

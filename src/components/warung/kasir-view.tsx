@@ -8,7 +8,7 @@ import ProductCard from "./gdc/ProductCard";
 import CartSection from "./gdc/CartSection";
 import CheckoutModal from "./gdc/CheckoutModal";
 import SavedBillsModal from "./gdc/SavedBillsModal";
-import { Search, ChevronDown, ChevronUp, ShoppingCart, LayoutGrid, Flame, Utensils, Beef, Coffee, Leaf, Cookie, Clock, X, ArrowUpDown, Citrus } from "lucide-react";
+import { Search, ChevronDown, ChevronUp, ShoppingCart, LayoutGrid, Flame, Utensils, Beef, Coffee, Leaf, Cookie, Clock, X, ArrowUpDown, Apple } from "lucide-react";
 import { cn } from "@/lib/utils";
 import React from "react";
 
@@ -20,7 +20,7 @@ const CATEGORY_ICON: Record<string, React.ReactNode> = {
   'Kebab':        <Beef       className="w-3 h-3" />,
   'Qalla Coffee': <Coffee     className="w-3 h-3" />,
   'Qalla Tea':    <Leaf       className="w-3 h-3" />,
-  'Qalla Juice':  <Citrus     className="w-3 h-3 text-orange-400" />,
+  'Qalla Juice':  <Apple      className="w-3 h-3" />,
   'Snack':        <Cookie     className="w-3 h-3" />,
 };
 

@@ -8,9 +8,26 @@ import ProductCard from "./gdc/ProductCard";
 import CartSection from "./gdc/CartSection";
 import CheckoutModal from "./gdc/CheckoutModal";
 import SavedBillsModal from "./gdc/SavedBillsModal";
-import { Search, ChevronDown, ChevronUp, ShoppingCart, LayoutGrid, Flame, Utensils, Beef, Coffee, Leaf, Cookie, Clock, X, ArrowUpDown, Apple } from "lucide-react";
+import { Search, ChevronDown, ChevronUp, ShoppingCart, LayoutGrid, Flame, Utensils, Beef, Coffee, Leaf, Cookie, Clock, X, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import React from "react";
+
+// Custom SVG Strawberry icon in Lucide style (monochrome)
+const Strawberry = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M12 2v2.5M9.5 3c.8.5 1.7 1.5 2.5 1.5s1.7-1 2.5-1.5M7 4.5c1.2 1 2.8 1.5 5 1.5s3.8-.5 5-1.5" />
+    <path d="M12 21.5c4.5-4.5 7.5-9.5 7.5-13a5.5 5.5 0 0 0-11 0c0 3.5 3 8.5 7.5 13z" />
+    <path d="M9 9h.01M15 9h.01M12 11h.01M9 13h.01M15 13h.01M12 15h.01M10 17h.01M14 17h.01" />
+  </svg>
+);
 
 // Icon map for each category pill
 const CATEGORY_ICON: Record<string, React.ReactNode> = {
@@ -20,7 +37,7 @@ const CATEGORY_ICON: Record<string, React.ReactNode> = {
   'Kebab':        <Beef       className="w-3 h-3" />,
   'Qalla Coffee': <Coffee     className="w-3 h-3" />,
   'Qalla Tea':    <Leaf       className="w-3 h-3" />,
-  'Qalla Juice':  <Apple      className="w-3 h-3" />,
+  'Qalla Juice':  <Strawberry className="w-3 h-3" />,
   'Snack':        <Cookie     className="w-3 h-3" />,
 };
 

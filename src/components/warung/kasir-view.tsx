@@ -8,7 +8,7 @@ import ProductCard from "./gdc/ProductCard";
 import CartSection from "./gdc/CartSection";
 import CheckoutModal from "./gdc/CheckoutModal";
 import SavedBillsModal from "./gdc/SavedBillsModal";
-import { Search, ChevronDown, ChevronUp, ShoppingCart, LayoutGrid, Flame, Utensils, Beef, Coffee, Leaf, Cookie, Clock, X, ArrowUpDown } from "lucide-react";
+import { Search, ChevronDown, ChevronUp, ShoppingCart, LayoutGrid, Flame, Utensils, Beef, Coffee, Leaf, Cookie, Clock, X, ArrowUpDown, Citrus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import React from "react";
 
@@ -20,6 +20,7 @@ const CATEGORY_ICON: Record<string, React.ReactNode> = {
   'Kebab':        <Beef       className="w-3 h-3" />,
   'Qalla Coffee': <Coffee     className="w-3 h-3" />,
   'Qalla Tea':    <Leaf       className="w-3 h-3" />,
+  'Qalla Juice':  <Citrus     className="w-3 h-3 text-orange-400" />,
   'Snack':        <Cookie     className="w-3 h-3" />,
 };
 
@@ -101,9 +102,9 @@ export function KasirView() {
   const [localCategories] = useState<string[]>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("miejebew_categories_v4");
-      return saved ? JSON.parse(saved) : ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Qalla Tea"];
+      return saved ? JSON.parse(saved) : ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"];
     }
-    return ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Qalla Tea"];
+    return ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"];
   });
 
   // Dynamic categories list including default and products from DB
@@ -268,7 +269,7 @@ export function KasirView() {
 
   const mappedCartItems = cartLines.map(line => {
     const isSpecialCategory = line.product.category === 'Kebab' || line.product.category === 'Lumpia Beef';
-    const isBypassed = ['Snack', 'Qalla Coffee', 'Qalla Tea'].includes(line.product.category);
+    const isBypassed = ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(line.product.category);
     let notesArr: string[] = [];
     
     if (line.spicyLevel !== undefined && !isBypassed) {
@@ -281,7 +282,12 @@ export function KasirView() {
       }
     }
     if (line.size) {
-      notesArr.push(`Ukuran: ${line.size}`);
+      const isSpaghetti = line.product.name.toLowerCase().includes("spaghetti");
+      if (isSpaghetti) {
+        notesArr.push(`Porsi: ${line.size}`);
+      } else {
+        notesArr.push(`Ukuran: ${line.size}`);
+      }
     }
     if (line.filling) {
       notesArr.push(`Varian Isi: ${line.filling}`);
@@ -453,17 +459,18 @@ export function KasirView() {
                     isDragging={draggedId === product.id}
                     isDragOver={dragOverId === product.id}
                     onAddToCart={() => {
-                      if (['Snack', 'Qalla Coffee', 'Qalla Tea'].includes(product.category)) {
+                      if (['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(product.category)) {
                         addToCart(product.id, 0, []);
                         toast.success(`${product.name} berhasil ditambahkan ke keranjang.`);
                         return;
                       }
+                      const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
                       setCustomizingProduct(product);
                       setSelectedSpicyLevel(0);
                       setSelectedToppings([]);
                       setIsToppingsExpanded(false);
                       setSelectedFilling("Beef Slice");
-                      setSelectedSize("REGULER");
+                      setSelectedSize(isSpaghetti ? "Single" : "REGULER");
                     }}
                   />
                 ))}
@@ -516,7 +523,7 @@ export function KasirView() {
             </div>
 
             {/* Spicy Levels */}
-            {!['Snack', 'Qalla Coffee', 'Qalla Tea'].includes(customizingProduct.category) && (
+            {!['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(customizingProduct.category) && (
               <div className="flex flex-col gap-2">
                 <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
                   Tingkat Kepedasan {!['Kebab', 'Lumpia Beef'].includes(customizingProduct.category) && "(Level 0 - 5)"}
@@ -560,17 +567,23 @@ export function KasirView() {
               </div>
             )}
 
-            {/* Size Selection (Only for Kebab) */}
-            {customizingProduct.category === 'Kebab' && (
+            {/* Size Selection (Only for Kebab and Spaghetti Goreng) */}
+            {(customizingProduct.category === 'Kebab' || customizingProduct.name.toLowerCase().includes('spaghetti')) && (
               <div className="flex flex-col gap-2">
                 <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                  Pilihan Ukuran
+                  Pilihan Ukuran / Porsi
                 </span>
                 <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { label: "REGULER", surcharge: 0 },
-                    { label: "LARGE", surcharge: 5000 },
-                  ].map((sizeObj) => {
+                  {(customizingProduct.name.toLowerCase().includes('spaghetti')
+                    ? [
+                        { label: "Single", surcharge: 0 },
+                        { label: "Double", surcharge: 4000 },
+                      ]
+                    : [
+                        { label: "REGULER", surcharge: 0 },
+                        { label: "LARGE", surcharge: 5000 },
+                      ]
+                  ).map((sizeObj) => {
                     const isSelected = selectedSize === sizeObj.label;
                     return (
                       <button
@@ -578,10 +591,12 @@ export function KasirView() {
                         type="button"
                         onClick={() => {
                           setSelectedSize(sizeObj.label);
-                          if (sizeObj.label === 'REGULER' && (selectedFilling === 'Chicken Katsu' || selectedFilling === 'Special')) {
-                            setSelectedFilling('Beef');
-                          } else if (sizeObj.label === 'LARGE' && selectedFilling === 'Beef Slice') {
-                            setSelectedFilling('Beef');
+                          if (customizingProduct.category === 'Kebab') {
+                            if (sizeObj.label === 'REGULER' && (selectedFilling === 'Chicken Katsu' || selectedFilling === 'Special')) {
+                              setSelectedFilling('Beef');
+                            } else if (sizeObj.label === 'LARGE' && selectedFilling === 'Beef Slice') {
+                              setSelectedFilling('Beef');
+                            }
                           }
                         }}
                         className={cn(
@@ -700,7 +715,7 @@ export function KasirView() {
             )}
 
             {/* Toppings Selection Accordion Header */}
-            {!['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea'].includes(customizingProduct.category) && (
+            {!['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(customizingProduct.category) && (
             <div className="flex flex-col gap-1.5">
               <button
                 type="button"
@@ -837,23 +852,29 @@ export function KasirView() {
             </div>
             )}
 
-            {/* Live Pricing Preview Panel */}
+{/* Live Pricing Preview Panel */}
             <div className="bg-sidebar-accent/30 dark:bg-white/4 border border-sidebar-border/30 dark:border-white/5 rounded-2xl p-4 flex flex-col gap-1.5">
               <div className="flex justify-between text-xs text-muted-foreground font-sans">
                 <span>Harga Dasar Menu</span>
                 <span className="font-mono">Rp {customizingProduct.sellPrice.toLocaleString('id-ID')}</span>
               </div>
-              {(!['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea'].includes(customizingProduct.category) && (selectedSpicyLevel === 4 || selectedSpicyLevel === 5)) && (
+              {(!['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(customizingProduct.category) && (selectedSpicyLevel === 4 || selectedSpicyLevel === 5)) && (
                 <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
                   <span>Tambahan Level {selectedSpicyLevel}</span>
                   <span className="font-mono">+ Rp 2.000</span>
                 </div>
               )}
-              {/* Size Pricing (Kebab) */}
+              {/* Size Pricing (Kebab & Spaghetti) */}
               {customizingProduct.category === 'Kebab' && selectedSize === 'LARGE' && (
                 <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
                   <span>Ukuran LARGE</span>
                   <span className="font-mono">+ Rp 5.000</span>
+                </div>
+              )}
+              {customizingProduct.name.toLowerCase().includes("spaghetti") && selectedSize === 'Double' && (
+                <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
+                  <span>Porsi Double</span>
+                  <span className="font-mono">+ Rp 4.000</span>
                 </div>
               )}
               {/* Filling Pricing (Kebab) */}
@@ -914,13 +935,14 @@ export function KasirView() {
                 <span>Harga Unit</span>
                 <span className="text-red-650 dark:text-red-400 font-mono font-extrabold">
                   Rp {((customizingProduct.sellPrice + 
-                        ((!['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea'].includes(customizingProduct.category) && (selectedSpicyLevel === 4 || selectedSpicyLevel === 5)) ? 2000 : 0) + 
+                        ((customizingProduct.name.toLowerCase().includes("spaghetti") && selectedSize === 'Double') ? 4000 : 0) +
+                        ((!['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(customizingProduct.category) && (selectedSpicyLevel === 4 || selectedSpicyLevel === 5)) ? 2000 : 0) + 
                         (customizingProduct.category === 'Kebab' && selectedSize === 'REGULER' && selectedFilling === 'Beef' ? 2000 : 0) +
                         (customizingProduct.category === 'Kebab' && selectedSize === 'LARGE' && selectedFilling !== 'Special' ? 5000 : 0) +
                         (customizingProduct.category === 'Kebab' && selectedSize === 'LARGE' && selectedFilling === 'Special' ? 10000 : 0) +
                         (customizingProduct.category === 'Lumpia Beef' && ['Beef Patty', 'Chicken Katsu'].includes(selectedFilling) ? 5000 : 0) +
                         (customizingProduct.category === 'Lumpia Beef' && selectedFilling === 'Special' ? 10000 : 0) +
-                        (!['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea'].includes(customizingProduct.category) ? (() => {
+                        (!['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(customizingProduct.category) ? (() => {
                           const specialToppings = selectedToppings.filter((t) => ["Beef Slice", "Keju Slice", "Telur"].includes(t));
                           const standardToppings = selectedToppings.filter((t) => !["Beef Slice", "Keju Slice", "Telur"].includes(t));
                           const stdCount = standardToppings.length;
@@ -956,7 +978,8 @@ export function KasirView() {
                 type="button"
                 onClick={() => {
                   const fillingToPass = (customizingProduct.category === 'Lumpia Beef' || customizingProduct.category === 'Kebab') ? selectedFilling : undefined;
-                  const sizeToPass = customizingProduct.category === 'Kebab' ? selectedSize : undefined;
+                  const isSpaghetti = customizingProduct.name.toLowerCase().includes("spaghetti");
+                  const sizeToPass = (customizingProduct.category === 'Kebab' || isSpaghetti) ? selectedSize : undefined;
                   addToCart(customizingProduct.id, selectedSpicyLevel, selectedToppings, fillingToPass, sizeToPass);
                   toast.success(`${customizingProduct.name} ditambah.`);
                   setCustomizingProduct(null);

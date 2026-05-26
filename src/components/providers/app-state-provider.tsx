@@ -458,7 +458,7 @@ export function AppStateProvider({
     const toppings = line.toppings ?? [];
     const filling = line.filling;
     const size = line.size;
-    const isBypassed = ['Snack', 'Qalla Coffee', 'Qalla Tea'].includes(product.category);
+    const isBypassed = ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(product.category);
     
     const spicySurcharge = isBypassed ? 0 : ((level === 4 || level === 5) ? 2000 : 0);
     
@@ -497,7 +497,10 @@ export function AppStateProvider({
       }
     }
 
-    const sellPrice = product.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge;
+    const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
+    const spaghettiSurcharge = (isSpaghetti && size === "Double") ? 4000 : 0;
+
+    const sellPrice = product.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
 
     return [
       {

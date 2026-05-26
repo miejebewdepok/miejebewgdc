@@ -614,11 +614,15 @@ export async function createTransaction(
         else if (item.filling === 'Special') fillingSurcharge = 10000;
       }
 
-      unitPrice = product.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge;
+      const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
+      const spaghettiSurcharge = (isSpaghetti && item.size === "Double") ? 4000 : 0;
+
+      unitPrice = product.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
     }
 
     // Construct a beautiful name incorporating spicy level and toppings
     const extras: string[] = [];
+    const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
     if (item.productId !== "promo_jasmine_tea" && item.spicyLevel !== undefined) {
       if (product.category === 'Kebab' || product.category === 'Lumpia Beef') {
          if (item.spicyLevel === 0) extras.push("Tidak Pedas");
@@ -629,7 +633,11 @@ export async function createTransaction(
       }
     }
     if (item.productId !== "promo_jasmine_tea" && item.size) {
-      extras.push(`Ukuran: ${item.size}`);
+      if (isSpaghetti) {
+        extras.push(`Porsi: ${item.size}`);
+      } else {
+        extras.push(`Ukuran: ${item.size}`);
+      }
     }
     if (item.productId !== "promo_jasmine_tea" && item.filling) {
       extras.push(`Varian Isi: ${item.filling}`);

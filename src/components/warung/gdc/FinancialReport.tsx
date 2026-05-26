@@ -160,7 +160,8 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       'Kebab': 0,
       'Snack': 0,
       'Qalla Coffee': 0,
-      'Qalla Tea': 0
+      'Qalla Tea': 0,
+      'Qalla Juice': 0
     };
 
     filteredTransactions.forEach(tx => {
@@ -177,7 +178,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       });
     });
 
-    const alwaysShow = ['Mie Pedas', 'Lumpia Beef', 'Kebab', 'Snack', 'Qalla Coffee', 'Qalla Tea'];
+    const alwaysShow = ['Mie Pedas', 'Lumpia Beef', 'Kebab', 'Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'];
 
     const result = Object.entries(categories)
       .map(([name, value]) => ({ name, value }))

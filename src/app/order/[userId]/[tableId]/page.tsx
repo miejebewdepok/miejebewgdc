@@ -229,10 +229,16 @@ export default function CustomerOrderPage(props: {
             ☕ Qalla Coffee
           </span>
         );
-      case "Qalla Tea":
+            case "Qalla Tea":
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-400 border border-teal-500/15 uppercase tracking-wider font-mono">
             🍃 Qalla Tea
+          </span>
+        );
+      case "Qalla Juice":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-400 border border-orange-500/15 uppercase tracking-wider font-mono">
+            🍹 Qalla Juice
           </span>
         );
       default:
@@ -299,8 +305,10 @@ export default function CustomerOrderPage(props: {
           return 1;
         case "Qalla Coffee":
           return 2;
-        default:
+        case "Qalla Juice":
           return 3;
+        default:
+          return 4;
       }
     };
 
@@ -343,11 +351,11 @@ export default function CustomerOrderPage(props: {
 
   // Surcharge calculator matching cashier logic
   const calculateConfiguredPrice = (product: Product, level: number, toppings: string[], filling?: string, size?: string) => {
-    const isBypassed = ["Snack", "Qalla Coffee", "Qalla Tea"].includes(product.category);
+    const isBypassed = ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(product.category);
     if (isBypassed) return product.sellPrice;
 
     // Spicy surcharge ONLY for non-Kebab, non-Lumpia Beef, non-bypassed
-    const isSpicySurcharged = !["Kebab", "Lumpia Beef", "Snack", "Qalla Coffee", "Qalla Tea"].includes(product.category);
+    const isSpicySurcharged = !["Kebab", "Lumpia Beef", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(product.category);
     const spicySurcharge = (isSpicySurcharged && (level === 4 || level === 5)) ? 2000 : 0;
 
     // Toppings surcharge logic
@@ -381,12 +389,15 @@ export default function CustomerOrderPage(props: {
       else if (filling === 'Special') fillingSurcharge = 10000;
     }
 
-    return product.sellPrice + spicySurcharge + stdSurcharge + specialSurcharge + fillingSurcharge;
+    const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
+    const spaghettiSurcharge = (isSpaghetti && size === "Double") ? 4000 : 0;
+
+    return product.sellPrice + spicySurcharge + stdSurcharge + specialSurcharge + fillingSurcharge + spaghettiSurcharge;
   };
 
   // Add to cart trigger
   const handleAddClick = (product: Product) => {
-    const isBypassed = ["Snack", "Qalla Coffee", "Qalla Tea"].includes(product.category);
+    const isBypassed = ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(product.category);
     if (isBypassed) {
       // Direct add to cart bypass customization
       const cartItemId = `${product.id}-lvl0-`;
@@ -417,8 +428,9 @@ export default function CustomerOrderPage(props: {
       setCustomizingProduct(product);
       setSpicyLevel(0);
       setSelectedToppings([]);
-      // Default filling and size for Kebab / Lumpia Beef
-      setSelectedSize("REGULER");
+      // Default filling and size for Kebab / Lumpia Beef / Spaghetti Goreng
+      const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
+      setSelectedSize(isSpaghetti ? "Single" : "REGULER");
       if (product.category === "Kebab") {
         setSelectedFilling("Beef Slice");
       } else if (product.category === "Lumpia Beef") {
@@ -435,7 +447,8 @@ export default function CustomerOrderPage(props: {
     const product = customizingProduct;
     
     const fillingToPass = product.category === "Kebab" || product.category === "Lumpia Beef" ? selectedFilling : undefined;
-    const sizeToPass = product.category === "Kebab" ? selectedSize : undefined;
+    const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
+    const sizeToPass = (product.category === "Kebab" || isSpaghetti) ? selectedSize : undefined;
 
     const configuredPrice = calculateConfiguredPrice(product, spicyLevel, selectedToppings, fillingToPass, sizeToPass);
     const toppingsKey = [...selectedToppings].sort().join(",");
@@ -711,10 +724,10 @@ export default function CustomerOrderPage(props: {
 
         {/* Sub Category Selector */}
         {activeCategory !== "Semua" && (
-          <div className={activeCategory === "Makanan" ? "grid grid-cols-4 gap-1.5" : "grid grid-cols-2 gap-2"}>
+          <div className={activeCategory === "Makanan" ? "grid grid-cols-4 gap-1.5" : "grid grid-cols-3 gap-2"}>
             {(activeCategory === "Makanan"
               ? ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack"]
-              : ["Qalla Tea", "Qalla Coffee"]
+              : ["Qalla Tea", "Qalla Coffee", "Qalla Juice"]
             ).map((subCat) => {
               const isSelected = activeSubCategory === subCat;
               return (
@@ -993,26 +1006,31 @@ export default function CustomerOrderPage(props: {
                 )}
               </div>
 
-              {/* Size Selection (Only for Kebab) */}
-              {customizingProduct.category === "Kebab" && (
+              {/* Size Selection (Only for Kebab and Spaghetti Goreng) */}
+              {(customizingProduct.category === "Kebab" || customizingProduct.name.toLowerCase().includes("spaghetti")) && (
                 <div className="my-5 border-t border-white/5 pt-4">
                   <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-2.5">
-                    Ukuran Kebab
+                    {customizingProduct.name.toLowerCase().includes("spaghetti") ? "Pilihan Porsi Spaghetti" : "Ukuran Kebab"}
                   </label>
                   <div className="grid grid-cols-2 gap-2">
-                    {["REGULER", "LARGE"].map((sz) => {
+                    {(customizingProduct.name.toLowerCase().includes("spaghetti")
+                      ? ["Single", "Double"]
+                      : ["REGULER", "LARGE"]
+                    ).map((sz) => {
                       const isSelected = selectedSize === sz;
-                      const surcharge = sz === "LARGE" ? 5000 : 0;
+                      const surcharge = (customizingProduct.name.toLowerCase().includes("spaghetti") && sz === "Double") ? 4000 : (sz === "LARGE" ? 5000 : 0);
                       return (
                         <button
                           key={sz}
                           type="button"
                           onClick={() => {
                             setSelectedSize(sz);
-                            if (sz === "REGULER" && (selectedFilling === "Chicken Katsu" || selectedFilling === "Special")) {
-                              setSelectedFilling("Beef");
-                            } else if (sz === "LARGE" && selectedFilling === "Beef Slice") {
-                              setSelectedFilling("Beef");
+                            if (customizingProduct.category === "Kebab") {
+                              if (sz === "REGULER" && (selectedFilling === "Chicken Katsu" || selectedFilling === "Special")) {
+                                setSelectedFilling("Beef");
+                              } else if (sz === "LARGE" && selectedFilling === "Beef Slice") {
+                                setSelectedFilling("Beef");
+                              }
                             }
                           }}
                           className={`py-2.5 border rounded-xl text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
@@ -1024,7 +1042,7 @@ export default function CustomerOrderPage(props: {
                           <span>{sz}</span>
                           {surcharge > 0 && (
                             <span className="text-[8px] text-yellow-500 font-mono mt-0.5">
-                              +Rp 5.000
+                              +{formatRupiah(surcharge)}
                             </span>
                           )}
                         </button>

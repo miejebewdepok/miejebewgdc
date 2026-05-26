@@ -428,6 +428,110 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
     alert(`Berhasil menyalin ${uniqueEmails.length} email unik ke papan klip!`);
   };
 
+  const handleDownloadExcel = () => {
+    if (promoClaims.length === 0) {
+      alert("Database kosong, tidak ada data untuk diunduh.");
+      return;
+    }
+    
+    let csvContent = "\uFEFF"; // BOM for UTF-8 Excel compatibility
+    csvContent += "Nama Pelanggan,Nomor WhatsApp,Email,Order/Meja,Tanggal Klaim\n";
+    
+    promoClaims.forEach((claim) => {
+      const name = `"${claim.customerName.replace(/"/g, '""')}"`;
+      const wa = `"${claim.whatsapp.replace(/"/g, '""')}"`;
+      const email = `"${(claim.email || '').replace(/"/g, '""')}"`;
+      const tbl = `"${claim.tableName.replace(/"/g, '""')}"`;
+      const date = `"${new Date(claim.createdAt).toLocaleString('id-ID').replace(/"/g, '""')}"`;
+      
+      csvContent += `${name},${wa},${email},${tbl},${date}\n`;
+    });
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `database_pelanggan_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDownloadPdf = () => {
+    if (promoClaims.length === 0) {
+      alert("Database kosong, tidak ada data untuk dicetak.");
+      return;
+    }
+    
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Popup diblokir oleh browser! Harap aktifkan izin popup.");
+      return;
+    }
+    
+    const rows = promoClaims.map((claim, idx) => `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="padding: 10px; text-align: center;">${idx + 1}</td>
+        <td style="padding: 10px; font-weight: bold;">${claim.customerName}</td>
+        <td style="padding: 10px; font-family: monospace;">${claim.whatsapp}</td>
+        <td style="padding: 10px; font-family: monospace;">${claim.email || '-'}</td>
+        <td style="padding: 10px; text-align: center;">Order ${claim.tableName.replace(/^(meja|order|self-order)[\s\-_]*/i, "")}</td>
+        <td style="padding: 10px; font-size: 11px;">${new Date(claim.createdAt).toLocaleString('id-ID')}</td>
+      </tr>
+    `).join("");
+    
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Database Pelanggan - Mie Jebew GDC</title>
+          <style>
+            body { font-family: sans-serif; color: #1e293b; padding: 20px; }
+            h1 { font-size: 20px; margin-bottom: 5px; text-transform: uppercase; }
+            p { font-size: 12px; color: #64748b; margin-top: 0; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+            th { background-color: #f1f5f9; padding: 12px 10px; text-align: left; border-bottom: 2px solid #cbd5e1; }
+            @media print {
+              .no-print { display: none; }
+              body { padding: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <h1>Database Pelanggan Promo QR</h1>
+              <p>MIE JEBEW GDC - Diunduh pada ${new Date().toLocaleDateString('id-ID')}</p>
+            </div>
+            <button class="no-print" onclick="window.print();" style="padding: 8px 16px; background-color: #dc2626; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px;">Cetak / Simpan PDF</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 50px; text-align: center;">No</th>
+                <th>Nama Pelanggan</th>
+                <th>Nomor WhatsApp</th>
+                <th>Email</th>
+                <th style="text-align: center;">Sumber</th>
+                <th>Tanggal Klaim</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 300);
+            }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   const handleDeleteClaim = async (id: string, name: string) => {
     if (!confirm(`Apakah Anda yakin ingin menghapus data klaim milik "${name}"? Pelanggan tersebut akan bisa mengklaim promo Jasmine Tea gratis kembali.`)) {
       return;
@@ -855,6 +959,22 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                   className="bg-indigo-500/15 border border-indigo-550/25 text-indigo-650 hover:bg-indigo-600/25 dark:text-indigo-400 dark:hover:bg-indigo-600/30 rounded-xl text-[10px] py-1.5 px-3 font-black text-center cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0"
                 >
                   Salin Semua Email
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadExcel}
+                  disabled={promoClaims.length === 0}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] py-1.5 px-3 font-black text-center cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0 shadow-md shadow-emerald-500/10"
+                >
+                  Unduh Excel (.csv)
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadPdf}
+                  disabled={promoClaims.length === 0}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] py-1.5 px-3 font-black text-center cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0 shadow-md shadow-indigo-500/10"
+                >
+                  Unduh PDF
                 </button>
                 <button
                   type="button"

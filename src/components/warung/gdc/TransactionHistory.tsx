@@ -97,6 +97,99 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
     }).format(val);
   };
 
+  const generateRawBtReceiptText = () => {
+    if (!selectedTx) return "";
+    const is80 = settings?.printerPaperSize === '80mm';
+    const width = is80 ? 48 : 32;
+    
+    const center = (text: string) => {
+      if (text.length >= width) return text.substring(0, width);
+      const pad = Math.floor((width - text.length) / 2);
+      return ' '.repeat(pad) + text;
+    };
+
+    const justify = (left: string, right: string) => {
+      const spaceNeeded = width - left.length - right.length;
+      if (spaceNeeded <= 0) {
+        return left + ' ' + right;
+      }
+      return left + ' '.repeat(spaceNeeded) + right;
+    };
+
+    let lines: string[] = [];
+    
+    // Header
+    lines.push(center(settings?.merchantName || "MIE JEBEW GDC"));
+    if (settings?.merchantAddress) {
+      lines.push(center(settings.merchantAddress));
+    }
+    if (settings?.merchantPhone) {
+      lines.push(center(`Telp/WA: ${settings.merchantPhone}`));
+    }
+    lines.push('-'.repeat(width));
+
+    // Metadata
+    lines.push(justify("Invoice:", selectedTx.id));
+    lines.push(justify("Tanggal:", new Date(selectedTx.createdAt).toLocaleDateString('id-ID')));
+    lines.push(justify("Kasir:", settings?.userProfileName || settings?.ownerName || 'Kasir'));
+    
+    const cleanCustName = (selectedTx.customerName || 'Umum').replace(/\bmeja\b/gi, 'Order').replace(/\bself\s*order\b/gi, 'Order');
+    lines.push(justify("Pelanggan:", cleanCustName));
+    lines.push(justify("Metode:", selectedTx.paymentMethod.toUpperCase()));
+    lines.push('='.repeat(width));
+
+    // Items
+    lines.push(justify("Item", "Total"));
+    lines.push('-'.repeat(width));
+    
+    selectedTx.items.forEach((item) => {
+      const name = item.productName || item.product?.name || 'Menu';
+      lines.push(name);
+      
+      if (item.notes) {
+        item.notes.split('\n').map((n: string) => n.trim()).filter(Boolean).forEach((note: string) => {
+          lines.push(`  » ${note.toUpperCase()}`);
+        });
+      }
+
+      const qtyPrice = `${item.quantity} x ${(item.sellPrice || item.unitPrice || 0).toLocaleString('id-ID')}`;
+      const totalVal = ((item.sellPrice || item.unitPrice || 0) * item.quantity).toLocaleString('id-ID');
+      lines.push(justify(`  ${qtyPrice}`, totalVal));
+    });
+
+    lines.push('-'.repeat(width));
+
+    // Totals
+    lines.push(justify("Subtotal:", `Rp ${calculatedSubtotal.toLocaleString('id-ID')}`));
+    if (serviceChargeVal > 0) {
+      lines.push(justify(`Layanan:`, `Rp ${serviceChargeVal.toLocaleString('id-ID')}`));
+    }
+    lines.push(justify("TOTAL AKHIR:", `Rp ${selectedTx.total.toLocaleString('id-ID')}`));
+    lines.push(justify("Bayar:", `Rp ${amountPaidVal.toLocaleString('id-ID')}`));
+    lines.push(justify("Kembalian:", `Rp ${selectedTx.paymentMethod === 'Tunai' ? changeVal.toLocaleString('id-ID') : '0'}`));
+    lines.push('-'.repeat(width));
+
+    // Footer
+    if (settings?.receiptHeader) lines.push(center(settings.receiptHeader));
+    if (settings?.receiptFooter) lines.push(center(settings.receiptFooter));
+    lines.push(center(`*** LAYANAN WA: ${settings?.merchantPhone || ''} ***`));
+    
+    lines.push("\n\n\n\n");
+
+    return lines.join("\n");
+  };
+
+  const handlePrintRawBt = () => {
+    try {
+      const text = generateRawBtReceiptText();
+      const base64 = btoa(unescape(encodeURIComponent(text)));
+      const url = `rawbt:base64,${base64}`;
+      window.location.href = url;
+    } catch (err) {
+      alert("Gagal memformat struk untuk RawBT: " + err);
+    }
+  };
+
   // Compute overall stats
   const totalIncome = transactions.reduce((sum, tx) => sum + tx.total, 0);
   const totalTxCount = transactions.length;
@@ -459,12 +552,22 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                 </div>
               </div>
 
-              <button
-                onClick={() => window.print()}
-                className="w-full bg-red-600 hover:bg-red-700 text-white rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 mt-4 cursor-pointer"
-              >
-                <Printer className="w-4 h-4" /> CETAK ULANG STRUK
-              </button>
+              <div className="grid grid-cols-2 gap-2 mt-4">
+                <button
+                  type="button"
+                  onClick={() => { try { window.print(); } catch(e) {} }}
+                  className="bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-foreground dark:text-white rounded-xl py-3 text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5 text-red-500" /> CETAK (PC)
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePrintRawBt}
+                  className="bg-indigo-650 hover:bg-indigo-700 text-white rounded-xl py-3 text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-indigo-650/20"
+                >
+                  <Printer className="w-3.5 h-3.5 text-white" /> CETAK (RAWBT)
+                </button>
+              </div>
             </aside>
           </div>
         )}

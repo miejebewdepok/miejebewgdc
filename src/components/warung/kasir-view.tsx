@@ -109,12 +109,30 @@ export function KasirView() {
 
   // Dynamic categories list including default and products from DB
   const categories = useMemo(() => {
-    return ["Semua", ...Array.from(
+    const list = Array.from(
       new Set([
         ...localCategories,
         ...products.map((p) => p.category).filter(Boolean),
       ])
-    )];
+    );
+
+    const CATEGORY_WEIGHT: Record<string, number> = {
+      'Mie Pedas':    1,
+      'Lumpia Beef':  2,
+      'Kebab':        3,
+      'Snack':        4,
+      'Qalla Coffee': 5,
+      'Qalla Tea':    6,
+      'Qalla Juice':  7,
+    };
+
+    list.sort((a, b) => {
+      const wA = CATEGORY_WEIGHT[a] !== undefined ? CATEGORY_WEIGHT[a] : 999;
+      const wB = CATEGORY_WEIGHT[b] !== undefined ? CATEGORY_WEIGHT[b] : 999;
+      return wA - wB;
+    });
+
+    return ["Semua", ...list];
   }, [localCategories, products]);
 
   // Sort products according to manual sort order

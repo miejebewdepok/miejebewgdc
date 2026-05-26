@@ -30,35 +30,38 @@ export async function POST(request: NextRequest) {
     // Calculate subtotal to verify minimum purchase requirement of Rp 15.000 for promo
     const orderSubtotal = items.reduce((sum, item) => sum + (item.sellPrice || 0) * (item.quantity || 0), 0);
 
-    // If customer claimed promo, check if they qualify (subtotal >= 15000, both WhatsApp and Email must be filled, valid, and not previously used OR subtotal >= 50000)
-    if (claimPromo && orderSubtotal >= 15000 && whatsappNumber?.trim() && emailAddress?.trim()) {
-      const waClean = whatsappNumber.trim();
-      const emailClean = emailAddress.trim();
+    const isVipBypass = orderSubtotal >= 50000;
+
+    // If customer claimed promo (or is VIP >= 50000), check if they qualify
+    if (isVipBypass || (claimPromo && orderSubtotal >= 15000 && whatsappNumber?.trim() && emailAddress?.trim())) {
+      const waClean = whatsappNumber?.trim() || "";
+      const emailClean = emailAddress?.trim() || "";
 
       const digitsOnly = waClean.replace(/\D/g, "");
-      const normalizedWa = digitsOnly.startsWith("0") ? "62" + digitsOnly.slice(1) : digitsOnly;
+      const normalizedWa = digitsOnly ? (digitsOnly.startsWith("0") ? "62" + digitsOnly.slice(1) : digitsOnly) : "";
 
-      const isVipBypass = orderSubtotal >= 50000;
       let promoAllowed = false;
 
       if (isVipBypass) {
-        // VIP gets free tea guaranteed, but we still try to record the claim in the DB for marketing list
+        // VIP gets free tea guaranteed, but we still try to record the claim in the DB for marketing list if phone is provided
         promoAllowed = true;
 
-        try {
-          const claimId = `claim_${crypto.randomUUID().slice(0, 8)}`;
-          await db.insert(customerPromoClaims).values({
-            id: claimId,
-            userId: userId,
-            customerName: customerName.trim(),
-            whatsapp: normalizedWa,
-            email: emailClean,
-            promoType: "Free Jasmine Tea",
-            tableName: tableName,
-            createdAt: new Date().toISOString(),
-          });
-        } catch (e) {
-          console.error("VIP claim insert error:", e);
+        if (waClean) {
+          try {
+            const claimId = `claim_${crypto.randomUUID().slice(0, 8)}`;
+            await db.insert(customerPromoClaims).values({
+              id: claimId,
+              userId: userId,
+              customerName: customerName.trim(),
+              whatsapp: normalizedWa,
+              email: emailClean || null,
+              promoType: "Free Jasmine Tea",
+              tableName: tableName,
+              createdAt: new Date().toISOString(),
+            });
+          } catch (e) {
+            console.error("VIP claim insert error:", e);
+          }
         }
       } else {
         // Normal checks

@@ -43,12 +43,12 @@ export const speakQrisNotification = (amount: number) => {
 
   // Konversi nominal ke teks terbilang
   const nominalTeks = angkaterbilang(amount).trim();
-  const textToSpeak = `QRIS sebesar ${nominalTeks} rupiah, berhasil diterima.`;
+  const textToSpeak = `Sebesar ${nominalTeks} rupiah, berhasil diterima.`;
 
   const utterance = new SpeechSynthesisUtterance(textToSpeak);
   utterance.lang = "id-ID"; // Set bahasa ke Bahasa Indonesia
-  utterance.rate = 0.9;     // Sedikit lebih lambat agar lebih jelas terdengar
-  utterance.pitch = 1.0;    // Pitch normal/jelas
+  utterance.rate = 1.15;    // Cepat bersemangat untuk gaya chipmunk
+  utterance.pitch = 1.8;     // Pitch tinggi agar bersuara chipmunk imut/lucu
 
   // Cari suara Bahasa Indonesia terbaik yang terpasang di sistem operasi
   const voices = window.speechSynthesis.getVoices();

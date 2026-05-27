@@ -1,0 +1,9 @@
+{
+  "appId": "com.miejebew.warungos",
+  "appName": "WarungOS GDC",
+  "webDir": "public",
+  "server": {
+    "url": "https://kasir-miejebew.vercel.app",
+    "cleartext": true
+  }
+}

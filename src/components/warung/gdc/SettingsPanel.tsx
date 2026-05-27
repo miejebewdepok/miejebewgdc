@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Settings } from '@/lib/types';
 import { useAppState } from '@/components/providers/app-state-provider';
+import { speakQrisNotification } from './CheckoutModal';
 import { 
   QrCode, 
   Printer, 
@@ -807,10 +808,8 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                     </div>
                   </div>
                 )}
-              </div>
-
-              {/* Visual Simulated Mockup Preview of QR Smart Panel */}
-              <div className="bg-black/5 dark:bg-black/40 border border-black/5 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between items-center text-center relative h-64 select-none">
+                            {/* Visual Simulated Mockup Preview of QR Smart Panel */}
+              <div className="bg-black/5 dark:bg-black/40 border border-black/5 dark:border-white/5 rounded-2xl p-4 flex flex-col justify-between items-center text-center relative h-auto min-h-[256px] py-4 select-none">
                 <span className="text-[10px] bg-yellow-500 text-slate-950 font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2">
                   PRINTOUT PREVIEW SCREEN
                 </span>
@@ -837,7 +836,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                     {qrisName || 'MIE JEBEW GDC OUTLET'}
                   </span>
                   <div className="flex gap-2 justify-center items-center mt-1.5">
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">Test input nominal:</span>
+                    <span className="text-[10px] text-slate-550 dark:text-slate-400 font-mono">Test input nominal:</span>
                     <input
                       type="number"
                       value={testAmount}
@@ -845,8 +844,15 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                       className="w-16 bg-black/5 dark:bg-white/10 text-foreground dark:text-white text-[10px] font-mono text-center border border-black/10 dark:border-white/10 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
                     />
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => speakQrisNotification(Number(testAmount) || 0)}
+                    className="mt-3 w-full py-2 px-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-[10px] font-extrabold text-center cursor-pointer transition-all flex items-center justify-center gap-1.5 shadow-md shadow-red-650/20 active:scale-95 border-none"
+                  >
+                    🔊 UJI SUARA QRIS (SOUNDBOX)
+                  </button>
                 </div>
-              </div>
+              </div>  </div>
 
             </div>
 

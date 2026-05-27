@@ -3,6 +3,67 @@ import React, { useState, useEffect } from 'react';
 import { CartItem, Transaction, Settings } from '@/lib/types';
 import { X, CreditCard, Banknote, QrCode, FileText, Printer, CheckCircle, Loader2 } from 'lucide-react';
 
+export const angkaterbilang = (nilai: number): string => {
+  const bilangan = [
+    "", "satu", "dua", "tiga", "empat", "lima",
+    "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"
+  ];
+  
+  let temp = "";
+  if (nilai < 12) {
+    temp = " " + bilangan[nilai];
+  } else if (nilai < 20) {
+    temp = angkaterbilang(nilai - 10) + " belas";
+  } else if (nilai < 100) {
+    temp = angkaterbilang(Math.floor(nilai / 10)) + " puluh" + angkaterbilang(nilai % 10);
+  } else if (nilai < 200) {
+    temp = " seratus" + angkaterbilang(nilai - 100);
+  } else if (nilai < 1000) {
+    temp = angkaterbilang(Math.floor(nilai / 100)) + " ratus" + angkaterbilang(nilai % 100);
+  } else if (nilai < 2000) {
+    temp = " seribu" + angkaterbilang(nilai - 1000);
+  } else if (nilai < 1000000) {
+    temp = angkaterbilang(Math.floor(nilai / 1000)) + " ribu" + angkaterbilang(nilai % 1000);
+  } else if (nilai < 1000000000) {
+    temp = angkaterbilang(Math.floor(nilai / 1000000)) + " juta" + angkaterbilang(nilai % 1000000);
+  } else if (nilai < 1000000000000) {
+    temp = angkaterbilang(Math.floor(nilai / 1000000000)) + " milyar" + angkaterbilang(nilai % 1000000000);
+  }
+  return temp;
+};
+
+export const speakQrisNotification = (amount: number) => {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+    console.warn("Speech Synthesis tidak didukung di browser ini.");
+    return;
+  }
+
+  // Bersihkan antrean suara lama agar tidak tabrakan
+  window.speechSynthesis.cancel();
+
+  // Konversi nominal ke teks terbilang
+  const nominalTeks = angkaterbilang(amount).trim();
+  const textToSpeak = `QRIS sebesar ${nominalTeks} rupiah, berhasil diterima.`;
+
+  const utterance = new SpeechSynthesisUtterance(textToSpeak);
+  utterance.lang = "id-ID"; // Set bahasa ke Bahasa Indonesia
+  utterance.rate = 0.9;     // Sedikit lebih lambat agar lebih jelas terdengar
+  utterance.pitch = 1.0;    // Pitch normal/jelas
+
+  // Cari suara Bahasa Indonesia terbaik yang terpasang di sistem operasi
+  const voices = window.speechSynthesis.getVoices();
+  const indonesianVoice = voices.find(
+    (voice) => voice.lang.includes("id-ID") || voice.name.toLowerCase().includes("indonesian")
+  );
+
+  if (indonesianVoice) {
+    utterance.voice = indonesianVoice;
+  }
+
+  // Mainkan suara!
+  window.speechSynthesis.speak(utterance);
+};
+
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -256,6 +317,9 @@ export default function CheckoutModal({
       if (success) {
         setCreatedTransaction(newTx);
         setIsCompleted(true);
+        if (paymentMethod === 'QRIS') {
+          speakQrisNotification(total);
+        }
       }
     } catch (err) {
       console.error("Checkout failed:", err);

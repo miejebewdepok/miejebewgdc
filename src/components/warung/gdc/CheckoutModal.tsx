@@ -47,14 +47,23 @@ export const speakQrisNotification = (amount: number) => {
 
   const utterance = new SpeechSynthesisUtterance(textToSpeak);
   utterance.lang = "id-ID"; // Set bahasa ke Bahasa Indonesia
-  utterance.rate = 1.15;    // Cepat bersemangat untuk gaya chipmunk
-  utterance.pitch = 1.8;     // Pitch tinggi agar bersuara chipmunk imut/lucu
+  utterance.rate = 0.95;    // Tempo mantap dan jelas untuk pria dewasa
+  utterance.pitch = 0.85;   // Pitch lebih rendah/bass untuk efek suara pria dewasa
 
   // Cari suara Bahasa Indonesia terbaik yang terpasang di sistem operasi
   const voices = window.speechSynthesis.getVoices();
-  const indonesianVoice = voices.find(
-    (voice) => voice.lang.includes("id-ID") || voice.name.toLowerCase().includes("indonesian")
+  
+  // Cari suara pria Indonesia jika ada (misal mengandung kata male atau pria)
+  let indonesianVoice = voices.find(
+    (voice) => voice.lang.includes("id-ID") && (voice.name.toLowerCase().includes("male") || voice.name.toLowerCase().includes("pria"))
   );
+
+  // Fallback ke suara Indonesia apa saja
+  if (!indonesianVoice) {
+    indonesianVoice = voices.find(
+      (voice) => voice.lang.includes("id-ID") || voice.name.toLowerCase().includes("indonesian")
+    );
+  }
 
   if (indonesianVoice) {
     utterance.voice = indonesianVoice;

@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">Mie Jebew GDC</string>
     <string name="title_activity_main">Mie Jebew GDC</string>
-    <string name="package_name">com.miejebew.warungos</string>
-    <string name="custom_url_scheme">com.miejebew.warungos</string>
+    <string name="package_name">com.miejebew.gdc</string>
+    <string name="custom_url_scheme">com.miejebew.gdc</string>
 </resources>

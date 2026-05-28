@@ -1,4 +1,4 @@
-package com.miejebew.warungos;
+package com.miejebew.gdc;
 
 import android.app.Notification;
 import android.content.Context;

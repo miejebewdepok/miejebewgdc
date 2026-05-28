@@ -1,4 +1,4 @@
-package com.miejebew.warungos;
+package com.miejebew.gdc;
 
 import com.getcapacitor.BridgeActivity;
 

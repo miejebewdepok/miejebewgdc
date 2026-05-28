@@ -22,15 +22,26 @@ export async function GET(request: NextRequest) {
       .where(eq(products.userId, userId))
       .orderBy(desc(products.createdAt));
 
-    // Get store name
+    // Get store name & details
     const [profile] = await db
       .select()
       .from(storeProfiles)
       .where(eq(storeProfiles.userId, userId))
       .limit(1);
 
+    let productOrder: string[] = [];
+    try {
+      if (profile && profile.businessNotes && profile.businessNotes.startsWith("{")) {
+        const extra = JSON.parse(profile.businessNotes);
+        productOrder = extra.productOrder ?? [];
+      }
+    } catch (e) {
+      console.error("Failed to parse productOrder from businessNotes", e);
+    }
+
     return NextResponse.json({
       storeName: profile?.storeName || "Mie Jebew GDC",
+      productOrder,
       products: productRows.map((p) => ({
         id: p.id,
         name: p.name,

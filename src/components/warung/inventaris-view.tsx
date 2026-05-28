@@ -5,7 +5,7 @@ import { useAppState } from "@/components/providers/app-state-provider";
 import ManageProductsModal from "./gdc/ManageProductsModal";
 
 export function InventarisView() {
-  const { products, addProduct, updateProduct, deleteProduct } = useAppState();
+  const { products, addProduct, updateProduct, deleteProduct, settings, updateSettings } = useAppState();
 
   // Local storage for categories — synced with kasir using same key & defaults
   const [localCategories, setLocalCategories] = useState<string[]>(() => {
@@ -44,17 +44,67 @@ export function InventarisView() {
     return list;
   }, [localCategories, products]);
 
+  // Sort products according to manual sort order from settings
+  const sortedProducts = useMemo(() => {
+    const productOrder = settings?.productOrder || [];
+    if (productOrder.length === 0) return products;
+
+    const orderMap = new Map<string, number>();
+    productOrder.forEach((id, idx) => {
+      orderMap.set(id, idx);
+    });
+
+    return [...products].sort((a, b) => {
+      const aIdx = orderMap.has(a.id) ? orderMap.get(a.id)! : 999999;
+      const bIdx = orderMap.has(b.id) ? orderMap.get(b.id)! : 999999;
+
+      if (aIdx !== bIdx) return aIdx - bIdx;
+
+      return products.indexOf(a) - products.indexOf(b);
+    });
+  }, [products, settings?.productOrder]);
+
   const handleUpdateCategories = (newCats: string[]) => {
     setLocalCategories(newCats);
     localStorage.setItem("miejebew_categories_v4", JSON.stringify(newCats));
   };
 
+  const handleMoveProduct = async (productId: string, direction: 'up' | 'down') => {
+    const currentOverallOrder = sortedProducts.map(p => p.id);
+    const overallIdx = currentOverallOrder.indexOf(productId);
+    if (overallIdx === -1) return;
+
+    let targetOverallIdx = -1;
+    if (direction === 'up' && overallIdx > 0) {
+      targetOverallIdx = overallIdx - 1;
+    } else if (direction === 'down' && overallIdx < currentOverallOrder.length - 1) {
+      targetOverallIdx = overallIdx + 1;
+    }
+
+    if (targetOverallIdx === -1 || targetOverallIdx === overallIdx) return;
+
+    const newOverallOrder = [...currentOverallOrder];
+    const [removed] = newOverallOrder.splice(overallIdx, 1);
+    newOverallOrder.splice(targetOverallIdx, 0, removed);
+
+    try {
+      await updateSettings({
+        ...settings,
+        productOrder: newOverallOrder
+      });
+    } catch (err: any) {
+      console.error("Gagal memperbarui urutan menu:", err);
+      alert("Gagal memperbarui urutan menu: " + err.message);
+    }
+  };
+
   return (
     <div className="w-full h-[calc(100vh-100px)] md:h-[calc(100vh-130px)] flex flex-col overflow-hidden">
       <ManageProductsModal
-        products={products}
+        products={sortedProducts}
         categories={categories}
         onUpdateCategories={handleUpdateCategories}
+        onMoveProduct={handleMoveProduct}
         onAddProduct={async (p: any) => {
           try {
             await addProduct({

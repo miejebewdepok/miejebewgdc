@@ -56,6 +56,7 @@ export default function CustomerOrderPage(props: {
   const [loading, setLoading] = useState(true);
   const [storeName, setStoreName] = useState("Mie Jebew GDC");
   const [products, setProducts] = useState<Product[]>([]);
+  const [productOrder, setProductOrder] = useState<string[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("Semua");
   const [activeSubCategory, setActiveSubCategory] = useState<string>("Semua");
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -104,6 +105,9 @@ export default function CustomerOrderPage(props: {
       .then((data) => {
         if (data.products) {
           setProducts(data.products);
+        }
+        if (data.productOrder) {
+          setProductOrder(data.productOrder);
         }
         if (data.storeName) {
           setStoreName(data.storeName);
@@ -282,6 +286,18 @@ export default function CustomerOrderPage(props: {
     };
 
     return subFiltered.sort((a, b) => {
+      // 1. Sort by productOrder index first if available
+      if (productOrder && productOrder.length > 0) {
+        const aIdx = productOrder.indexOf(a.id);
+        const bIdx = productOrder.indexOf(b.id);
+        const aVal = aIdx !== -1 ? aIdx : 999999;
+        const bVal = bIdx !== -1 ? bIdx : 999999;
+        if (aVal !== bVal) {
+          return aVal - bVal;
+        }
+      }
+
+      // Fallback
       const weightA = getFoodWeight(a.category);
       const weightB = getFoodWeight(b.category);
       if (weightA !== weightB) {
@@ -296,7 +312,7 @@ export default function CustomerOrderPage(props: {
       }
       return a.name.localeCompare(b.name);
     });
-  }, [products, activeSubCategory]);
+  }, [products, activeSubCategory, productOrder]);
 
   const drinkProducts = useMemo(() => {
     const getDrinkWeight = (cat: string) => {
@@ -318,6 +334,18 @@ export default function CustomerOrderPage(props: {
       : filtered.filter((p) => p.category === activeSubCategory);
 
     return subFiltered.sort((a, b) => {
+      // 1. Sort by productOrder index first if available
+      if (productOrder && productOrder.length > 0) {
+        const aIdx = productOrder.indexOf(a.id);
+        const bIdx = productOrder.indexOf(b.id);
+        const aVal = aIdx !== -1 ? aIdx : 999999;
+        const bVal = bIdx !== -1 ? bIdx : 999999;
+        if (aVal !== bVal) {
+          return aVal - bVal;
+        }
+      }
+
+      // Fallback
       const weightA = getDrinkWeight(a.category);
       const weightB = getDrinkWeight(b.category);
       if (weightA !== weightB) {
@@ -328,7 +356,7 @@ export default function CustomerOrderPage(props: {
       }
       return a.name.localeCompare(b.name);
     });
-  }, [products, activeSubCategory]);
+  }, [products, activeSubCategory, productOrder]);
 
   const formatRupiah = (val: number) => {
     return new Intl.NumberFormat("id-ID", {

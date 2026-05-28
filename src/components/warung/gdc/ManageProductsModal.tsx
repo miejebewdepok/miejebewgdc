@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useState } from 'react';
 import { Product } from '@/lib/types';
-import { Plus, Edit2, Trash2, X, PlusCircle, AlertTriangle, Coffee, Tag, Sparkles } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, PlusCircle, AlertTriangle, Coffee, Tag, Sparkles, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface ManageProductsModalProps {
   products: Product[];
@@ -10,6 +10,7 @@ interface ManageProductsModalProps {
   onDeleteProduct: (productId: string) => void;
   categories: string[];
   onUpdateCategories: (categories: string[]) => void;
+  onMoveProduct?: (productId: string, direction: 'up' | 'down') => void;
 }
 
 export default function ManageProductsModal({
@@ -18,7 +19,8 @@ export default function ManageProductsModal({
   onUpdateProduct,
   onDeleteProduct,
   categories,
-  onUpdateCategories
+  onUpdateCategories,
+  onMoveProduct
 }: ManageProductsModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -271,6 +273,24 @@ export default function ManageProductsModal({
                       </td>
                       <td className="py-3.5 pl-2 text-right">
                         <div className="flex gap-2 justify-end">
+                          {searchTerm === '' && onMoveProduct && (
+                            <>
+                              <button
+                                onClick={() => onMoveProduct(prod.id, 'up')}
+                                className="p-1 px-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg cursor-pointer transition-colors"
+                                title="Geser ke atas"
+                              >
+                                <ArrowUp className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => onMoveProduct(prod.id, 'down')}
+                                className="p-1 px-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg cursor-pointer transition-colors"
+                                title="Geser ke bawah"
+                              >
+                                <ArrowDown className="w-3.5 h-3.5" />
+                              </button>
+                            </>
+                          )}
                           <button
                             onClick={() => openEditForm(prod)}
                             className="p-1 px-2 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 rounded-lg cursor-pointer transition-colors"

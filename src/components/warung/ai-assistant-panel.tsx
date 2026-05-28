@@ -12,6 +12,7 @@ import {
   PackageSearch,
   Plus,
   RefreshCw,
+  Flame,
   Send,
   Sparkles,
   Trash2,
@@ -31,6 +32,18 @@ import {
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+
+interface FlameParticle {
+  id: string;
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+  vx: number;
+  vy: number;
+  maxLife: number;
+  life: number;
+}
 
 type Tone = "default" | "warn" | "success";
 
@@ -467,6 +480,78 @@ export function AIAssistantPanel({
   const dragStartRef = useRef({ x: 0, y: 0 });
   const positionStartRef = useRef({ x: 0, y: 0 });
 
+  // Flame Particle System States and Refs
+  const [particles, setParticles] = useState<FlameParticle[]>([]);
+  const particlesRef = useRef<FlameParticle[]>([]);
+  const animationFrameRef = useRef<number | null>(null);
+
+  // Function to spawn particles at a screen position
+  const spawnParticles = useCallback((x: number, y: number, count = 2) => {
+    const colors = [
+      "rgba(253, 224, 71, 0.95)", // Bright Yellow
+      "rgba(249, 115, 22, 0.9)",  // Fiery Orange
+      "rgba(239, 68, 68, 0.85)",  // Flame Red
+      "rgba(220, 38, 38, 0.75)",  // Deep Crimson
+      "rgba(251, 146, 60, 0.9)",  // Light Orange
+    ];
+    
+    const newParticles: FlameParticle[] = [];
+    for (let i = 0; i < count; i++) {
+      const size = Math.random() * 16 + 6; // 6px to 22px
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 2 + 0.5;
+      
+      newParticles.push({
+        id: `${Date.now()}_${Math.random()}`,
+        x: x + (Math.random() - 0.5) * 10,
+        y: y + (Math.random() - 0.5) * 10,
+        size,
+        color,
+        vx: Math.cos(angle) * speed * 0.4,
+        vy: -Math.random() * 2.5 - 1.5, // Float upwards
+        maxLife: Math.random() * 25 + 15, // 15-40 frames (around 0.5s)
+        life: 0,
+      });
+    }
+    
+    particlesRef.current = [...particlesRef.current, ...newParticles];
+    setParticles(particlesRef.current);
+    
+    // Start animation loop if not running
+    if (!animationFrameRef.current) {
+      const animate = () => {
+        if (particlesRef.current.length === 0) {
+          animationFrameRef.current = null;
+          setParticles([]);
+          return;
+        }
+
+        particlesRef.current = particlesRef.current
+          .map((p) => ({
+            ...p,
+            x: p.x + p.vx + (Math.random() - 0.5) * 1.2, // Wobble in the wind
+            y: p.y + p.vy,
+            life: p.life + 1,
+          }))
+          .filter((p) => p.life < p.maxLife);
+
+        setParticles(particlesRef.current);
+        animationFrameRef.current = requestAnimationFrame(animate);
+      };
+      animationFrameRef.current = requestAnimationFrame(animate);
+    }
+  }, []);
+
+  // Clean up animation frame on unmount
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
+
   // Load saved position from localStorage on mount, or set default y: -80 to clear mobile cart bar
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -512,6 +597,9 @@ export function AIAssistantPanel({
       const boundedY = Math.min(20, Math.max(-window.innerHeight + 80, newY));
       
       setPosition({ x: boundedX, y: boundedY });
+
+      // Spawn fiery flame particles along the touch trajectory!
+      spawnParticles(touch.clientX, touch.clientY, 3);
     }
   };
 
@@ -552,6 +640,9 @@ export function AIAssistantPanel({
         const boundedX = Math.min(20, Math.max(-window.innerWidth + 80, newX));
         const boundedY = Math.min(20, Math.max(-window.innerHeight + 80, newY));
         setPosition({ x: boundedX, y: boundedY });
+
+        // Spawn fiery flame particles along the mouse drag trajectory!
+        spawnParticles(moveEvent.clientX, moveEvent.clientY, 3);
       }
     };
 
@@ -576,13 +667,31 @@ export function AIAssistantPanel({
     window.addEventListener("mouseup", handleMouseUp);
   };
 
+  const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    spawnParticles(centerX, centerY, 5);
+  };
+
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (isDraggingRef.current || isDraggingState) {
       e.preventDefault();
       e.stopPropagation();
       return;
     }
-    onOpenChange(true);
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    // Spawn fire burst
+    spawnParticles(centerX, centerY, 12);
+
+    // Slight delay to allow the burst of flames to be seen before panel opens
+    setTimeout(() => {
+      onOpenChange(true);
+    }, 180);
   };
   const [isThinking, setIsThinking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -970,21 +1079,67 @@ export function AIAssistantPanel({
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onMouseEnter={handleMouseEnter}
           style={{
             transform: `translate(${position.x}px, ${position.y}px)`,
             touchAction: "none",
             transition: isDraggingState ? "none" : "transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
           }}
           className={cn(
-            "lg:hidden fixed bottom-4 right-4 z-45 bg-gradient-to-r from-red-650 to-amber-500 text-white p-3.5 rounded-full shadow-[0_8px_20px_-4px_rgba(186,92,35,0.6)] active:scale-[0.93] transition-all duration-200 animate-in fade-in duration-300 flex items-center justify-center border border-white/20 select-none",
+            "lg:hidden fixed bottom-4 right-4 z-45",
+            // A stunning custom flame shape: rotated tear-drop!
+            "w-14 h-14 rounded-tl-[50%] rounded-tr-[50%] rounded-bl-[50%] rounded-br-[0%] rotate-45",
+            // Fiery gradient and heavy, dramatic flame glow
+            "bg-gradient-to-br from-yellow-400 via-orange-500 to-red-650 text-white",
+            "shadow-[0_0_20px_rgba(239,68,68,0.7),_0_0_40px_rgba(249,115,22,0.5)]",
+            "border-2 border-yellow-300/40 flex items-center justify-center select-none active:scale-[0.93] transition-all duration-200 animate-in fade-in duration-300",
             isDraggingState ? "cursor-grabbing" : "cursor-grab"
           )}
           aria-label="Buka asisten AI"
           title="Tanya Asisten AI"
         >
-          <Sparkles className="w-5.5 h-5.5 animate-pulse" />
+          {/* Inside, we rotate the Flame icon back by -45 degrees so it stands upright! */}
+          <div className="-rotate-45 flex items-center justify-center relative w-full h-full">
+            {/* Pulsing glow background for the flame */}
+            <div className="absolute inset-0 bg-yellow-400/20 rounded-full blur-md animate-pulse"></div>
+            <Flame className="w-7 h-7 text-white fill-white/10 filter drop-shadow-[0_2px_8px_rgba(253,224,71,0.5)] animate-mie-jebew-bounce" />
+          </div>
         </button>
       )}
+
+      {/* Flame Particle Overlay */}
+      {particles.map((p) => {
+        const ratio = p.life / p.maxLife;
+        const scale = 1 - ratio; // shrink
+        const opacity = 1 - ratio * ratio; // fade out
+        
+        return (
+          <div
+            key={p.id}
+            className="fixed pointer-events-none z-[999] rounded-full blur-[1px] mix-blend-screen"
+            style={{
+              left: p.x,
+              top: p.y,
+              width: p.size,
+              height: p.size,
+              backgroundColor: p.color,
+              transform: `translate(-50%, -50%) scale(${scale})`,
+              opacity: opacity,
+              boxShadow: `0 0 8px ${p.color}, 0 0 16px ${p.color.replace('0.9', '0.4').replace('0.8', '0.4')}`,
+            }}
+          />
+        );
+      })}
+
+      <style>{`
+        @keyframes mieJebewBounceSubtle {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3px); }
+        }
+        .animate-mie-jebew-bounce {
+          animation: mieJebewBounceSubtle 2s ease-in-out infinite;
+        }
+      `}</style>
 
       <aside
         className={cn(

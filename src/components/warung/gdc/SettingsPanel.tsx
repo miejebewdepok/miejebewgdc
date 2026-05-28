@@ -937,60 +937,64 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
               </div>
             </div>
                     {/* DATABASE WHATSAPP & EMAIL PELANGGAN (PROMO QR) CARD */}
-          <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-5 mt-6">
-            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-red-500/10 text-red-500 rounded-xl">
-                  <Smartphone className="w-4 h-4" />
+          <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-4 mt-6">
+            {/* Header Row */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-red-500/10 text-red-500 rounded-xl">
+                  <Smartphone className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-foreground dark:text-white uppercase tracking-wider">Database Pelanggan (Promo QR)</h3>
-                  <p className="text-[10px] text-slate-555 dark:text-slate-400 mt-0.5">Kontak WhatsApp & Email dari klaim Jasmine Tea saat Self-Order</p>
+                  <h3 className="text-sm font-bold text-foreground dark:text-white uppercase tracking-wider">DATABASE PELANGGAN</h3>
+                  <p className="text-[11px] text-slate-555 dark:text-slate-400 mt-0.5 font-medium">Kontak WhatsApp & Email</p>
                 </div>
               </div>
+              
+              {/* Dangerous action isolated on the right */}
+              <button
+                type="button"
+                onClick={handleDeleteAllClaims}
+                disabled={promoClaims.length === 0}
+                className="bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600/20 text-rose-600 dark:text-rose-450 dark:hover:bg-rose-600/30 rounded-xl text-[10px] py-1.5 px-3.5 font-black cursor-pointer transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 duration-150 self-start md:self-auto"
+              >
+                Hapus Semua Data
+              </button>
+            </div>
 
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  type="button"
-                  onClick={handleCopyAllWhatsapp}
-                  disabled={promoClaims.length === 0}
-                  className="bg-emerald-650/15 border border-emerald-500/25 text-emerald-650 hover:bg-emerald-600/25 dark:text-emerald-300 dark:hover:bg-emerald-600/30 rounded-xl text-[10px] py-1.5 px-3 font-black text-center cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0"
-                >
-                  Salin Semua WA ({promoClaims.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCopyAllEmails}
-                  disabled={promoClaims.length === 0}
-                  className="bg-indigo-500/15 border border-indigo-550/25 text-indigo-650 hover:bg-indigo-600/25 dark:text-indigo-400 dark:hover:bg-indigo-600/30 rounded-xl text-[10px] py-1.5 px-3 font-black text-center cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0"
-                >
-                  Salin Semua Email
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDownloadExcel}
-                  disabled={promoClaims.length === 0}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] py-1.5 px-3 font-black text-center cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0 shadow-md shadow-emerald-500/10"
-                >
-                  Unduh Excel (.csv)
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDownloadPdf}
-                  disabled={promoClaims.length === 0}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] py-1.5 px-3 font-black text-center cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0 shadow-md shadow-indigo-500/10"
-                >
-                  Unduh PDF
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDeleteAllClaims}
-                  disabled={promoClaims.length === 0}
-                  className="bg-rose-600/10 border border-rose-500/25 text-rose-600 hover:bg-rose-600/20 dark:text-rose-450 dark:hover:bg-rose-600/30 rounded-xl text-[10px] py-1.5 px-3 font-black text-center cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0"
-                >
-                  Hapus Semua Data
-                </button>
-              </div>
+            {/* Action Toolbar Row */}
+            <div className="flex flex-wrap gap-2.5 items-center">
+              <button
+                type="button"
+                onClick={handleCopyAllWhatsapp}
+                disabled={promoClaims.length === 0}
+                className="bg-emerald-650/15 border border-emerald-500/25 text-emerald-650 hover:bg-emerald-600/25 dark:text-emerald-300 dark:hover:bg-emerald-600/30 rounded-xl text-[10px] py-1.5 px-3.5 font-black cursor-pointer transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 duration-150"
+              >
+                Salin Semua WA ({promoClaims.length})
+              </button>
+              <button
+                type="button"
+                onClick={handleCopyAllEmails}
+                disabled={promoClaims.length === 0}
+                className="bg-indigo-500/15 border border-indigo-550/25 text-indigo-650 hover:bg-indigo-600/25 dark:text-indigo-400 dark:hover:bg-indigo-600/30 rounded-xl text-[10px] py-1.5 px-3.5 font-black cursor-pointer transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 duration-150"
+              >
+                Salin Semua Email
+              </button>
+              <button
+                type="button"
+                onClick={handleDownloadExcel}
+                disabled={promoClaims.length === 0}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] py-1.5 px-3.5 font-black cursor-pointer transition-all flex items-center justify-center gap-1.5 shrink-0 shadow-md shadow-emerald-500/10 active:scale-95 duration-150"
+              >
+                Unduh Excel (.csv)
+              </button>
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={promoClaims.length === 0}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] py-1.5 px-3.5 font-black cursor-pointer transition-all flex items-center justify-center gap-1.5 shrink-0 shadow-md shadow-indigo-500/10 active:scale-95 duration-150"
+              >
+                Unduh PDF
+              </button>
             </div>
 
             {/* Search Input */}

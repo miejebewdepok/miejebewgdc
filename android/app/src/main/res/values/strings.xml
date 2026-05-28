@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">WarungOS GDC</string>
-    <string name="title_activity_main">WarungOS GDC</string>
+    <string name="app_name">Mie Jebew GDC</string>
+    <string name="title_activity_main">Mie Jebew GDC</string>
     <string name="package_name">com.miejebew.warungos</string>
     <string name="custom_url_scheme">com.miejebew.warungos</string>
 </resources>

@@ -1,6 +1,6 @@
 {
   "appId": "com.miejebew.warungos",
-  "appName": "WarungOS GDC",
+  "appName": "Mie Jebew GDC",
   "webDir": "public",
   "server": {
     "url": "https://kasir-miejebew.vercel.app",

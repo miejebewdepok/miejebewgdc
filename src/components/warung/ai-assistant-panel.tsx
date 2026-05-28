@@ -992,9 +992,11 @@ export function AIAssistantPanel({
           // Mobile Layout (overlay drawer, fixed right)
           "fixed inset-y-0 right-0 z-50 w-full sm:w-[380px] rounded-l-[28px] rounded-r-none",
           open ? "flex animate-in slide-in-from-right duration-300" : "hidden",
-          // Desktop Layout (relative sidebar layout)
-          "lg:relative lg:inset-auto lg:z-auto lg:h-full lg:shrink-0 lg:rounded-[28px] lg:shadow-[0_38px_90px_-50px_rgba(68,39,20,0.7)]",
-          open ? "lg:w-[380px] xl:w-[420px] lg:flex" : "lg:w-[64px] lg:flex"
+          // Desktop Layout:
+          // - When closed: render inline as a 64px rail
+          // - When open: render fixed overlay on the right to prevent pushing the POS content and causing viewport shifting/sidebar cutoff!
+          !open && "lg:relative lg:inset-auto lg:z-auto lg:h-full lg:shrink-0 lg:rounded-[28px] lg:shadow-[0_38px_90px_-50px_rgba(68,39,20,0.7)] lg:w-[64px] lg:flex",
+          open && "lg:fixed lg:inset-y-0 lg:right-0 lg:z-50 lg:h-full lg:w-[380px] xl:w-[420px] lg:flex lg:rounded-l-[28px] lg:rounded-r-none"
         )}
         aria-label="Asisten AI MIE JEBEW GDC"
       >

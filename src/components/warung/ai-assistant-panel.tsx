@@ -459,6 +459,131 @@ export function AIAssistantPanel({
   const [chat, setChat] = useState<ChatRecord | null>(null);
   const [messages, setMessages] = useState<ServerMessage[]>([]);
   const [input, setInput] = useState("");
+
+  // Floating Action Button (FAB) Draggable State and Logic
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDraggingState, setIsDraggingState] = useState(false);
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const positionStartRef = useRef({ x: 0, y: 0 });
+
+  // Load saved position from localStorage on mount, or set default y: -80 to clear mobile cart bar
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("mie_jebew_ai_pos");
+        if (saved) {
+          setPosition(JSON.parse(saved));
+        } else {
+          // A safer default on mobile that doesn't overlap the shopping cart bar (at bottom-4)
+          // y: -80 translates to about 80px higher (approx bottom-24)
+          setPosition({ x: 0, y: -80 });
+        }
+      } catch (e) {
+        console.error("Failed to load AI badge position", e);
+      }
+    }
+  }, []);
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLButtonElement>) => {
+    const touch = e.touches[0];
+    isDraggingRef.current = false;
+    setIsDraggingState(false);
+    dragStartRef.current = { x: touch.clientX, y: touch.clientY };
+    positionStartRef.current = { ...position };
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLButtonElement>) => {
+    const touch = e.touches[0];
+    const dx = touch.clientX - dragStartRef.current.x;
+    const dy = touch.clientY - dragStartRef.current.y;
+    
+    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+      isDraggingRef.current = true;
+      setIsDraggingState(true);
+    }
+    
+    if (isDraggingRef.current) {
+      const newX = positionStartRef.current.x + dx;
+      const newY = positionStartRef.current.y + dy;
+      
+      // Bounding box within the viewport to keep the badge visible and selectable
+      const boundedX = Math.min(20, Math.max(-window.innerWidth + 80, newX));
+      const boundedY = Math.min(20, Math.max(-window.innerHeight + 80, newY));
+      
+      setPosition({ x: boundedX, y: boundedY });
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLButtonElement>) => {
+    if (isDraggingRef.current) {
+      e.preventDefault();
+      try {
+        localStorage.setItem("mie_jebew_ai_pos", JSON.stringify(position));
+      } catch (err) {
+        console.error("Failed to save AI badge position", err);
+      }
+      // Keep state true for a tiny split second to prevent immediate click trigger
+      setTimeout(() => {
+        setIsDraggingState(false);
+        isDraggingRef.current = false;
+      }, 50);
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
+    isDraggingRef.current = false;
+    setIsDraggingState(false);
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    positionStartRef.current = { ...position };
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const dx = moveEvent.clientX - dragStartRef.current.x;
+      const dy = moveEvent.clientY - dragStartRef.current.y;
+      
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        isDraggingRef.current = true;
+        setIsDraggingState(true);
+      }
+      
+      if (isDraggingRef.current) {
+        const newX = positionStartRef.current.x + dx;
+        const newY = positionStartRef.current.y + dy;
+        const boundedX = Math.min(20, Math.max(-window.innerWidth + 80, newX));
+        const boundedY = Math.min(20, Math.max(-window.innerHeight + 80, newY));
+        setPosition({ x: boundedX, y: boundedY });
+      }
+    };
+
+    const handleMouseUp = (upEvent: MouseEvent) => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      
+      if (isDraggingRef.current) {
+        try {
+          localStorage.setItem("mie_jebew_ai_pos", JSON.stringify(position));
+        } catch (err) {
+          console.error("Failed to save AI badge position", err);
+        }
+        setTimeout(() => {
+          setIsDraggingState(false);
+          isDraggingRef.current = false;
+        }, 50);
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (isDraggingRef.current || isDraggingState) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    onOpenChange(true);
+  };
   const [isThinking, setIsThinking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -840,8 +965,20 @@ export function AIAssistantPanel({
       {!open && (
         <button
           type="button"
-          onClick={() => onOpenChange(true)}
-          className="lg:hidden fixed bottom-4 right-4 z-45 bg-gradient-to-r from-red-650 to-amber-500 text-white p-3.5 rounded-full shadow-[0_8px_20px_-4px_rgba(186,92,35,0.6)] active:scale-[0.93] transition-all duration-200 animate-in fade-in duration-300 flex items-center justify-center border border-white/20 cursor-pointer"
+          onClick={handleButtonClick}
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{
+            transform: `translate(${position.x}px, ${position.y}px)`,
+            touchAction: "none",
+            transition: isDraggingState ? "none" : "transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
+          }}
+          className={cn(
+            "lg:hidden fixed bottom-4 right-4 z-45 bg-gradient-to-r from-red-650 to-amber-500 text-white p-3.5 rounded-full shadow-[0_8px_20px_-4px_rgba(186,92,35,0.6)] active:scale-[0.93] transition-all duration-200 animate-in fade-in duration-300 flex items-center justify-center border border-white/20 select-none",
+            isDraggingState ? "cursor-grabbing" : "cursor-grab"
+          )}
           aria-label="Buka asisten AI"
           title="Tanya Asisten AI"
         >

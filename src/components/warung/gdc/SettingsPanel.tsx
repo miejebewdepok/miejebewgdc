@@ -937,9 +937,9 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
               </div>
             </div>
                     {/* DATABASE WHATSAPP & EMAIL PELANGGAN (PROMO QR) CARD */}
-          <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-4 mt-6">
+          <div className="glass-morphism rounded-3xl p-4 sm:p-6 relative overflow-hidden flex flex-col gap-4 mt-6">
             {/* Header Row */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-red-500/10 text-red-500 rounded-xl">
                   <Smartphone className="w-5 h-5" />
@@ -955,19 +955,19 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                 type="button"
                 onClick={handleDeleteAllClaims}
                 disabled={promoClaims.length === 0}
-                className="bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600/20 text-rose-600 dark:text-rose-450 dark:hover:bg-rose-600/30 rounded-xl text-[10px] py-1.5 px-3.5 font-black cursor-pointer transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 duration-150 self-start md:self-auto"
+                className="bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600/20 text-rose-600 dark:text-rose-450 dark:hover:bg-rose-600/30 rounded-xl text-[10px] py-1.5 px-3.5 font-black cursor-pointer transition-all flex items-center justify-center gap-1.5 active:scale-95 duration-150 w-full sm:w-auto text-center"
               >
                 Hapus Semua Data
               </button>
             </div>
 
             {/* Action Toolbar Row */}
-            <div className="flex flex-wrap gap-2.5 items-center">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-2.5 sm:items-center">
               <button
                 type="button"
                 onClick={handleCopyAllWhatsapp}
                 disabled={promoClaims.length === 0}
-                className="bg-emerald-650/15 border border-emerald-500/25 text-emerald-650 hover:bg-emerald-600/25 dark:text-emerald-300 dark:hover:bg-emerald-600/30 rounded-xl text-[10px] py-1.5 px-3.5 font-black cursor-pointer transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 duration-150"
+                className="w-full sm:w-auto bg-emerald-650/15 border border-emerald-500/25 text-emerald-650 hover:bg-emerald-600/25 dark:text-emerald-300 dark:hover:bg-emerald-600/30 rounded-xl text-[10px] py-2 px-3 sm:py-1.5 sm:px-3.5 font-black cursor-pointer transition-all flex items-center justify-center gap-1.5 active:scale-95 duration-150"
               >
                 Salin Semua WA ({promoClaims.length})
               </button>
@@ -975,7 +975,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                 type="button"
                 onClick={handleCopyAllEmails}
                 disabled={promoClaims.length === 0}
-                className="bg-indigo-500/15 border border-indigo-550/25 text-indigo-650 hover:bg-indigo-600/25 dark:text-indigo-400 dark:hover:bg-indigo-600/30 rounded-xl text-[10px] py-1.5 px-3.5 font-black cursor-pointer transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 duration-150"
+                className="w-full sm:w-auto bg-indigo-500/15 border border-indigo-550/25 text-indigo-650 hover:bg-indigo-600/25 dark:text-indigo-400 dark:hover:bg-indigo-600/30 rounded-xl text-[10px] py-2 px-3 sm:py-1.5 sm:px-3.5 font-black cursor-pointer transition-all flex items-center justify-center gap-1.5 active:scale-95 duration-150"
               >
                 Salin Semua Email
               </button>
@@ -983,7 +983,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                 type="button"
                 onClick={handleDownloadExcel}
                 disabled={promoClaims.length === 0}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] py-1.5 px-3.5 font-black cursor-pointer transition-all flex items-center justify-center gap-1.5 shrink-0 shadow-md shadow-emerald-500/10 active:scale-95 duration-150"
+                className="w-full sm:w-auto bg-emerald-650 hover:bg-emerald-700 text-white rounded-xl text-[10px] py-2 px-3 sm:py-1.5 sm:px-3.5 font-black cursor-pointer transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/10 active:scale-95 duration-150"
               >
                 Unduh Excel (.csv)
               </button>
@@ -991,7 +991,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                 type="button"
                 onClick={handleDownloadPdf}
                 disabled={promoClaims.length === 0}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] py-1.5 px-3.5 font-black cursor-pointer transition-all flex items-center justify-center gap-1.5 shrink-0 shadow-md shadow-indigo-500/10 active:scale-95 duration-150"
+                className="w-full sm:w-auto bg-indigo-650 hover:bg-indigo-700 text-white rounded-xl text-[10px] py-2 px-3 sm:py-1.5 sm:px-3.5 font-black cursor-pointer transition-all flex items-center justify-center gap-1.5 shadow-md shadow-indigo-500/10 active:scale-95 duration-150"
               >
                 Unduh PDF
               </button>
@@ -1050,34 +1050,39 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                       (c.email && c.email.toLowerCase().includes(claimsSearchQuery.toLowerCase())) ||
                       c.tableName.toLowerCase().includes(claimsSearchQuery.toLowerCase())
                     ).map((claim) => (
-                      <div key={claim.id} className="bg-black/5 dark:bg-black/30 border border-black/5 dark:border-white/5 rounded-2xl p-3 flex justify-between items-center gap-3">
-                        <div className="overflow-hidden flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-foreground dark:text-white truncate max-w-[120px]" title={claim.customerName}>
+                      <div key={claim.id} className="bg-black/5 dark:bg-black/30 border border-black/5 dark:border-white/5 rounded-2xl p-3.5 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3.5 hover:bg-black/10 dark:hover:bg-white/5 transition-all">
+                        <div className="overflow-hidden flex-1 flex flex-col gap-1">
+                          <div className="flex items-center flex-wrap gap-2">
+                            <span className="text-xs font-bold text-foreground dark:text-white truncate max-w-[150px] sm:max-w-[200px]" title={claim.customerName}>
                               {claim.customerName}
                             </span>
                             <span className="text-[8px] font-black bg-red-500/10 text-red-500 dark:text-red-400 px-1.5 py-0.5 rounded-full border border-red-500/15 uppercase font-mono shrink-0">
                               Self Order {claim.tableName.replace(/^(meja|order|self-order)[\s\-_]*/i, "")}
                             </span>
                           </div>
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono block mt-1 truncate">
-                            WA: {claim.whatsapp}
-                          </span>
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono block mt-0.5 truncate">
-                            Email: {claim.email || "-"}
-                          </span>
-                          <span className="text-[8px] text-slate-400 dark:text-slate-500 block mt-0.5">
+                          
+                          <div className="grid grid-cols-1 gap-1 mt-1 border-l-2 border-red-500/25 pl-2.5">
+                            <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono block truncate break-all">
+                              <span className="font-bold text-slate-500 dark:text-slate-500 mr-1 text-[9px] uppercase">WA:</span> {claim.whatsapp}
+                            </span>
+                            <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono block truncate break-all">
+                              <span className="font-bold text-slate-500 dark:text-slate-500 mr-1 text-[9px] uppercase">Email:</span> {claim.email || "-"}
+                            </span>
+                          </div>
+                          
+                          <span className="text-[8px] text-slate-400 dark:text-slate-500 block mt-1">
                             Klaim: {new Date(claim.createdAt).toLocaleString('id-ID')}
                           </span>
                         </div>
-                        <div className="flex flex-col gap-1.5 shrink-0">
+                        
+                        <div className="flex flex-row sm:flex-col gap-1.5 shrink-0 w-full sm:w-auto">
                           <button
                             type="button"
                             onClick={() => {
                               navigator.clipboard.writeText(claim.whatsapp);
                               alert(`Nomor WA ${claim.whatsapp} berhasil disalin!`);
                             }}
-                            className="py-1 px-2.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-slate-800 dark:text-white rounded-lg text-[9px] font-bold text-center cursor-pointer transition-all"
+                            className="flex-1 sm:flex-none py-2 px-2.5 sm:py-1 sm:px-2.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-slate-800 dark:text-white rounded-xl sm:rounded-lg text-[9px] font-bold text-center cursor-pointer transition-all active:scale-95 duration-150"
                           >
                             Salin WA
                           </button>
@@ -1088,7 +1093,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                                 navigator.clipboard.writeText(claim.email || "");
                                 alert(`Email ${claim.email} berhasil disalin!`);
                               }}
-                              className="py-1 px-2.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-650 dark:text-indigo-400 rounded-lg text-[9px] font-bold text-center cursor-pointer transition-all"
+                              className="flex-1 sm:flex-none py-2 px-2.5 sm:py-1 sm:px-2.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-650 dark:text-indigo-400 rounded-xl sm:rounded-lg text-[9px] font-bold text-center cursor-pointer transition-all active:scale-95 duration-150"
                             >
                               Salin Email
                             </button>
@@ -1096,7 +1101,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                           <button
                             type="button"
                             onClick={() => handleDeleteClaim(claim.id, claim.customerName)}
-                            className="py-1 px-2.5 bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 text-rose-600 dark:text-rose-450 rounded-lg text-[9px] font-black text-center cursor-pointer transition-all"
+                            className="flex-1 sm:flex-none py-2 px-2.5 sm:py-1 sm:px-2.5 bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 text-rose-600 dark:text-rose-450 rounded-xl sm:rounded-lg text-[9px] font-black text-center cursor-pointer transition-all active:scale-95 duration-150"
                           >
                             Hapus
                           </button>

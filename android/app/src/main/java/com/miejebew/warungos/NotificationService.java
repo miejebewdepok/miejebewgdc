@@ -57,6 +57,8 @@ public class NotificationService extends NotificationListenerService implements 
         // Filter only merchant & bank apps to avoid false positives (e.g. chats, personal stuff)
         boolean isMerchantApp = packageName.contains("gobiz") || 
                                 packageName.contains("shopee.partner") || 
+                                packageName.contains("shopeepay.merchant") || 
+                                packageName.contains("shopee") || 
                                 packageName.contains("grab.merchant") ||
                                 packageName.contains("bca") ||
                                 packageName.contains("mandiri.livin") ||

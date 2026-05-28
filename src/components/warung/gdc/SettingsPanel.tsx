@@ -585,9 +585,9 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-extrabold text-foreground dark:text-white flex items-center gap-2">
-            <SettingsIcon className="text-red-500 w-5 h-5" /> Pengaturan Sistem POS
+            <SettingsIcon className="text-red-500 w-5 h-5" /> Pengaturan Sistem
           </h2>
-          <p className="text-slate-550 dark:text-slate-400 text-xs">Atur parameter perpajakan, profil restoran, gerbang QRIS, dan koneksi Printer Bluetooth</p>
+          <p className="text-slate-550 dark:text-slate-400 text-xs">Konfigurasi Parameter Restoran & POS</p>
         </div>
 
         <button
@@ -597,11 +597,11 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
         >
           {isSaving ? (
             <>
-              <RefreshCw className="w-4 h-4 animate-spin" /> MENYIMPAN...
+              <RefreshCw className="w-4 h-4 animate-spin" /> SAVING...
             </>
           ) : (
             <>
-              <Check className="w-4 h-4" /> SIMPAN SEMUA PERUBAHAN
+              <Check className="w-4 h-4" /> SAVE ALL CHANGES
             </>
           )}
         </button>

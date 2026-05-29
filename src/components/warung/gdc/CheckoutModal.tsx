@@ -36,7 +36,33 @@ export const angkaterbilang = (nilai: number): string => {
 let activeQrisUtterance: any = null;
 
 export const speakQrisNotification = (amount: number) => {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+  if (typeof window === "undefined") return;
+
+  // Konversi nominal ke teks terbilang
+  const nominalTeks = angkaterbilang(amount).trim();
+  const textToSpeak = `Sebesar ${nominalTeks} rupiah, berhasil diterima.`;
+  const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=id&client=tw-ob&q=${encodeURIComponent(textToSpeak)}`;
+
+  try {
+    // Attempt playing high-quality pre-rendered Google TTS audio first (100% reliable in APK/WebViews)
+    const audio = new Audio(ttsUrl);
+    audio.volume = 1.0;
+    
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch((audioErr) => {
+        console.warn("Audio Qris TTS failed, falling back to SpeechSynthesis", audioErr);
+        speakQrisNotificationNative(textToSpeak);
+      });
+    }
+  } catch (err) {
+    console.warn("Audio Qris creation failed, falling back to SpeechSynthesis", err);
+    speakQrisNotificationNative(textToSpeak);
+  }
+};
+
+const speakQrisNotificationNative = (textToSpeak: string) => {
+  if (!("speechSynthesis" in window)) {
     console.warn("Speech Synthesis tidak didukung di browser ini.");
     return;
   }
@@ -47,10 +73,6 @@ export const speakQrisNotification = (amount: number) => {
   if (window.speechSynthesis.paused) {
     window.speechSynthesis.resume();
   }
-
-  // Konversi nominal ke teks terbilang
-  const nominalTeks = angkaterbilang(amount).trim();
-  const textToSpeak = `Sebesar ${nominalTeks} rupiah, berhasil diterima.`;
 
   // Gunakan variabel global agar tidak terkena garbage-collection di Android WebView / APK
   activeQrisUtterance = new SpeechSynthesisUtterance(textToSpeak);

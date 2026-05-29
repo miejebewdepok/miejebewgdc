@@ -346,46 +346,65 @@ export function AppStateProvider({
                   playSynthNode(1567.98, 1.57, 0.18, 0.40); // G6
                 };
 
-                // 2. Play the Indonesian Female Voice overlay (using garbage-collection resistant global reference)
+                // 2. Play the Indonesian Female Voice overlay (using bulletproof Audio + SpeechSynthesis fallback)
                 const speakVoiceOverlay = (startTimeOffset: number) => {
                   setTimeout(() => {
-                    if (!('speechSynthesis' in window)) return;
+                    const text = "Ada pesanan diterima";
+                    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=id&client=tw-ob&q=${encodeURIComponent(text)}`;
+                    
                     try {
-                      // Cancel previous speech to prevent overlapping or queue blocking
-                      window.speechSynthesis.cancel();
+                      // Attempt playing high-quality pre-rendered Google TTS audio first (100% reliable in APK/WebViews)
+                      const audio = new Audio(ttsUrl);
+                      audio.volume = 1.0;
                       
-                      // Ensure the speech synthesis is active and not paused
-                      if (window.speechSynthesis.paused) {
-                        window.speechSynthesis.resume();
+                      const playPromise = audio.play();
+                      if (playPromise !== undefined) {
+                        playPromise.catch((audioErr) => {
+                          console.warn("Audio TTS failed, falling back to SpeechSynthesis", audioErr);
+                          playNativeSpeechSynthesis(text);
+                        });
                       }
-
-                      // Assign to the global variable to prevent garbage collection inside Android Webview / APK
-                      activeUtterance = new SpeechSynthesisUtterance("Ada pesanan diterima");
-                      activeUtterance.lang = "id-ID";
-                      
-                      const voices = window.speechSynthesis.getVoices();
-                      const indonesianVoice = voices.find((v: any) => 
-                        v.lang.toLowerCase().includes("id-id") || v.lang.toLowerCase().startsWith("id")
-                      );
-                      if (indonesianVoice) {
-                        activeUtterance.voice = indonesianVoice;
-                      }
-                      activeUtterance.rate = 1.05; // Quick and professional tempo
-                      activeUtterance.pitch = 1.15; // Bright, clear female pitch curve
-                      activeUtterance.volume = 1.0; // Loud volume
-                      
-                      activeUtterance.onend = () => {
-                        activeUtterance = null;
-                      };
-                      activeUtterance.onerror = () => {
-                        activeUtterance = null;
-                      };
-
-                      window.speechSynthesis.speak(activeUtterance);
-                    } catch (speechErr) {
-                      console.error("Speech overlay error", speechErr);
+                    } catch (err) {
+                      console.warn("Audio creation failed, falling back to SpeechSynthesis", err);
+                      playNativeSpeechSynthesis(text);
                     }
                   }, startTimeOffset * 1000 + 200); // Trigger 0.2s after the kick beat starts
+                };
+
+                const playNativeSpeechSynthesis = (text: string) => {
+                  if (!('speechSynthesis' in window)) return;
+                  try {
+                    window.speechSynthesis.cancel();
+                    if (window.speechSynthesis.paused) {
+                      window.speechSynthesis.resume();
+                    }
+
+                    // Assign to global variable to prevent garbage collection inside Android Webview / APK
+                    activeUtterance = new SpeechSynthesisUtterance(text);
+                    activeUtterance.lang = "id-ID";
+                    
+                    const voices = window.speechSynthesis.getVoices();
+                    const indonesianVoice = voices.find((v: any) => 
+                      v.lang.toLowerCase().includes("id-id") || v.lang.toLowerCase().startsWith("id")
+                    );
+                    if (indonesianVoice) {
+                      activeUtterance.voice = indonesianVoice;
+                    }
+                    activeUtterance.rate = 1.05; // Quick and professional tempo
+                    activeUtterance.pitch = 1.15; // Bright, clear female pitch curve
+                    activeUtterance.volume = 1.0; // Loud volume
+                    
+                    activeUtterance.onend = () => {
+                      activeUtterance = null;
+                    };
+                    activeUtterance.onerror = () => {
+                      activeUtterance = null;
+                    };
+
+                    window.speechSynthesis.speak(activeUtterance);
+                  } catch (speechErr) {
+                    console.error("Native Speech fallback error", speechErr);
+                  }
                 };
 
                 // 3. Play the combined K-Pop loop sequence exactly 5 times, spaced 1.8 seconds apart (9 seconds total)

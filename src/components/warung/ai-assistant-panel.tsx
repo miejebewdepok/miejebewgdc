@@ -985,7 +985,7 @@ export function AIAssistantPanel({
           <img 
             src="/ai-fire.png" 
             alt="AI Fire" 
-            className="w-14 h-14 object-contain drop-shadow-[0_8px_16px_rgba(220,38,38,0.55)] select-none pointer-events-none animate-pulse duration-[3000ms]"
+            className="w-20 h-20 object-contain drop-shadow-[0_10px_20px_rgba(220,38,38,0.6)] select-none pointer-events-none animate-pulse duration-[3000ms]"
           />
         </button>
       )}
@@ -1011,11 +1011,11 @@ export function AIAssistantPanel({
           className="group/rail flex h-full w-full flex-col items-center justify-center gap-3 px-2 py-4 text-foreground/80 transition-colors hover:bg-primary/5"
           aria-label="Buka asisten AI"
         >
-          <span className="flex size-10 items-center justify-center rounded-full bg-transparent transition-transform group-hover/rail:scale-110 active:scale-95 duration-200">
+          <span className="flex size-14 items-center justify-center rounded-full bg-transparent transition-transform group-hover/rail:scale-110 active:scale-95 duration-200">
             <img 
               src="/ai-fire.png" 
               alt="Asisten AI" 
-              className="w-9 h-9 object-contain drop-shadow-[0_4px_8px_rgba(220,38,38,0.45)]"
+              className="w-12 h-12 object-contain drop-shadow-[0_6px_12px_rgba(220,38,38,0.5)]"
             />
           </span>
           <span
@@ -1031,11 +1031,11 @@ export function AIAssistantPanel({
       ) : (
         <>
           <header className="flex items-center gap-3 border-b border-border/60 px-4 py-3">
-            <span className="flex size-9 items-center justify-center rounded-full bg-transparent shrink-0">
+            <span className="flex size-12 items-center justify-center rounded-full bg-transparent shrink-0">
               <img 
                 src="/ai-fire.png" 
                 alt="AI" 
-                className="w-8 h-8 object-contain drop-shadow-[0_2px_6px_rgba(220,38,38,0.4)]"
+                className="w-10 h-10 object-contain drop-shadow-[0_4px_8px_rgba(220,38,38,0.45)]"
               />
             </span>
             <div className="flex-1 min-w-0">

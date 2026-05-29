@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { emptyAppState } from "@/lib/empty-state";
 import { AppState, Debt, DebtDraft, PaymentMethod, Product, ProductDraft, SavedBill, Settings, Transaction } from "@/lib/types";
@@ -71,12 +71,16 @@ async function requestJson<T>(input: RequestInfo, init?: RequestInit): Promise<T
   return data as T;
 }
 
+// Keep a global reference to prevent garbage collection of SpeechSynthesisUtterance in Android WebViews
+let activeUtterance: any = null;
+
 export function AppStateProvider({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const router = useRouter();
+  const pathname = usePathname();
   const [state, setState] = useState<AppState>(emptyAppState);
   const { data: session, isPending } = useSession();
   const sessionUserId = session?.user?.id ?? null;
@@ -147,7 +151,8 @@ export function AppStateProvider({
 
   // Polling for saved bills to detect new table self-orders
   useEffect(() => {
-    if (!sessionUserId) return;
+    // DO NOT poll or play merchant notifications if on the customer self-order page
+    if (!sessionUserId || pathname?.includes("/order/")) return;
 
     const interval = setInterval(async () => {
       try {
@@ -341,26 +346,42 @@ export function AppStateProvider({
                   playSynthNode(1567.98, 1.57, 0.18, 0.40); // G6
                 };
 
-                // 2. Play the Indonesian Female Voice overlay
+                // 2. Play the Indonesian Female Voice overlay (using garbage-collection resistant global reference)
                 const speakVoiceOverlay = (startTimeOffset: number) => {
                   setTimeout(() => {
                     if (!('speechSynthesis' in window)) return;
                     try {
-                      const utterance = new SpeechSynthesisUtterance("Ada pesanan diterima");
-                      utterance.lang = "id-ID";
+                      // Cancel previous speech to prevent overlapping or queue blocking
+                      window.speechSynthesis.cancel();
+                      
+                      // Ensure the speech synthesis is active and not paused
+                      if (window.speechSynthesis.paused) {
+                        window.speechSynthesis.resume();
+                      }
+
+                      // Assign to the global variable to prevent garbage collection inside Android Webview / APK
+                      activeUtterance = new SpeechSynthesisUtterance("Ada pesanan diterima");
+                      activeUtterance.lang = "id-ID";
                       
                       const voices = window.speechSynthesis.getVoices();
-                      const indonesianVoice = voices.find((v) => 
-                        (v.lang.toLowerCase().includes("id-id") || v.lang.toLowerCase().startsWith("id")) &&
-                        (v.name.toLowerCase().includes("female") || v.name.toLowerCase().includes("wanita") || v.name.toLowerCase().includes("google") || v.name.toLowerCase().includes("microsoft") || v.name.toLowerCase().includes("natural") || true)
+                      const indonesianVoice = voices.find((v: any) => 
+                        v.lang.toLowerCase().includes("id-id") || v.lang.toLowerCase().startsWith("id")
                       );
                       if (indonesianVoice) {
-                        utterance.voice = indonesianVoice;
+                        activeUtterance.voice = indonesianVoice;
                       }
-                      utterance.rate = 1.05; // Quick and professional tempo
-                      utterance.pitch = 1.15; // Bright, clear female pitch curve
-                      utterance.volume = 1.0; // Loud volume
-                      window.speechSynthesis.speak(utterance);
+                      activeUtterance.rate = 1.05; // Quick and professional tempo
+                      activeUtterance.pitch = 1.15; // Bright, clear female pitch curve
+                      activeUtterance.volume = 1.0; // Loud volume
+                      
+                      activeUtterance.onend = () => {
+                        activeUtterance = null;
+                      };
+                      activeUtterance.onerror = () => {
+                        activeUtterance = null;
+                      };
+
+                      window.speechSynthesis.speak(activeUtterance);
                     } catch (speechErr) {
                       console.error("Speech overlay error", speechErr);
                     }

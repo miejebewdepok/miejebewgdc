@@ -32,6 +32,9 @@ export const angkaterbilang = (nilai: number): string => {
   return temp;
 };
 
+// Keep a global reference to prevent garbage collection of SpeechSynthesisUtterance in Android WebViews
+let activeQrisUtterance: any = null;
+
 export const speakQrisNotification = (amount: number) => {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) {
     console.warn("Speech Synthesis tidak didukung di browser ini.");
@@ -40,15 +43,20 @@ export const speakQrisNotification = (amount: number) => {
 
   // Bersihkan antrean suara lama agar tidak tabrakan
   window.speechSynthesis.cancel();
+  
+  if (window.speechSynthesis.paused) {
+    window.speechSynthesis.resume();
+  }
 
   // Konversi nominal ke teks terbilang
   const nominalTeks = angkaterbilang(amount).trim();
   const textToSpeak = `Sebesar ${nominalTeks} rupiah, berhasil diterima.`;
 
-  const utterance = new SpeechSynthesisUtterance(textToSpeak);
-  utterance.lang = "id-ID"; // Set bahasa ke Bahasa Indonesia
-  utterance.rate = 0.95;    // Tempo mantap dan jelas untuk pria dewasa
-  utterance.pitch = 0.85;   // Pitch lebih rendah/bass untuk efek suara pria dewasa
+  // Gunakan variabel global agar tidak terkena garbage-collection di Android WebView / APK
+  activeQrisUtterance = new SpeechSynthesisUtterance(textToSpeak);
+  activeQrisUtterance.lang = "id-ID"; // Set bahasa ke Bahasa Indonesia
+  activeQrisUtterance.rate = 0.95;    // Tempo mantap dan jelas untuk pria dewasa
+  activeQrisUtterance.pitch = 0.85;   // Pitch lebih rendah/bass untuk efek suara pria dewasa
 
   // Cari suara Bahasa Indonesia terbaik yang terpasang di sistem operasi
   const voices = window.speechSynthesis.getVoices();
@@ -66,11 +74,18 @@ export const speakQrisNotification = (amount: number) => {
   }
 
   if (indonesianVoice) {
-    utterance.voice = indonesianVoice;
+    activeQrisUtterance.voice = indonesianVoice;
   }
 
+  activeQrisUtterance.onend = () => {
+    activeQrisUtterance = null;
+  };
+  activeQrisUtterance.onerror = () => {
+    activeQrisUtterance = null;
+  };
+
   // Mainkan suara!
-  window.speechSynthesis.speak(utterance);
+  window.speechSynthesis.speak(activeQrisUtterance);
 };
 
 interface CheckoutModalProps {

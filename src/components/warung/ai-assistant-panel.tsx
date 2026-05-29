@@ -976,16 +976,20 @@ export function AIAssistantPanel({
             transition: isDraggingState ? "none" : "transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
           }}
           className={cn(
-            "lg:hidden fixed bottom-4 right-4 z-45 bg-gradient-to-r from-red-650 to-amber-500 text-white p-3.5 rounded-full shadow-[0_8px_20px_-4px_rgba(186,92,35,0.6)] active:scale-[0.93] transition-all duration-200 animate-in fade-in duration-300 flex items-center justify-center border border-white/20 select-none",
+            "lg:hidden fixed bottom-4 right-4 z-45 bg-transparent p-0 border-none rounded-full active:scale-[0.90] transition-all duration-200 animate-in fade-in duration-300 flex items-center justify-center select-none outline-none focus:outline-none focus:ring-0",
             isDraggingState ? "cursor-grabbing" : "cursor-grab"
           )}
           aria-label="Buka asisten AI"
           title="Tanya Asisten AI"
         >
-          <Sparkles className="w-5.5 h-5.5 animate-pulse" />
+          <img 
+            src="/ai-fire.png" 
+            alt="AI Fire" 
+            className="w-14 h-14 object-contain drop-shadow-[0_8px_16px_rgba(220,38,38,0.55)] select-none pointer-events-none animate-pulse duration-[3000ms]"
+          />
         </button>
       )}
-
+ 
       <aside
         className={cn(
           "flex flex-col overflow-hidden border border-white/60 bg-card/85 backdrop-blur-xl shadow-2xl transition-all duration-200 ease-out",
@@ -1007,24 +1011,32 @@ export function AIAssistantPanel({
           className="group/rail flex h-full w-full flex-col items-center justify-center gap-3 px-2 py-4 text-foreground/80 transition-colors hover:bg-primary/5"
           aria-label="Buka asisten AI"
         >
-          <span className="flex size-9 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-[0_18px_38px_-22px_rgba(186,92,35,0.85)] transition-transform group-hover/rail:scale-105">
-            <Sparkles className="size-4" />
+          <span className="flex size-10 items-center justify-center rounded-full bg-transparent transition-transform group-hover/rail:scale-110 active:scale-95 duration-200">
+            <img 
+              src="/ai-fire.png" 
+              alt="Asisten AI" 
+              className="w-9 h-9 object-contain drop-shadow-[0_4px_8px_rgba(220,38,38,0.45)]"
+            />
           </span>
           <span
-            className="text-[11px] font-medium tracking-wide text-foreground/70"
+            className="text-[10px] font-black tracking-wider text-red-600 dark:text-red-400 uppercase"
             style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
           >
             Asisten AI
           </span>
-          <span className="mt-auto rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-700 animate-pulse">
+          <span className="mt-auto rounded-full bg-emerald-100 dark:bg-emerald-500/20 px-1.5 py-0.5 text-[9px] font-extrabold text-emerald-700 dark:text-emerald-400 animate-pulse">
             ●
           </span>
         </button>
       ) : (
         <>
           <header className="flex items-center gap-3 border-b border-border/60 px-4 py-3">
-            <span className="flex size-9 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-              <Sparkles className="size-4" />
+            <span className="flex size-9 items-center justify-center rounded-full bg-transparent shrink-0">
+              <img 
+                src="/ai-fire.png" 
+                alt="AI" 
+                className="w-8 h-8 object-contain drop-shadow-[0_2px_6px_rgba(220,38,38,0.4)]"
+              />
             </span>
             <div className="flex-1 min-w-0">
               <p className="font-heading text-sm font-semibold leading-tight truncate">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Settings } from '@/lib/types';
 import { useAppState } from '@/components/providers/app-state-provider';
+import { useSession } from '@/lib/auth-client';
 import { speakQrisNotification } from './CheckoutModal';
 import { 
   QrCode, 
@@ -17,7 +18,10 @@ import {
   AlertCircle, 
   Signal, 
   Battery, 
-  Sparkles 
+  Sparkles,
+  UserCheck,
+  UserX,
+  ShieldCheck
 } from 'lucide-react';
 
 const compressImage = (base64Str: string, maxWidth = 400, maxHeight = 400, quality = 0.7): Promise<string> => {
@@ -113,12 +117,60 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
     }
   };
 
+  const { data: session } = useSession();
+  const userEmail = session?.user?.email;
+
+  // Manage User Access States
+  const [usersList, setUsersList] = useState<{ id: string; name: string; email: string; isApproved: boolean; createdAt: string }[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+
+  const fetchUsersList = async () => {
+    if (userEmail !== "taufiqrusdhi.ez@gmail.com") return;
+    setIsLoadingUsers(true);
+    try {
+      const res = await fetch("/api/settings/users");
+      const data = await res.json();
+      if (res.ok && data.users) {
+        setUsersList(data.users);
+      }
+    } catch (e) {
+      console.error("Gagal memuat pengguna:", e);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
+  const handleToggleUserApproval = async (targetUserId: string, currentStatus: boolean) => {
+    try {
+      const res = await fetch("/api/settings/users", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: targetUserId, isApproved: !currentStatus }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setUsersList(prev => prev.map(u => u.id === targetUserId ? { ...u, isApproved: !currentStatus } : u));
+      } else {
+        alert(data.error || "Gagal memperbarui status akses.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Terjadi kesalahan koneksi.");
+    }
+  };
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setOrigin(window.location.origin);
     }
     fetchPromoClaims();
   }, []);
+
+  useEffect(() => {
+    if (userEmail === "taufiqrusdhi.ez@gmail.com") {
+      fetchUsersList();
+    }
+  }, [userEmail]);
 
   const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1188,7 +1240,81 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
               />
             </div>
           </div>
-          
+
+          {/* USER APPROVAL PANEL (ONLY FOR OWNER) */}
+          {userEmail === "taufiqrusdhi.ez@gmail.com" && (
+            <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-4">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-red-500/10 text-red-500 rounded-xl">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-bold text-foreground dark:text-white uppercase tracking-wider">Persetujuan Akses Akun</h3>
+              </div>
+
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-sans">
+                Setujui atau cabut akses untuk akun kasir/kru yang mendaftar. Pengguna yang belum disetujui tidak akan bisa masuk ke aplikasi.
+              </p>
+
+              {isLoadingUsers ? (
+                <div className="py-6 text-center text-xs font-bold text-slate-400">
+                  <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2 text-red-500" />
+                  Memuat daftar pengguna...
+                </div>
+              ) : usersList.length <= 1 ? (
+                <div className="py-4 text-center bg-black/5 dark:bg-black/20 rounded-2xl">
+                  <span className="text-[10px] font-bold text-slate-450 block">Tidak ada pengguna lain terdaftar</span>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1 no-scrollbar animate-fade">
+                  {usersList
+                    .filter((u) => u.email !== "taufiqrusdhi.ez@gmail.com")
+                    .map((user) => (
+                      <div
+                        key={user.id}
+                        className="bg-black/5 dark:bg-black/30 border border-black/5 dark:border-white/5 rounded-2xl p-3 flex items-center justify-between gap-3 hover:bg-black/10 dark:hover:bg-white/5 transition-all"
+                      >
+                        <div className="overflow-hidden flex-1 flex flex-col gap-0.5">
+                          <span className="text-xs font-bold text-foreground dark:text-white truncate block" title={user.name}>
+                            {user.name || "Nama Belum Diisi"}
+                          </span>
+                          <span className="text-[10px] text-slate-555 dark:text-slate-400 font-mono truncate block" title={user.email}>
+                            {user.email}
+                          </span>
+                          <span className="text-[8px] text-slate-400 dark:text-slate-555 block font-mono">
+                            Daftar: {new Date(user.createdAt).toLocaleDateString("id-ID")}
+                          </span>
+                        </div>
+
+                        <div className="shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleUserApproval(user.id, user.isApproved)}
+                            className={`py-1.5 px-3 border rounded-xl text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                              user.isApproved
+                                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-650 dark:text-emerald-400 hover:bg-emerald-500/20"
+                                : "bg-red-500/10 border-red-500/25 text-red-650 dark:text-red-400 hover:bg-red-500/20"
+                            }`}
+                          >
+                            {user.isApproved ? (
+                              <>
+                                <UserCheck className="w-3.5 h-3.5 text-emerald-500" />
+                                Aktif
+                              </>
+                            ) : (
+                              <>
+                                <UserX className="w-3.5 h-3.5 text-red-500" />
+                                Diblokir
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* PRINTER BLUETOOTH THERMAL CONNECT MODULE */}
           <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-5">
             <div className="flex items-center justify-between">

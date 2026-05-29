@@ -113,6 +113,16 @@ export async function POST(
       );
     }
 
+    if (intent === "sign-up") {
+      const successURL = new URL("/auth", getBaseUrl(request));
+      successURL.searchParams.set("mode", "signin");
+      successURL.searchParams.set(
+        "success",
+        "Pendaftaran berhasil! Akun Anda sedang menunggu persetujuan dari taufiqrusdhi.ez@gmail.com. Silakan hubungi pemilik untuk mengaktifkan akses masuk Anda."
+      );
+      return NextResponse.redirect(successURL, { status: 303 });
+    }
+
     const redirectTarget = new URL(authResult?.url ?? callbackURL, getBaseUrl(request));
     const response = NextResponse.redirect(redirectTarget, { status: 303 });
     appendSetCookieHeaders(authResponse, response);

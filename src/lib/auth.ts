@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { Pool } from "pg";
+import { createAuthMiddleware, APIError } from "better-auth/api";
 
 const globalForAuth = globalThis as typeof globalThis & {
   __warungosAuthPool?: Pool;
@@ -78,7 +79,48 @@ export const auth = betterAuth({
     "warungos-dev-secret-please-change-this-in-production",
   baseURL: resolveAuthBaseUrl(),
   trustedOrigins: async (request) => getTrustedAuthOrigins(request),
+  user: {
+    additionalFields: {
+      isApproved: {
+        type: "boolean",
+        required: false,
+        defaultValue: false,
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
+    autoSignIn: false, // Do not log in immediately after registration, wait for approval
+  },
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      // Intercept the email/password sign-in process
+      if (ctx.path === "/sign-in/email") {
+        const email = ctx.body?.email;
+        if (email) {
+          const pool = getAuthPool();
+          try {
+            const res = await pool.query(
+              'SELECT "isApproved" FROM "user" WHERE email = $1 LIMIT 1',
+              [email.toLowerCase().trim()]
+            );
+            if (res.rows.length > 0) {
+              const user = res.rows[0];
+              // Block sign-in if the user is explicitly set to not approved
+              if (user.isApproved === false) {
+                throw new APIError("FORBIDDEN", {
+                  message: "Akun Anda belum disetujui oleh pemilik (taufiqrusdhi.ez@gmail.com). Silakan hubungi pemilik untuk mengaktifkan akses.",
+                });
+              }
+            }
+          } catch (err: any) {
+            if (err instanceof APIError) {
+              throw err;
+            }
+            console.error("Error in before sign-in hook:", err);
+          }
+        }
+      }
+    }),
   },
 });

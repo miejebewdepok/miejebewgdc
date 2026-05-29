@@ -35,7 +35,8 @@ export function AuthScreen() {
   const { data: session, isPending: isSessionPending } = useSession();
   const queryMode = searchParams.get("mode") === "signup" ? "signup" : "signin";
   const authError = searchParams.get("error");
-  const [mode, setMode] = useState<AuthMode>(queryMode);
+  const authSuccess = searchParams.get("success");
+  const [mode, setMode] = useState<AuthMode>(authSuccess ? "signin" : queryMode);
   const [showPassword, setShowPassword] = useState(false);
   const [signInForm, setSignInForm] = useState({
     email: "",
@@ -54,8 +55,12 @@ export function AuthScreen() {
   }, [isSessionPending, router, session]);
 
   useEffect(() => {
-    setMode(queryMode);
-  }, [queryMode]);
+    if (authSuccess) {
+      setMode("signin");
+    } else {
+      setMode(queryMode);
+    }
+  }, [queryMode, authSuccess]);
 
   return (
     <div className="relative min-h-screen bg-[#fef2f2] dark:bg-[#090b11] text-[#450a0a] dark:text-slate-100 overflow-hidden flex items-center justify-center px-4 py-8 lg:p-12 font-sans select-none transition-colors duration-300 dark">
@@ -121,10 +126,18 @@ export function AuthScreen() {
               </button>
             </div>
 
+            {/* Success Display */}
+            {authSuccess ? (
+              <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3.5 text-xs text-emerald-650 dark:text-emerald-400 font-semibold mb-6 flex items-start gap-2 leading-relaxed">
+                <CheckCircle2 className="w-4 h-4 text-emerald-550 shrink-0 mt-0.5" />
+                <span>{authSuccess}</span>
+              </div>
+            ) : null}
+
             {/* Error Display */}
             {authError ? (
-              <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-550 dark:text-red-400 font-semibold mb-6 flex items-center gap-2">
-                <Flame className="w-4 h-4 text-red-550 shrink-0" />
+              <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-550 dark:text-red-400 font-semibold mb-6 flex items-start gap-2 leading-relaxed">
+                <Flame className="w-4 h-4 text-red-550 shrink-0 mt-0.5" />
                 <span>{authError}</span>
               </div>
             ) : null}

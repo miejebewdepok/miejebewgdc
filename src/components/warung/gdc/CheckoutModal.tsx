@@ -41,7 +41,7 @@ export const speakQrisNotification = (amount: number) => {
   // Konversi nominal ke teks terbilang
   const nominalTeks = angkaterbilang(amount).trim();
   const textToSpeak = `Sebesar ${nominalTeks} rupiah, berhasil diterima.`;
-  const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=id&client=tw-ob&q=${encodeURIComponent(textToSpeak)}`;
+  const ttsUrl = `/api/tts?text=${encodeURIComponent(textToSpeak)}`;
 
   try {
     // Attempt playing high-quality pre-rendered Google TTS audio first (100% reliable in APK/WebViews)

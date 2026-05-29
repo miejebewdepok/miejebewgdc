@@ -350,7 +350,7 @@ export function AppStateProvider({
                 const speakVoiceOverlay = (startTimeOffset: number) => {
                   setTimeout(() => {
                     const text = "Ada pesanan diterima";
-                    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=id&client=tw-ob&q=${encodeURIComponent(text)}`;
+                    const ttsUrl = `/api/tts?text=${encodeURIComponent(text)}`;
                     
                     try {
                       // Attempt playing high-quality pre-rendered Google TTS audio first (100% reliable in APK/WebViews)

@@ -11,7 +11,11 @@ export function InventarisView() {
   const userEmail = session?.user?.email;
 
   const defaultCategories = useMemo(() => {
-    if (userEmail === "taufiqrusdhi.ez@gmail.com") {
+    if (
+      userEmail === "taufiqrusdhi.ez@gmail.com" ||
+      userEmail === "miejebew.depok@gmail.com" ||
+      userEmail === "miejebew.crew@gmail.com"
+    ) {
       return ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"];
     }
     return [];

@@ -1,26 +1,53 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAppState } from "@/components/providers/app-state-provider";
+import { useSession } from "@/lib/auth-client";
 import ManageProductsModal from "./gdc/ManageProductsModal";
 
 export function InventarisView() {
   const { products, addProduct, updateProduct, deleteProduct, settings, updateSettings } = useAppState();
+  const { data: session } = useSession();
+  const userEmail = session?.user?.email;
 
-  // Local storage for categories — synced with kasir using same key & defaults
-  const [localCategories, setLocalCategories] = useState<string[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("miejebew_categories_v4");
-      return saved ? JSON.parse(saved) : ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"];
+  const defaultCategories = useMemo(() => {
+    if (userEmail === "taufiqrusdhi.ez@gmail.com") {
+      return ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"];
     }
-    return ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"];
-  });
+    return [];
+  }, [userEmail]);
+
+  // Local storage for categories — synced with kasir using user-isolated keys
+  const [localCategories, setLocalCategories] = useState<string[] | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && userEmail !== undefined) {
+      const storageKey = userEmail ? `miejebew_categories_v4_${userEmail}` : "miejebew_categories_v4";
+      let saved = localStorage.getItem(storageKey);
+      
+      // Auto-migrate old categories for the main owner if they don't have user-isolated categories yet
+      if (!saved && userEmail === "taufiqrusdhi.ez@gmail.com") {
+        const oldSaved = localStorage.getItem("miejebew_categories_v4");
+        if (oldSaved) {
+          saved = oldSaved;
+          localStorage.setItem(storageKey, oldSaved);
+        }
+      }
+
+      if (saved) {
+        setLocalCategories(JSON.parse(saved));
+      } else {
+        setLocalCategories(defaultCategories);
+      }
+    }
+  }, [defaultCategories, userEmail]);
 
   // Keep categories updated with any new ones dynamically found in products and sort strictly
   const categories = useMemo(() => {
+    const cats = localCategories !== null ? localCategories : defaultCategories;
     const list = Array.from(
       new Set([
-        ...localCategories,
+        ...cats,
         ...products.map((p) => p.category).filter(Boolean),
       ])
     );
@@ -42,7 +69,7 @@ export function InventarisView() {
     });
 
     return list;
-  }, [localCategories, products]);
+  }, [localCategories, products, defaultCategories]);
 
   // Sort products according to manual sort order from settings
   const sortedProducts = useMemo(() => {
@@ -66,7 +93,10 @@ export function InventarisView() {
 
   const handleUpdateCategories = (newCats: string[]) => {
     setLocalCategories(newCats);
-    localStorage.setItem("miejebew_categories_v4", JSON.stringify(newCats));
+    if (typeof window !== "undefined") {
+      const storageKey = userEmail ? `miejebew_categories_v4_${userEmail}` : "miejebew_categories_v4";
+      localStorage.setItem(storageKey, JSON.stringify(newCats));
+    }
   };
 
   const handleMoveProduct = async (productId: string, direction: 'up' | 'down') => {

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
+import { useSession } from "@/lib/auth-client";
 import { Product, ProductCategory, Transaction } from "@/lib/types";
 import ProductCard from "./gdc/ProductCard";
 import CartSection from "./gdc/CartSection";
@@ -115,20 +116,47 @@ export function KasirView() {
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
 
-  // Local categories from localStorage — shared key with Kelola Menu
-  const [localCategories] = useState<string[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("miejebew_categories_v4");
-      return saved ? JSON.parse(saved) : ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"];
+  const { data: session } = useSession();
+  const userEmail = session?.user?.email;
+
+  const defaultCategories = useMemo(() => {
+    if (userEmail === "taufiqrusdhi.ez@gmail.com") {
+      return ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"];
     }
-    return ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"];
-  });
+    return [];
+  }, [userEmail]);
+
+  // Local categories from localStorage — shared key with Kelola Menu (user-isolated)
+  const [localCategories, setLocalCategories] = useState<string[] | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && userEmail !== undefined) {
+      const storageKey = userEmail ? `miejebew_categories_v4_${userEmail}` : "miejebew_categories_v4";
+      let saved = localStorage.getItem(storageKey);
+      
+      // Auto-migrate old categories for the main owner if they don't have user-isolated categories yet
+      if (!saved && userEmail === "taufiqrusdhi.ez@gmail.com") {
+        const oldSaved = localStorage.getItem("miejebew_categories_v4");
+        if (oldSaved) {
+          saved = oldSaved;
+          localStorage.setItem(storageKey, oldSaved);
+        }
+      }
+
+      if (saved) {
+        setLocalCategories(JSON.parse(saved));
+      } else {
+        setLocalCategories(defaultCategories);
+      }
+    }
+  }, [defaultCategories, userEmail]);
 
   // Dynamic categories list including default and products from DB
   const categories = useMemo(() => {
+    const cats = localCategories !== null ? localCategories : defaultCategories;
     const list = Array.from(
       new Set([
-        ...localCategories,
+        ...cats,
         ...products.map((p) => p.category).filter(Boolean),
       ])
     );
@@ -150,7 +178,7 @@ export function KasirView() {
     });
 
     return ["Semua", ...list];
-  }, [localCategories, products]);
+  }, [localCategories, products, defaultCategories]);
 
   // Sort products according to manual sort order
   const sortedProducts = useMemo(() => {

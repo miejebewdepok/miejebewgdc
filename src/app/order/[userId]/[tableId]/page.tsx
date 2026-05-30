@@ -265,7 +265,13 @@ export default function CustomerOrderPage(props: {
             ☕ Qalla Coffee
           </span>
         );
-            case "Qalla Tea":
+            case "Tea Series":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-400 border border-teal-500/15 uppercase tracking-wider font-mono">
+            🍃 Tea Series
+          </span>
+        );
+      case "Qalla Tea":
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-400 border border-teal-500/15 uppercase tracking-wider font-mono">
             🍃 Qalla Tea
@@ -349,6 +355,7 @@ export default function CustomerOrderPage(props: {
   const drinkProducts = useMemo(() => {
     const getDrinkWeight = (cat: string) => {
       switch (cat) {
+        case "Tea Series":
         case "Qalla Tea":
           return 1;
         case "Qalla Coffee":
@@ -692,10 +699,10 @@ export default function CustomerOrderPage(props: {
                 CONGRATULATIONS!
               </span>
               <span className="text-[11.5px] font-extrabold text-white text-center leading-tight">
-                FREE QALLA TEA GRANTED! 🍃
+                {isCabang2 ? "FREE TEA SERIES GRANTED! 🍃" : "FREE QALLA TEA GRANTED! 🍃"}
               </span>
               <span className="text-[8.5px] font-bold text-emerald-300/80 tracking-wide uppercase mt-0.5">
-                Refreshing Jasmine Tea Included
+                {isCabang2 ? "Refreshing Tea Included" : "Refreshing Jasmine Tea Included"}
               </span>
             </div>
           </div>
@@ -1423,7 +1430,7 @@ export default function CustomerOrderPage(props: {
                               </div>
                             )}
                             <span className="text-[10px] font-black tracking-wide text-white uppercase flex items-center gap-1">
-                              Promo Qalla Tea {isVipUnlocked && <span className="text-indigo-400 font-extrabold text-[8px] px-1 bg-indigo-500/20 rounded">VIP</span>}
+                              {isCabang2 ? "Promo Tea Series" : "Promo Qalla Tea"} {isVipUnlocked && <span className="text-indigo-400 font-extrabold text-[8px] px-1 bg-indigo-500/20 rounded">VIP</span>}
                             </span>
                           </div>
                           
@@ -1488,7 +1495,7 @@ export default function CustomerOrderPage(props: {
                         <div className="text-[9px] font-bold mt-1">
                           {isVipUnlocked ? (
                             <span className="text-indigo-400 flex items-center gap-1 font-extrabold">
-                              🌟 VIP UNLOCKED: Free Qalla Tea Activated!
+                              {isCabang2 ? "🌟 VIP UNLOCKED: Free Es Teh Manis Activated!" : "🌟 VIP UNLOCKED: Free Qalla Tea Activated!"}
                             </span>
                           ) : isPromoUnlocked ? (
                             <span className="text-emerald-400">
@@ -1510,7 +1517,9 @@ export default function CustomerOrderPage(props: {
                           </div>
                           <h4 className="text-xs font-black text-indigo-400 uppercase tracking-widest">🌟 VIP Promo Active</h4>
                           <p className="text-[10px] text-slate-350 font-bold max-w-[285px] leading-relaxed mt-1">
-                            Free Jasmine Tea has been automatically added to your cart! No phone number or email required.
+                            {isCabang2
+                              ? "Free Es Teh Manis has been automatically added to your cart! No phone number or email required."
+                              : "Free Jasmine Tea has been automatically added to your cart! No phone number or email required."}
                           </p>
                         </div>
                       ) : (
@@ -1528,7 +1537,7 @@ export default function CustomerOrderPage(props: {
                             </div>
                             <div>
                               <span className="text-xs font-extrabold text-white block">
-                                Klaim GRATIS Qalla Tea (Jasmine) 🍃
+                                {isCabang2 ? "Klaim GRATIS Es Teh Tawar 🍃" : "Klaim GRATIS Qalla Tea (Jasmine) 🍃"}
                               </span>
                               <span className="text-[9px] text-slate-400 font-medium block mt-0.5 leading-tight">
                                 Masukkan No. WhatsApp dan Email untuk klaim promo.

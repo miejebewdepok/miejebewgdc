@@ -40,6 +40,11 @@ export async function POST(request: NextRequest) {
       const digitsOnly = waClean.replace(/\D/g, "");
       const normalizedWa = digitsOnly ? (digitsOnly.startsWith("0") ? "62" + digitsOnly.slice(1) : digitsOnly) : "";
 
+      const isCabang2 = userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5";
+      const promoType = isCabang2
+        ? (isVipBypass ? "Free Es Teh Manis (VIP)" : "Free Es Teh Tawar")
+        : "Free Jasmine Tea";
+
       let promoAllowed = false;
 
       if (isVipBypass) {
@@ -55,7 +60,7 @@ export async function POST(request: NextRequest) {
               customerName: customerName.trim(),
               whatsapp: normalizedWa,
               email: emailClean || null,
-              promoType: "Free Jasmine Tea",
+              promoType: promoType,
               tableName: tableName,
               createdAt: new Date().toISOString(),
             });
@@ -95,7 +100,7 @@ export async function POST(request: NextRequest) {
               customerName: customerName.trim(),
               whatsapp: normalizedWa,
               email: emailClean,
-              promoType: "Free Jasmine Tea",
+              promoType: promoType,
               tableName: tableName,
               createdAt: new Date().toISOString(),
             });
@@ -104,7 +109,21 @@ export async function POST(request: NextRequest) {
       }
 
       if (promoAllowed) {
-        // Inject free Jasmine Tea item (Rp 0)
+        let promoName = "Qalla Tea (Jasmine Tea) [PROMO]";
+        let promoCategory = "Qalla Tea";
+        let promoDesc = isVipBypass
+          ? "Minuman Jasmine Tea dingin gratis dari promo VIP Self-Order."
+          : "Minuman Jasmine Tea dingin gratis dari promo Self-Order.";
+
+        if (isCabang2) {
+          promoCategory = "Tea Series";
+          promoName = isVipBypass ? "Es Teh Manis [PROMO]" : "Es Teh Tawar [PROMO]";
+          promoDesc = isVipBypass
+            ? "Minuman Es Teh Manis dingin gratis dari promo VIP Self-Order."
+            : "Minuman Es Teh Tawar dingin gratis dari promo Self-Order.";
+        }
+
+        // Inject free Jasmine Tea/Es Teh Tawar/Es Teh Manis item (Rp 0)
         finalItems.push({
           id: `promo-jasmine-tea-${crypto.randomUUID().slice(0, 8)}`,
           productId: "promo_jasmine_tea",
@@ -114,13 +133,11 @@ export async function POST(request: NextRequest) {
           sellPrice: 0, // Rp 0 (FREE!)
           product: {
             id: "promo_jasmine_tea",
-            name: "Qalla Tea (Jasmine Tea) [PROMO]",
-            category: "Qalla Tea",
+            name: promoName,
+            category: promoCategory,
             sellPrice: 0,
             stock: 999,
-            description: isVipBypass
-              ? "Minuman Jasmine Tea dingin gratis dari promo VIP Self-Order."
-              : "Minuman Jasmine Tea dingin gratis dari promo Self-Order.",
+            description: promoDesc,
           }
         });
       }

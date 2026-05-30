@@ -479,10 +479,64 @@ export function AppStateProvider({
     
     // In-memory fallback mock for dynamic promo Jasmine Tea product
     if (!product && line.productId === "promo_jasmine_tea") {
+      const isCabang2 = sessionUserId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5";
+      const nonPromoTotal = state.cart
+        .filter(it => it.productId !== "promo_jasmine_tea")
+        .reduce((sum, line) => {
+          const p = state.products.find(item => item.id === line.productId);
+          if (!p) return sum;
+          const level = line.spicyLevel ?? 0;
+          const toppings = line.toppings ?? [];
+          const filling = line.filling;
+          const size = line.size;
+          const isBypassed = isCabang2 
+            ? p.category === 'Tea Series'
+            : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(p.category);
+          const spicySurcharge = isBypassed ? 0 : ((level === 4 || level === 5) ? 2000 : 0);
+          const specialKeys = isCabang2 
+            ? ["Ceker", "Kulit Ayam", "Pangsit Goreng", "Telur"] 
+            : ["Beef Slice", "Keju Slice", "Telur"];
+          const specialToppings = toppings.filter((t) => specialKeys.includes(t));
+          const standardToppings = toppings.filter((t) => !specialKeys.includes(t));
+          const stdCount = standardToppings.length;
+          const stdSurcharge = stdCount === 3 ? 5000 : (stdCount === 7 ? 10000 : stdCount * 2000);
+          let specialSurcharge = 0;
+          specialToppings.forEach((t) => {
+            if (t === "Beef Slice") specialSurcharge += 2500;
+            else if (t === "Ceker") specialSurcharge += 2500;
+            else if (t === "Kulit Ayam") specialSurcharge += 2500;
+            else if (t === "Pangsit Goreng") specialSurcharge += 2500;
+            else if (t === "Telur") specialSurcharge += 4000;
+            else if (t === "Keju Slice") specialSurcharge += 3000;
+          });
+          const toppingsSurcharge = isBypassed ? 0 : stdSurcharge + specialSurcharge;
+          let fillingSurcharge = 0;
+          if (!isBypassed) {
+            if (p.category === 'Kebab') {
+              if (size === 'REGULER') {
+                if (filling === 'Beef') fillingSurcharge = 2000;
+              } else if (size === 'LARGE') {
+                if (filling === 'Beef Slice' || filling === 'Beef' || filling === 'Chicken Katsu') fillingSurcharge = 5000;
+                else if (filling === 'Special') fillingSurcharge = 10000;
+              }
+            } else {
+              if (filling === 'Beef Patty' || filling === 'Chicken Katsu') fillingSurcharge = 5000;
+              else if (filling === 'Special') fillingSurcharge = 10000;
+            }
+          }
+          const isSpaghetti = p.name.toLowerCase().includes("spaghetti");
+          const spaghettiSurcharge = (isSpaghetti && size === "Double") ? 4000 : 0;
+          const linePrice = p.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
+          return sum + linePrice * line.quantity;
+        }, 0);
+
+      const isVip = nonPromoTotal >= 50000;
       product = {
         id: "promo_jasmine_tea",
-        name: "Qalla Tea (Jasmine Tea) [PROMO]",
-        category: "Qalla Tea",
+        name: isCabang2
+          ? (isVip ? "Es Teh Manis [PROMO]" : "Es Teh Tawar [PROMO]")
+          : "Qalla Tea (Jasmine Tea) [PROMO]",
+        category: isCabang2 ? "Tea Series" : "Qalla Tea",
         sellPrice: 0,
         stock: 999999,
         minimumStock: 0,

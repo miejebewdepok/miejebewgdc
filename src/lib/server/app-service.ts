@@ -569,16 +569,58 @@ export async function createTransaction(
   const lineItems = payload.items.map((item) => {
     let product: any;
     if (item.productId === "promo_jasmine_tea") {
+      const isCabang2 = userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5";
+      const nonPromoSubtotal = payload.items
+        .filter(it => it.productId !== "promo_jasmine_tea")
+        .reduce((sum, it) => {
+          const p = productMap.get(it.productId);
+          if (!p) return sum;
+          const spicySurcharge = (it.spicyLevel === 4 || it.spicyLevel === 5) ? 2000 : 0;
+          const toppingsCount = it.toppings ? it.toppings.length : 0;
+          const toppingsSurcharge = toppingsCount === 3 
+            ? 5000 
+            : toppingsCount === 7 
+            ? 10000 
+            : toppingsCount * 2000;
+          let fillingSurcharge = 0;
+          if (p.category === 'Kebab') {
+            if (it.size === 'REGULER') {
+              if (it.filling === 'Beef') fillingSurcharge = 2000;
+            } else if (it.size === 'LARGE') {
+              if (it.filling === 'Beef Slice' || it.filling === 'Beef' || it.filling === 'Chicken Katsu') fillingSurcharge = 5000;
+              else if (it.filling === 'Special') fillingSurcharge = 10000;
+            }
+          } else {
+            if (it.filling === 'Beef Patty' || it.filling === 'Chicken Katsu') fillingSurcharge = 5000;
+            else if (it.filling === 'Special') fillingSurcharge = 10000;
+          }
+          const isSpaghetti = p.name.toLowerCase().includes("spaghetti");
+          const spaghettiSurcharge = (isSpaghetti && it.size === "Double") ? 4000 : 0;
+          const unitPrice = p.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
+          return sum + unitPrice * it.quantity;
+        }, 0);
+      const isVip = nonPromoSubtotal >= 50000;
+
+      let name = "Qalla Tea (Jasmine Tea) [PROMO]";
+      let category = "Qalla Tea";
+      let description = isVip ? "Promo Jasmine Tea gratis (VIP)" : "Promo Jasmine Tea gratis";
+
+      if (isCabang2) {
+        category = "Tea Series";
+        name = isVip ? "Es Teh Manis [PROMO]" : "Es Teh Tawar [PROMO]";
+        description = isVip ? "Promo Es Teh Manis gratis (VIP)" : "Promo Es Teh Tawar gratis";
+      }
+
       product = {
         id: "promo_jasmine_tea",
         userId,
-        name: "Qalla Tea (Jasmine Tea) [PROMO]",
-        category: "Qalla Tea",
+        name,
+        category,
         buyPrice: 0,
         sellPrice: 0,
         stock: 9999,
         minimumStock: -1,
-        description: "Promo Jasmine Tea gratis",
+        description,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };

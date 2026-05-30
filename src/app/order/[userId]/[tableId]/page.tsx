@@ -300,16 +300,20 @@ export default function CustomerOrderPage(props: {
   const foodProducts = useMemo(() => {
     const getFoodWeight = (cat: string) => {
       switch (cat) {
-        case "Mie Pedas":
+        case "Mie Tek Tek":
           return 1;
-        case "Lumpia Beef":
+        case "Mie Pedas":
           return 2;
-        case "Kebab":
+        case "Pangsit":
           return 3;
-        case "Snack":
+        case "Lumpia Beef":
           return 4;
-        default:
+        case "Kebab":
           return 5;
+        case "Snack":
+          return 6;
+        default:
+          return 7;
       }
     };
 
@@ -806,9 +810,9 @@ export default function CustomerOrderPage(props: {
 
         {/* Sub Category Selector */}
         {activeCategory !== "Semua" && (
-          <div className={activeCategory === "Makanan" ? (isCabang2 ? "grid grid-cols-2 gap-1.5" : "grid grid-cols-4 gap-1.5") : (isCabang2 ? "grid grid-cols-2 gap-2" : "grid grid-cols-3 gap-2")}>
+          <div className={activeCategory === "Makanan" ? (isCabang2 ? "grid grid-cols-3 gap-1.5" : "grid grid-cols-4 gap-1.5") : (isCabang2 ? "grid grid-cols-2 gap-2" : "grid grid-cols-3 gap-2")}>
             {(activeCategory === "Makanan"
-              ? (isCabang2 ? ["Mie Tek Tek", "Pangsit"] : ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack"])
+              ? (isCabang2 ? ["Mie Tek Tek", "Mie Pedas", "Pangsit"] : ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack"])
               : (isCabang2 ? ["Tea Series", "Delight Series"] : ["Qalla Tea", "Qalla Coffee", "Qalla Juice"])
             ).map((subCat) => {
               const isSelected = activeSubCategory === subCat;

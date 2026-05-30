@@ -61,11 +61,21 @@ function resolveAuthBaseUrl() {
 
 function getAuthPool() {
   if (!globalForAuth.__warungosAuthPool) {
+    let connStr =
+      process.env.DATABASE_URL ??
+      process.env.POSTGRES_URL ??
+      "postgresql://postgres:postgres@127.0.0.1:5432/warungos";
+
+    // Self-healing: redirect Supabase session mode (port 5432) to transaction mode (port 6543)
+    // to avoid EMAXCONNSESSION errors on serverless platforms like Vercel.
+    if (connStr.includes("pooler.supabase.com:5432")) {
+      connStr = connStr.replace("pooler.supabase.com:5432", "pooler.supabase.com:6543");
+    }
+
     globalForAuth.__warungosAuthPool = new Pool({
-      connectionString:
-        process.env.DATABASE_URL ??
-        process.env.POSTGRES_URL ??
-        "postgresql://postgres:postgres@127.0.0.1:5432/warungos",
+      connectionString: connStr,
+      max: 2,
+      idleTimeoutMillis: 10000,
     });
   }
 

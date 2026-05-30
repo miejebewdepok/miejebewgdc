@@ -499,12 +499,14 @@ export function AppStateProvider({
     const filling = line.filling;
     const size = line.size;
     const isCabang2 = sessionUserId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5";
-    const isBypassed = ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice', ...(isCabang2 ? ['Tea Series'] : [])].includes(product.category);
+    const isBypassed = isCabang2 
+      ? product.category === 'Tea Series'
+      : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(product.category);
     
     const spicySurcharge = isBypassed ? 0 : ((level === 4 || level === 5) ? 2000 : 0);
     
     const specialKeys = isCabang2 
-      ? ["Ceker", "Pangsit Goreng", "Telur"] 
+      ? ["Ceker", "Kulit Ayam", "Pangsit Goreng", "Telur"] 
       : ["Beef Slice", "Keju Slice", "Telur"];
 
     const specialToppings = toppings.filter((t) => specialKeys.includes(t));
@@ -521,6 +523,7 @@ export function AppStateProvider({
     specialToppings.forEach((t) => {
       if (t === "Beef Slice") specialSurcharge += 2500;
       else if (t === "Ceker") specialSurcharge += 2500;
+      else if (t === "Kulit Ayam") specialSurcharge += 2500;
       else if (t === "Pangsit Goreng") specialSurcharge += 2500;
       else if (t === "Telur") specialSurcharge += 4000;
       else if (t === "Keju Slice") specialSurcharge += 3000;

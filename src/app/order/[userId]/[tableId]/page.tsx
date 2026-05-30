@@ -91,6 +91,7 @@ export default function CustomerOrderPage(props: {
         "Otak-Otak",
         "Cireng",
         "Ceker",
+        "Kulit Ayam",
         "Pangsit Goreng",
         "Telur"
       ]
@@ -410,16 +411,18 @@ export default function CustomerOrderPage(props: {
 
   // Surcharge calculator matching cashier logic
   const calculateConfiguredPrice = (product: Product, level: number, toppings: string[], filling?: string, size?: string) => {
-    const isBypassed = ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice", ...(isCabang2 ? ["Tea Series"] : [])].includes(product.category);
+    const isBypassed = isCabang2 
+      ? product.category === "Tea Series"
+      : ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(product.category);
     if (isBypassed) return product.sellPrice;
 
     // Spicy surcharge ONLY for non-Kebab, non-Lumpia Beef, non-bypassed
-    const isSpicySurcharged = !["Kebab", "Lumpia Beef", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice", ...(isCabang2 ? ["Tea Series"] : [])].includes(product.category);
+    const isSpicySurcharged = !isBypassed && product.category !== "Kebab" && product.category !== "Lumpia Beef";
     const spicySurcharge = (isSpicySurcharged && (level === 4 || level === 5)) ? 2000 : 0;
 
     // Toppings surcharge logic
     const specialKeys = isCabang2 
-      ? ["Ceker", "Pangsit Goreng", "Telur"] 
+      ? ["Ceker", "Kulit Ayam", "Pangsit Goreng", "Telur"] 
       : ["Beef Slice", "Keju Slice", "Telur"];
 
     const specialToppings = toppings.filter((t) => specialKeys.includes(t));
@@ -436,6 +439,7 @@ export default function CustomerOrderPage(props: {
     specialToppings.forEach((t) => {
       if (t === "Beef Slice") specialSurcharge += 2500;
       else if (t === "Ceker") specialSurcharge += 2500;
+      else if (t === "Kulit Ayam") specialSurcharge += 2500;
       else if (t === "Pangsit Goreng") specialSurcharge += 2500;
       else if (t === "Telur") specialSurcharge += 4000;
       else if (t === "Keju Slice") specialSurcharge += 3000;
@@ -462,7 +466,9 @@ export default function CustomerOrderPage(props: {
 
   // Add to cart trigger
   const handleAddClick = (product: Product) => {
-    const isBypassed = ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice", ...(isCabang2 ? ["Tea Series"] : [])].includes(product.category);
+    const isBypassed = isCabang2 
+      ? product.category === "Tea Series"
+      : ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(product.category);
     if (isBypassed) {
       // Direct add to cart bypass customization
       const cartItemId = `${product.id}-lvl0-`;
@@ -1210,7 +1216,7 @@ export default function CustomerOrderPage(props: {
                   <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1 no-scrollbar">
                     {toppingsList.map((t) => {
                       const isPremium = isCabang2 
-                        ? ["Ceker", "Pangsit Goreng", "Telur"].includes(t)
+                        ? ["Ceker", "Kulit Ayam", "Pangsit Goreng", "Telur"].includes(t)
                         : ["Beef Slice", "Keju Slice", "Telur"].includes(t);
                       const premiumPrice = isCabang2 
                         ? (t === "Telur" ? 4000 : 2500)
@@ -1300,7 +1306,10 @@ export default function CustomerOrderPage(props: {
                     <div className="overflow-hidden flex-1">
                       <h4 className="text-xs font-bold text-white truncate">{item.product.name}</h4>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {item.product.category !== "Snack" && item.product.category !== "Qalla Coffee" && item.product.category !== "Qalla Tea" && (
+                        {!(isCabang2 
+                          ? item.product.category === "Tea Series" 
+                          : ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice", "Kebab", "Lumpia Beef"].includes(item.product.category)
+                        ) && (
                           <span className="text-[8px] font-black bg-red-500/10 text-red-400 px-1 py-0.5 rounded uppercase font-mono">
                             Lvl {item.spicyLevel}
                           </span>

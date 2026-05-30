@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { CartItem } from '@/lib/types';
 import { Trash2, Plus, Minus, Receipt, Save, RefreshCw, Flame, X } from 'lucide-react';
+import { useSession } from '@/lib/auth-client';
 
 interface CartSectionProps {
   cartItems: CartItem[];
@@ -24,6 +25,10 @@ export default function CartSection({
   onSaveBill,
   onCloseMobile
 }: CartSectionProps) {
+  const { data: session } = useSession();
+  const userEmail = session?.user?.email;
+  const isCabang2 = userEmail === "miejebew.depok@gmail.com";
+
   const [billNamePrompt, setBillNamePrompt] = useState(false);
   const [billName, setBillName] = useState('');
   const [activeCustomer, setActiveCustomer] = useState<string | null>(null);
@@ -116,16 +121,21 @@ export default function CartSection({
                     {item.product?.name || 'Menu'}
                   </p>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-red-500/15 text-red-500 border border-red-500/10 uppercase tracking-tight">
-                      🔥 {(() => {
-                        if (item.product?.category === 'Kebab' || item.product?.category === 'Lumpia Beef') {
-                          if (item.spicyLevel === 0) return "Tidak Pedas";
-                          if (item.spicyLevel === 1) return "Sedang";
-                          if (item.spicyLevel === 2) return "Pedas";
-                        }
-                        return `Lvl ${item.spicyLevel ?? 0}`;
-                      })()}
-                    </span>
+                    {!(isCabang2
+                      ? item.product?.category === 'Tea Series'
+                      : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice', 'Kebab', 'Lumpia Beef'].includes(item.product?.category)
+                    ) && (
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-red-500/15 text-red-500 border border-red-500/10 uppercase tracking-tight">
+                        🔥 {(() => {
+                          if (item.product?.category === 'Kebab' || item.product?.category === 'Lumpia Beef') {
+                            if (item.spicyLevel === 0) return "Tidak Pedas";
+                            if (item.spicyLevel === 1) return "Sedang";
+                            if (item.spicyLevel === 2) return "Pedas";
+                          }
+                          return `Lvl ${item.spicyLevel ?? 0}`;
+                        })()}
+                      </span>
+                    )}
                     {item.toppings && item.toppings.length > 0 && (
                       <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 border border-yellow-500/10 uppercase tracking-tight">
                         🍜 {(() => {

@@ -586,7 +586,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
   };
 
   const handleDeleteClaim = async (id: string, name: string) => {
-    if (!confirm(`Apakah Anda yakin ingin menghapus data klaim milik "${name}"? Pelanggan tersebut akan bisa mengklaim promo Jasmine Tea gratis kembali.`)) {
+    if (!confirm(`Apakah Anda yakin ingin menghapus data klaim milik "${name}"? Pelanggan tersebut akan bisa mengklaim promo ${userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5" ? "Es Teh Tawar" : "Jasmine Tea"} gratis kembali.`)) {
       return;
     }
     try {
@@ -1082,7 +1082,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                   <Smartphone className="w-8 h-8 text-slate-450 dark:text-slate-600 mx-auto mb-2" />
                   <span className="text-xs font-bold text-slate-400 block">Belum Ada Klaim Promo</span>
                   <p className="text-[10px] text-slate-555 dark:text-slate-500 mt-1 max-w-[250px] mx-auto leading-relaxed">
-                    Kontak WhatsApp & Email pelanggan yang mengklaim Jasmine Tea gratis saat self-order akan otomatis muncul di sini.
+                    Kontak WhatsApp & Email pelanggan yang mengklaim {userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5" ? "Es Teh Tawar" : "Jasmine Tea"} gratis saat self-order akan otomatis muncul di sini.
                   </p>
                 </div>
               ) : (

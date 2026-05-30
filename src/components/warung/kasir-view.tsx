@@ -213,6 +213,9 @@ export function KasirView() {
       'Qalla Coffee': 5,
       'Qalla Tea':    6,
       'Qalla Juice':  7,
+      'Mie Tek Tek':  1,
+      'Pangsit':      2,
+      'Tea Series':   3,
     };
 
     list.sort((a, b) => {

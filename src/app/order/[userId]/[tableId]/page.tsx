@@ -265,12 +265,6 @@ export default function CustomerOrderPage(props: {
             ☕ Qalla Coffee
           </span>
         );
-            case "Tea Series":
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-400 border border-teal-500/15 uppercase tracking-wider font-mono">
-            🍃 Tea Series
-          </span>
-        );
       case "Qalla Tea":
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-400 border border-teal-500/15 uppercase tracking-wider font-mono">

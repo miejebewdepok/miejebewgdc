@@ -51,6 +51,8 @@ export default function CustomerOrderPage(props: {
   const rawTableId = resolvedParams.tableId;
   const tableId = decodeURIComponent(rawTableId);
   const tableNumOnly = tableId.replace(/^(meja|order)[\s\-_]*/i, "");
+  
+  const isCabang2 = userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5";
 
   // States
   const [loading, setLoading] = useState(true);
@@ -81,20 +83,31 @@ export default function CustomerOrderPage(props: {
   const [lastBillName, setLastBillName] = useState("");
   const [promoEarned, setPromoEarned] = useState(false);
 
-  const toppingsList = [
-    "Bakso",
-    "Bakso Ikan",
-    "Sosis",
-    "Nugget",
-    "Kornet",
-    "Otak-Otak",
-    "Tahu Aci",
-    "Scallop",
-    "Cireng",
-    "Beef Slice",
-    "Keju Slice",
-    "Telur"
-  ];
+  const toppingsList = isCabang2
+    ? [
+        "Bakso",
+        "Sosis",
+        "Nugget",
+        "Otak-Otak",
+        "Cireng",
+        "Ceker",
+        "Pangsit Goreng",
+        "Telur"
+      ]
+    : [
+        "Bakso",
+        "Bakso Ikan",
+        "Sosis",
+        "Nugget",
+        "Kornet",
+        "Otak-Otak",
+        "Tahu Aci",
+        "Scallop",
+        "Cireng",
+        "Beef Slice",
+        "Keju Slice",
+        "Telur"
+      ];
 
   // Load products catalog from public API
   useEffect(() => {
@@ -203,6 +216,24 @@ export default function CustomerOrderPage(props: {
 
   const getSubCategoryBadge = (category: string) => {
     switch (category) {
+      case "Mie Tek Tek":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-400 border border-red-500/15 uppercase tracking-wider font-mono">
+            🍜 Mie Tek Tek
+          </span>
+        );
+      case "Pangsit":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/15 uppercase tracking-wider font-mono">
+            🥟 Pangsit
+          </span>
+        );
+      case "Tea Series":
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-400 border border-teal-500/15 uppercase tracking-wider font-mono">
+            🍃 Tea Series
+          </span>
+        );
       case "Mie Pedas":
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-400 border border-red-500/15 uppercase tracking-wider font-mono">
@@ -379,16 +410,20 @@ export default function CustomerOrderPage(props: {
 
   // Surcharge calculator matching cashier logic
   const calculateConfiguredPrice = (product: Product, level: number, toppings: string[], filling?: string, size?: string) => {
-    const isBypassed = ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(product.category);
+    const isBypassed = ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice", ...(isCabang2 ? ["Tea Series"] : [])].includes(product.category);
     if (isBypassed) return product.sellPrice;
 
     // Spicy surcharge ONLY for non-Kebab, non-Lumpia Beef, non-bypassed
-    const isSpicySurcharged = !["Kebab", "Lumpia Beef", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(product.category);
+    const isSpicySurcharged = !["Kebab", "Lumpia Beef", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice", ...(isCabang2 ? ["Tea Series"] : [])].includes(product.category);
     const spicySurcharge = (isSpicySurcharged && (level === 4 || level === 5)) ? 2000 : 0;
 
     // Toppings surcharge logic
-    const specialToppings = toppings.filter((t) => ["Beef Slice", "Keju Slice", "Telur"].includes(t));
-    const standardToppings = toppings.filter((t) => !["Beef Slice", "Keju Slice", "Telur"].includes(t));
+    const specialKeys = isCabang2 
+      ? ["Ceker", "Pangsit Goreng", "Telur"] 
+      : ["Beef Slice", "Keju Slice", "Telur"];
+
+    const specialToppings = toppings.filter((t) => specialKeys.includes(t));
+    const standardToppings = toppings.filter((t) => !specialKeys.includes(t));
 
     const stdCount = standardToppings.length;
     const stdSurcharge = stdCount === 3 
@@ -400,6 +435,8 @@ export default function CustomerOrderPage(props: {
     let specialSurcharge = 0;
     specialToppings.forEach((t) => {
       if (t === "Beef Slice") specialSurcharge += 2500;
+      else if (t === "Ceker") specialSurcharge += 2500;
+      else if (t === "Pangsit Goreng") specialSurcharge += 2500;
       else if (t === "Telur") specialSurcharge += 4000;
       else if (t === "Keju Slice") specialSurcharge += 3000;
     });
@@ -425,7 +462,7 @@ export default function CustomerOrderPage(props: {
 
   // Add to cart trigger
   const handleAddClick = (product: Product) => {
-    const isBypassed = ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(product.category);
+    const isBypassed = ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice", ...(isCabang2 ? ["Tea Series"] : [])].includes(product.category);
     if (isBypassed) {
       // Direct add to cart bypass customization
       const cartItemId = `${product.id}-lvl0-`;
@@ -752,10 +789,10 @@ export default function CustomerOrderPage(props: {
 
         {/* Sub Category Selector */}
         {activeCategory !== "Semua" && (
-          <div className={activeCategory === "Makanan" ? "grid grid-cols-4 gap-1.5" : "grid grid-cols-3 gap-2"}>
+          <div className={activeCategory === "Makanan" ? (isCabang2 ? "grid grid-cols-2 gap-1.5" : "grid grid-cols-4 gap-1.5") : (isCabang2 ? "grid grid-cols-1 gap-2" : "grid grid-cols-3 gap-2")}>
             {(activeCategory === "Makanan"
-              ? ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack"]
-              : ["Qalla Tea", "Qalla Coffee", "Qalla Juice"]
+              ? (isCabang2 ? ["Mie Tek Tek", "Pangsit"] : ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack"])
+              : (isCabang2 ? ["Tea Series"] : ["Qalla Tea", "Qalla Coffee", "Qalla Juice"])
             ).map((subCat) => {
               const isSelected = activeSubCategory === subCat;
               return (
@@ -1172,8 +1209,12 @@ export default function CustomerOrderPage(props: {
                   </label>
                   <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1 no-scrollbar">
                     {toppingsList.map((t) => {
-                      const isPremium = ["Beef Slice", "Keju Slice", "Telur"].includes(t);
-                      const premiumPrice = t === "Beef Slice" ? 2500 : t === "Telur" ? 4000 : 3000;
+                      const isPremium = isCabang2 
+                        ? ["Ceker", "Pangsit Goreng", "Telur"].includes(t)
+                        : ["Beef Slice", "Keju Slice", "Telur"].includes(t);
+                      const premiumPrice = isCabang2 
+                        ? (t === "Telur" ? 4000 : 2500)
+                        : (t === "Beef Slice" ? 2500 : t === "Telur" ? 4000 : 3000);
                       return (
                         <button
                           key={t}

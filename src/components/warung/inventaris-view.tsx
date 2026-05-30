@@ -11,9 +11,11 @@ export function InventarisView() {
   const userEmail = session?.user?.email;
 
   const defaultCategories = useMemo(() => {
+    if (userEmail === "miejebew.depok@gmail.com") {
+      return ["Mie Tek Tek", "Pangsit", "Tea Series"];
+    }
     if (
       userEmail === "taufiqrusdhi.ez@gmail.com" ||
-      userEmail === "miejebew.depok@gmail.com" ||
       userEmail === "miejebew.crew@gmail.com"
     ) {
       return ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"];
@@ -39,7 +41,13 @@ export function InventarisView() {
       }
 
       if (saved) {
-        setLocalCategories(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        if (userEmail === "miejebew.depok@gmail.com" && parsed.includes("Mie Pedas")) {
+          setLocalCategories(defaultCategories);
+          localStorage.setItem(storageKey, JSON.stringify(defaultCategories));
+        } else {
+          setLocalCategories(parsed);
+        }
       } else {
         setLocalCategories(defaultCategories);
       }

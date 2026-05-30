@@ -118,7 +118,7 @@ export async function POST(
       successURL.searchParams.set("mode", "signin");
       successURL.searchParams.set(
         "success",
-        "Pendaftaran berhasil! Akun Anda sedang menunggu persetujuan dari taufiqrusdhi.ez@gmail.com. Silakan hubungi pemilik untuk mengaktifkan akses masuk Anda."
+        "Registration successful! Your account is pending approval by RP Group. Please contact RP Group to activate your access."
       );
       return NextResponse.redirect(successURL, { status: 303 });
     }

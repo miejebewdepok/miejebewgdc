@@ -109,7 +109,7 @@ export const auth = betterAuth({
               // Block sign-in if the user is explicitly set to not approved
               if (user.isApproved === false) {
                 throw new APIError("FORBIDDEN", {
-                  message: "Akun Anda belum disetujui oleh pemilik (taufiqrusdhi.ez@gmail.com). Silakan hubungi pemilik untuk mengaktifkan akses.",
+                  message: "Your account is pending approval by RP Group. Please contact RP Group to activate your access.",
                 });
               }
             }

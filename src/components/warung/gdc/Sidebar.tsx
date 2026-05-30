@@ -25,6 +25,8 @@ interface SidebarProps {
   onThemeChange: (theme: 'dark' | 'light') => void;
   userProfileName?: string;
   userProfileImage?: string;
+  storeName?: string;
+  storeLogo?: string;
 }
 
 export default function Sidebar({ 
@@ -35,7 +37,9 @@ export default function Sidebar({
   theme,
   onThemeChange,
   userProfileName = 'Andi Budiman',
-  userProfileImage
+  userProfileImage,
+  storeName = 'Mie Jebew GDC',
+  storeLogo
 }: SidebarProps) {
   
   const formatRupiah = (val: number) => {
@@ -90,13 +94,16 @@ export default function Sidebar({
     <aside className="w-full lg:w-64 h-full bg-sidebar/80 dark:bg-slate-950/45 backdrop-blur-xl border-r border-sidebar-border/40 dark:border-white/10 flex flex-col justify-between p-6 z-20 shrink-0 select-none text-sidebar-foreground transition-colors duration-300">
       {/* Brand & Cashier Title */}
       <div className="flex flex-col gap-8">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 border border-sidebar-border/30 dark:border-white/10 bg-white shadow-md shadow-red-500/10">
-            <img src="/logo.png" alt="Mie Jebew Logo" className="w-full h-full object-cover" />
+        <div className="flex items-center gap-3 animate-fade-in">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 border border-sidebar-border/30 dark:border-white/10 bg-white shadow-md shadow-red-500/10 transition-all">
+            <img src={storeLogo || "/logo.png"} alt="Mie Jebew Logo" className="w-full h-full object-cover" />
           </div>
           <div>
             <span className="text-[10px] font-extrabold text-sidebar-foreground/60 dark:text-slate-400 block tracking-widest uppercase">RESTO SYSTEM</span>
-            <span className="text-[15px] font-black text-foreground dark:text-white tracking-tight leading-none">Mie Jebew GDC<span className="text-red-500">.</span></span>
+            <span className="text-[15px] font-black text-foreground dark:text-white tracking-tight leading-none">
+              {storeName}
+              <span className="text-red-500">.</span>
+            </span>
           </div>
         </div>
 

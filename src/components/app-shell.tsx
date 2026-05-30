@@ -29,6 +29,18 @@ export function AppShell({
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const currentName = settings.merchantName || settings.storeName;
+      if (currentName) {
+        localStorage.setItem("last_logged_in_store_name", currentName);
+      }
+      if (settings.userProfileImage) {
+        localStorage.setItem("last_logged_in_store_logo", settings.userProfileImage);
+      }
+    }
+  }, [settings.merchantName, settings.storeName, settings.userProfileImage]);
+
   const theme = (mounted ? nextTheme : 'dark') === 'light' ? 'light' : 'dark';
 
   const totalSalesToday = useMemo(() => {
@@ -72,6 +84,8 @@ export function AppShell({
           onThemeChange={setTheme}
           userProfileName={settings.ownerName || "Kasir"}
           userProfileImage={settings.userProfileImage}
+          storeName={settings.merchantName || settings.storeName || "Mie Jebew GDC"}
+          storeLogo={settings.userProfileImage}
         />
       </div>
 
@@ -112,16 +126,24 @@ export function AppShell({
                   onThemeChange={setTheme}
                   userProfileName={settings.ownerName || "Kasir"}
                   userProfileImage={settings.userProfileImage}
+                  storeName={settings.merchantName || settings.storeName || "Mie Jebew GDC"}
+                  storeLogo={settings.userProfileImage}
                 />
               </SheetContent>
             </Sheet>
             
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 bg-red-600 rounded-lg flex items-center justify-center shadow-md">
-                <Store className="w-4 h-4 text-white" />
+              <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0 border border-white/10 bg-white dark:bg-slate-900 flex items-center justify-center shadow-md">
+                {settings.userProfileImage ? (
+                  <img src={settings.userProfileImage} alt="Logo" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-red-600 flex items-center justify-center">
+                    <Store className="w-4 h-4 text-white" />
+                  </div>
+                )}
               </div>
               <span className="text-sm font-black text-foreground dark:text-white uppercase tracking-tight">
-                MIE JEBEW GDC
+                {settings.merchantName || settings.storeName || "MIE JEBEW GDC"}
               </span>
             </div>
           </div>

@@ -37,6 +37,23 @@ export function AuthScreen() {
   const authError = searchParams.get("error");
   const authSuccess = searchParams.get("success");
   const [mode, setMode] = useState<AuthMode>(authSuccess ? "signin" : queryMode);
+  
+  const [cachedStoreName, setCachedStoreName] = useState("MIE JEBEW GDC");
+  const [cachedStoreLogo, setCachedStoreLogo] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedName = localStorage.getItem("last_logged_in_store_name");
+      const savedLogo = localStorage.getItem("last_logged_in_store_logo");
+      if (savedName) {
+        setCachedStoreName(savedName);
+      }
+      if (savedLogo) {
+        setCachedStoreLogo(savedLogo);
+      }
+    }
+  }, []);
+
   const [showPassword, setShowPassword] = useState(false);
   const [signInForm, setSignInForm] = useState({
     email: "",
@@ -77,12 +94,18 @@ export function AuthScreen() {
       <div className="w-full max-w-md relative z-10 flex flex-col gap-6 items-center">
         
         {/* Logo & Simple Header */}
-        <div className="flex flex-col items-center text-center gap-2 mb-2">
-          <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-red-600 to-amber-500 shadow-[0_0_25px_rgba(239,68,68,0.45)] animate-bounce duration-[3000ms]">
-            <Flame className="size-7 text-white" />
+        <div className="flex flex-col items-center text-center gap-2 mb-2 animate-fade-in">
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-red-600 to-amber-500 shadow-[0_0_25px_rgba(239,68,68,0.45)] animate-bounce duration-[3000ms] overflow-hidden border border-white/10 bg-white">
+            {cachedStoreLogo ? (
+              <img src={cachedStoreLogo} alt="Logo" className="w-full h-full object-cover" />
+            ) : (
+              <Flame className="size-7 text-white" />
+            )}
           </div>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-sm font-black uppercase tracking-[0.25em] bg-gradient-to-r from-red-500 to-amber-400 bg-clip-text text-transparent">MIE JEBEW GDC</span>
+            <span className="text-sm font-black uppercase tracking-[0.25em] bg-gradient-to-r from-red-500 to-amber-400 bg-clip-text text-transparent">
+              {cachedStoreName}
+            </span>
             <span className="text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded-full uppercase">POS v2.0</span>
           </div>
           <p className="text-xs text-red-900/60 dark:text-slate-400 font-medium">Sistem Kasir POS & Restoran</p>

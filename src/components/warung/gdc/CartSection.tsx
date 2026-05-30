@@ -122,7 +122,7 @@ export default function CartSection({
                   </p>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {!(isCabang2
-                      ? item.product?.category === 'Tea Series'
+                      ? (item.product?.category === 'Tea Series' || item.product?.category === 'Delight Series' || item.product?.category?.toLowerCase() === 'chocolatte')
                       : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice', 'Kebab', 'Lumpia Beef'].includes(item.product?.category)
                     ) && (
                       <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-red-500/15 text-red-500 border border-red-500/10 uppercase tracking-tight">

@@ -43,6 +43,7 @@ const CATEGORY_ICON: Record<string, React.ReactNode> = {
   'Mie Tek Tek':  <Flame      className="w-3 h-3" />,
   'Pangsit':      <Utensils   className="w-3 h-3" />,
   'Tea Series':   <Leaf       className="w-3 h-3" />,
+  'Delight Series': <Coffee   className="w-3 h-3" />,
 };
 
 export function KasirView() {
@@ -153,7 +154,7 @@ export function KasirView() {
 
   const defaultCategories = useMemo(() => {
     if (userEmail === "miejebew.depok@gmail.com") {
-      return ["Mie Tek Tek", "Pangsit", "Tea Series"];
+      return ["Mie Tek Tek", "Pangsit", "Tea Series", "Delight Series"];
     }
     if (
       userEmail === "taufiqrusdhi.ez@gmail.com" ||
@@ -198,10 +199,14 @@ export function KasirView() {
   // Dynamic categories list including default and products from DB
   const categories = useMemo(() => {
     const cats = localCategories !== null ? localCategories : defaultCategories;
+    const mappedProductCategories = products.map((p) => {
+      if (p.category?.toLowerCase() === "chocolatte") return "Delight Series";
+      return p.category;
+    });
     const list = Array.from(
       new Set([
         ...cats,
-        ...products.map((p) => p.category).filter(Boolean),
+        ...mappedProductCategories.filter(Boolean),
       ])
     );
 
@@ -216,6 +221,7 @@ export function KasirView() {
       'Mie Tek Tek':  1,
       'Pangsit':      2,
       'Tea Series':   3,
+      'Delight Series': 4,
     };
 
     list.sort((a, b) => {
@@ -248,7 +254,8 @@ export function KasirView() {
 
   const filteredProducts = useMemo(() => {
     return sortedProducts.filter((product) => {
-      const matchCategory = selectedCategory === "Semua" || product.category === selectedCategory;
+      const displayCategory = product.category?.toLowerCase() === "chocolatte" ? "Delight Series" : product.category;
+      const matchCategory = selectedCategory === "Semua" || displayCategory === selectedCategory;
       const matchSearch = product.name.toLowerCase().includes(catalogSearch.toLowerCase()) || 
                           product.description.toLowerCase().includes(catalogSearch.toLowerCase());
       return matchCategory && matchSearch;
@@ -381,7 +388,7 @@ export function KasirView() {
     const isSpecialCategory = line.product.category === 'Kebab' || line.product.category === 'Lumpia Beef';
     const isCabang2 = userEmail === "miejebew.depok@gmail.com";
     const isBypassed = isCabang2 
-      ? line.product.category === 'Tea Series'
+      ? (line.product.category === 'Tea Series' || line.product.category === 'Delight Series' || line.product.category?.toLowerCase() === 'chocolatte')
       : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(line.product.category);
     let notesArr: string[] = [];
     
@@ -574,7 +581,7 @@ export function KasirView() {
                     onAddToCart={() => {
                       const isCabang2 = userEmail === "miejebew.depok@gmail.com";
                       const isBypassedCategory = isCabang2 
-                        ? product.category === 'Tea Series'
+                        ? (product.category === 'Tea Series' || product.category === 'Delight Series' || product.category?.toLowerCase() === 'chocolatte')
                         : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(product.category);
                       if (isBypassedCategory) {
                         addToCart(product.id, 0, []);
@@ -641,7 +648,7 @@ export function KasirView() {
 
             {/* Spicy Levels */}
             {!(userEmail === "miejebew.depok@gmail.com"
-               ? customizingProduct.category === "Tea Series"
+               ? (customizingProduct.category === "Tea Series" || customizingProduct.category === "Delight Series" || customizingProduct.category?.toLowerCase() === "chocolatte")
                : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(customizingProduct.category)
              ) && (
               <div className="flex flex-col gap-2">
@@ -836,7 +843,7 @@ export function KasirView() {
 
             {/* Toppings Selection Accordion Header */}
              {!(userEmail === "miejebew.depok@gmail.com"
-               ? customizingProduct.category === "Tea Series"
+               ? (customizingProduct.category === "Tea Series" || customizingProduct.category === "Delight Series" || customizingProduct.category?.toLowerCase() === "chocolatte")
                : ['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(customizingProduct.category)
              ) && (
             <div className="flex flex-col gap-1.5">
@@ -998,7 +1005,7 @@ export function KasirView() {
                 <span className="font-mono">Rp {customizingProduct.sellPrice.toLocaleString('id-ID')}</span>
               </div>
               {(!(userEmail === "miejebew.depok@gmail.com"
-                ? customizingProduct.category === "Tea Series"
+                ? (customizingProduct.category === "Tea Series" || customizingProduct.category === "Delight Series" || customizingProduct.category?.toLowerCase() === "chocolatte")
                 : ['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(customizingProduct.category)
               ) && (selectedSpicyLevel === 4 || selectedSpicyLevel === 5)) && (
                 <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
@@ -1070,7 +1077,7 @@ export function KasirView() {
                   Rp {((customizingProduct.sellPrice + 
                         ((customizingProduct.name.toLowerCase().includes("spaghetti") && selectedSize === 'Double') ? 4000 : 0) +
                         ((!(userEmail === "miejebew.depok@gmail.com"
-                          ? customizingProduct.category === "Tea Series"
+                          ? (customizingProduct.category === "Tea Series" || customizingProduct.category === "Delight Series" || customizingProduct.category?.toLowerCase() === "chocolatte")
                           : ['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(customizingProduct.category)
                         ) && (selectedSpicyLevel === 4 || selectedSpicyLevel === 5)) ? 2000 : 0) + 
                         (customizingProduct.category === 'Kebab' && selectedSize === 'REGULER' && selectedFilling === 'Beef' ? 2000 : 0) +
@@ -1079,7 +1086,7 @@ export function KasirView() {
                         (customizingProduct.category === 'Lumpia Beef' && ['Beef Patty', 'Chicken Katsu'].includes(selectedFilling) ? 5000 : 0) +
                         (customizingProduct.category === 'Lumpia Beef' && selectedFilling === 'Special' ? 10000 : 0) +
                         (!(userEmail === "miejebew.depok@gmail.com"
-                          ? customizingProduct.category === "Tea Series"
+                          ? (customizingProduct.category === "Tea Series" || customizingProduct.category === "Delight Series" || customizingProduct.category?.toLowerCase() === "chocolatte")
                           : ['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(customizingProduct.category)
                         ) ? calculateToppingsSurcharge(selectedToppings) : 0))).toLocaleString('id-ID')}                </span>
               </div>

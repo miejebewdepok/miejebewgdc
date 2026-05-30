@@ -159,7 +159,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
   // Product sales breakdown (dynamically computed from all actual items sold)
   const salesByCategory = useMemo(() => {
     const defaultCats = isCabang2
-      ? ['Mie Tek Tek', 'Pangsit', 'Tea Series']
+      ? ['Mie Tek Tek', 'Pangsit', 'Tea Series', 'Delight Series']
       : ['Mie Pedas', 'Lumpia Beef', 'Kebab', 'Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'];
 
     const categories: Record<string, number> = {};
@@ -167,7 +167,11 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
 
     filteredTransactions.forEach(tx => {
       (tx.items || []).forEach(item => {
-        const category = item.category || item.product?.category || 'Lainnya';
+        let category = item.category || item.product?.category || 'Lainnya';
+        // Map Chocolatte → Delight Series for Cabang 2
+        if (isCabang2 && category.toLowerCase() === 'chocolatte') {
+          category = 'Delight Series';
+        }
         const price = item.sellPrice || item.unitPrice || 0;
         const totalLine = price * (item.quantity || 0);
         

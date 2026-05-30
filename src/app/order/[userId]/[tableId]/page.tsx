@@ -208,7 +208,9 @@ export default function CustomerOrderPage(props: {
       lower.includes("jus") ||
       lower.includes("water") ||
       lower.includes("es") ||
-      lower.includes("qalla")
+      lower.includes("qalla") ||
+      lower.includes("choco") ||
+      lower.includes("delight")
     );
   };
 
@@ -216,6 +218,14 @@ export default function CustomerOrderPage(props: {
   const categories = ["Semua", "Makanan", "Minuman"];
 
   const getSubCategoryBadge = (category: string) => {
+    const catLower = (category || "").toLowerCase();
+    if (category === "Delight Series" || catLower === "chocolatte") {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-gradient-to-r from-amber-600/20 to-orange-700/20 text-amber-400 border border-amber-600/15 uppercase tracking-wider font-mono">
+          🍫 Delight Series
+        </span>
+      );
+    }
     switch (category) {
       case "Mie Tek Tek":
         return (
@@ -348,23 +358,23 @@ export default function CustomerOrderPage(props: {
 
   const drinkProducts = useMemo(() => {
     const getDrinkWeight = (cat: string) => {
-      switch (cat) {
-        case "Tea Series":
-        case "Qalla Tea":
-          return 1;
-        case "Qalla Coffee":
-          return 2;
-        case "Qalla Juice":
-          return 3;
-        default:
-          return 4;
-      }
+      const lower = (cat || "").toLowerCase();
+      if (lower === "tea series" || lower === "qalla tea") return 1;
+      if (lower === "delight series" || lower === "chocolatte") return 2;
+      if (lower === "qalla coffee") return 3;
+      if (lower === "qalla juice") return 4;
+      return 5;
     };
 
     const filtered = products.filter((p) => isDrinkCategory(p.category));
     const subFiltered = activeSubCategory === "Semua"
       ? filtered
-      : filtered.filter((p) => p.category === activeSubCategory);
+      : filtered.filter((p) => {
+          if (activeSubCategory === "Delight Series") {
+            return p.category === "Delight Series" || p.category.toLowerCase() === "chocolatte";
+          }
+          return p.category === activeSubCategory;
+        });
 
     return subFiltered.sort((a, b) => {
       // 1. Sort by productOrder index first if available
@@ -413,7 +423,7 @@ export default function CustomerOrderPage(props: {
   // Surcharge calculator matching cashier logic
   const calculateConfiguredPrice = (product: Product, level: number, toppings: string[], filling?: string, size?: string) => {
     const isBypassed = isCabang2 
-      ? product.category === "Tea Series"
+      ? (product.category === "Tea Series" || product.category === "Delight Series" || product.category.toLowerCase() === "chocolatte")
       : ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(product.category);
     if (isBypassed) return product.sellPrice;
 
@@ -468,7 +478,7 @@ export default function CustomerOrderPage(props: {
   // Add to cart trigger
   const handleAddClick = (product: Product) => {
     const isBypassed = isCabang2 
-      ? product.category === "Tea Series"
+      ? (product.category === "Tea Series" || product.category === "Delight Series" || product.category.toLowerCase() === "chocolatte")
       : ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(product.category);
     if (isBypassed) {
       // Direct add to cart bypass customization
@@ -796,10 +806,10 @@ export default function CustomerOrderPage(props: {
 
         {/* Sub Category Selector */}
         {activeCategory !== "Semua" && (
-          <div className={activeCategory === "Makanan" ? (isCabang2 ? "grid grid-cols-2 gap-1.5" : "grid grid-cols-4 gap-1.5") : (isCabang2 ? "grid grid-cols-1 gap-2" : "grid grid-cols-3 gap-2")}>
+          <div className={activeCategory === "Makanan" ? (isCabang2 ? "grid grid-cols-2 gap-1.5" : "grid grid-cols-4 gap-1.5") : (isCabang2 ? "grid grid-cols-2 gap-2" : "grid grid-cols-3 gap-2")}>
             {(activeCategory === "Makanan"
               ? (isCabang2 ? ["Mie Tek Tek", "Pangsit"] : ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack"])
-              : (isCabang2 ? ["Tea Series"] : ["Qalla Tea", "Qalla Coffee", "Qalla Juice"])
+              : (isCabang2 ? ["Tea Series", "Delight Series"] : ["Qalla Tea", "Qalla Coffee", "Qalla Juice"])
             ).map((subCat) => {
               const isSelected = activeSubCategory === subCat;
               return (
@@ -1308,7 +1318,7 @@ export default function CustomerOrderPage(props: {
                       <h4 className="text-xs font-bold text-white truncate">{item.product.name}</h4>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {!(isCabang2 
-                          ? item.product.category === "Tea Series" 
+                          ? (item.product.category === "Tea Series" || item.product.category === "Delight Series" || item.product.category.toLowerCase() === "chocolatte") 
                           : ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice", "Kebab", "Lumpia Beef"].includes(item.product.category)
                         ) && (
                           <span className="text-[8px] font-black bg-red-500/10 text-red-400 px-1 py-0.5 rounded uppercase font-mono">

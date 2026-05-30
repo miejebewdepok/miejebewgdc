@@ -12,7 +12,7 @@ export function InventarisView() {
 
   const defaultCategories = useMemo(() => {
     if (userEmail === "miejebew.depok@gmail.com") {
-      return ["Mie Tek Tek", "Pangsit", "Tea Series"];
+      return ["Mie Tek Tek", "Pangsit", "Tea Series", "Delight Series"];
     }
     if (
       userEmail === "taufiqrusdhi.ez@gmail.com" ||
@@ -57,10 +57,14 @@ export function InventarisView() {
   // Keep categories updated with any new ones dynamically found in products and sort strictly
   const categories = useMemo(() => {
     const cats = localCategories !== null ? localCategories : defaultCategories;
+    const mappedProductCategories = products.map((p) => {
+      if (p.category?.toLowerCase() === "chocolatte") return "Delight Series";
+      return p.category;
+    });
     const list = Array.from(
       new Set([
         ...cats,
-        ...products.map((p) => p.category).filter(Boolean),
+        ...mappedProductCategories.filter(Boolean),
       ])
     );
 
@@ -75,6 +79,7 @@ export function InventarisView() {
       'Mie Tek Tek':  1,
       'Pangsit':      2,
       'Tea Series':   3,
+      'Delight Series': 4,
     };
 
     list.sort((a, b) => {

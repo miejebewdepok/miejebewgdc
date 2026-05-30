@@ -490,7 +490,7 @@ export function AppStateProvider({
           const filling = line.filling;
           const size = line.size;
           const isBypassed = isCabang2 
-            ? p.category === 'Tea Series'
+            ? (p.category === 'Tea Series' || p.category === 'Delight Series' || p.category.toLowerCase() === 'chocolatte')
             : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(p.category);
           const spicySurcharge = isBypassed ? 0 : ((level === 4 || level === 5) ? 2000 : 0);
           const specialKeys = isCabang2 
@@ -554,7 +554,7 @@ export function AppStateProvider({
     const size = line.size;
     const isCabang2 = sessionUserId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5";
     const isBypassed = isCabang2 
-      ? product.category === 'Tea Series'
+      ? (product.category === 'Tea Series' || product.category === 'Delight Series' || product.category.toLowerCase() === 'chocolatte')
       : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(product.category);
     
     const spicySurcharge = isBypassed ? 0 : ((level === 4 || level === 5) ? 2000 : 0);

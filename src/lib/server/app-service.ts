@@ -785,6 +785,9 @@ export async function createTransaction(
     const branchName = userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5"
       ? "Cabang 2 (Depok)"
       : "Cabang 1 (GDC)";
+    const branchCode = userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5"
+      ? "DEPOK"
+      : "GDC";
     const payload = {
       orderId: transaction.id,
       date: saleDate,
@@ -796,6 +799,8 @@ export async function createTransaction(
       profit: transaction.total - hpp,
       discount: 0,
       promoName: branchName,
+      branchCode,             // GDC atau DEPOK — field eksplisit untuk identifikasi cabang
+      sourceUserId: userId,   // userId asli dari Kasir untuk verifikasi
     };
     void fetch(raniaWebhookUrl, {
       method: "POST",

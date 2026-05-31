@@ -782,6 +782,9 @@ export async function createTransaction(
       .map((i) => `${i.productName} x${i.quantity}`)
       .join("\n");
     const saleDate = new Date(transaction.createdAt).toISOString().split("T")[0];
+    const branchName = userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5"
+      ? "Cabang 2 (Depok)"
+      : "Cabang 1 (GDC)";
     const payload = {
       orderId: transaction.id,
       date: saleDate,
@@ -792,7 +795,7 @@ export async function createTransaction(
       platformFee: 0,
       profit: transaction.total - hpp,
       discount: 0,
-      promoName: "",
+      promoName: branchName,
     };
     void fetch(raniaWebhookUrl, {
       method: "POST",

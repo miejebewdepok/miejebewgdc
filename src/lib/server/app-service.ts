@@ -770,6 +770,42 @@ export async function createTransaction(
     }
   }
 
+  // ── Kirim webhook ke Rania Finance (fire & forget) ──────────────────────
+  const raniaWebhookUrl = process.env.RANIA_FINANCE_WEBHOOK_URL;
+  const raniaWebhookSecret = process.env.RANIA_FINANCE_WEBHOOK_SECRET;
+  if (raniaWebhookUrl && raniaWebhookSecret) {
+    const hpp = transaction.items.reduce(
+      (sum, item) => sum + (item.costPrice ?? 0) * item.quantity,
+      0
+    );
+    const itemsText = transaction.items
+      .map((i) => `${i.productName} x${i.quantity}`)
+      .join("\n");
+    const saleDate = new Date(transaction.createdAt).toISOString().split("T")[0];
+    const payload = {
+      orderId: transaction.id,
+      date: saleDate,
+      channel: "Offline",
+      items: itemsText,
+      total: transaction.total,
+      hpp,
+      platformFee: 0,
+      profit: transaction.total - hpp,
+      discount: 0,
+      promoName: "",
+    };
+    void fetch(raniaWebhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-webhook-secret": raniaWebhookSecret,
+      },
+      body: JSON.stringify(payload),
+    }).catch((err) =>
+      console.error("[RANIA_WEBHOOK] Gagal kirim webhook transaksi:", err)
+    );
+  }
+
   return {
     transaction,
     products: nextState.products,

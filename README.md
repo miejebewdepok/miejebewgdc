@@ -52,7 +52,7 @@ npm run db:seed
 npm run db:studio
 ```
 
-## Verifikasi
+## Verifikasi 
 
 ```bash
 npm run lint

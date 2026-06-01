@@ -436,26 +436,40 @@ export default function CustomerOrderPage(props: {
     const spicySurcharge = (isSpicySurcharged && (level === 4 || level === 5)) ? 2000 : 0;
 
     // Toppings surcharge logic
+    const premiumKeys = isCabang2 ? ["Telur"] : ["Telur", "Keju Slice"];
     const specialKeys = isCabang2 
-      ? ["Telur"] 
-      : ["Beef Slice", "Keju Slice", "Telur"];
-
+      ? ["Ceker", "Kulit Ayam", "Pangsit Goreng"] 
+      : ["Beef Slice"];
+      
+    const premiumToppings = toppings.filter((t) => premiumKeys.includes(t));
     const specialToppings = toppings.filter((t) => specialKeys.includes(t));
-    const standardToppings = toppings.filter((t) => !specialKeys.includes(t));
-
-    const stdCount = standardToppings.length;
-    const stdSurcharge = stdCount === 3 
-      ? 5000 
-      : (stdCount === 7 
-        ? 10000 
-        : stdCount * 2000);
-
-    let specialSurcharge = 0;
-    specialToppings.forEach((t) => {
-      if (t === "Beef Slice") specialSurcharge += 2500;
-      else if (t === "Telur") specialSurcharge += 4000;
-      else if (t === "Keju Slice") specialSurcharge += 3000;
+    const promoToppings = toppings.filter((t) => !premiumKeys.includes(t) && !specialKeys.includes(t));
+    
+    // Calculate Promo Toppings with greedy standard logic (groups of 7 for 10k, groups of 3 for 5k, rest 2k each)
+    let promoSurcharge = 0;
+    let remCount = promoToppings.length;
+    
+    const sevens = Math.floor(remCount / 7);
+    promoSurcharge += sevens * 10000;
+    remCount %= 7;
+    
+    const threes = Math.floor(remCount / 3);
+    promoSurcharge += threes * 5000;
+    remCount %= 3;
+    
+    promoSurcharge += remCount * 2000;
+    
+    // Calculate Special Toppings (Rp 2.500 each)
+    const specialSurcharge = specialToppings.length * 2500;
+    
+    // Calculate Premium Toppings (Telur +4k, Keju Slice +3k)
+    let premiumSurcharge = 0;
+    premiumToppings.forEach((t) => {
+      if (t === "Telur") premiumSurcharge += 4000;
+      else if (t === "Keju Slice") premiumSurcharge += 3000;
     });
+
+    const totalToppingsSurcharge = promoSurcharge + specialSurcharge + premiumSurcharge;
 
     let fillingSurcharge = 0;
     if (product.category === 'Kebab') {
@@ -473,7 +487,7 @@ export default function CustomerOrderPage(props: {
     const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
     const spaghettiSurcharge = (isSpaghetti && size === "Double") ? 4000 : 0;
 
-    return product.sellPrice + spicySurcharge + stdSurcharge + specialSurcharge + fillingSurcharge + spaghettiSurcharge;
+    return product.sellPrice + spicySurcharge + totalToppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
   };
 
   // Add to cart trigger

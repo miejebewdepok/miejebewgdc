@@ -125,42 +125,46 @@ export function KasirView() {
 
   const calculateToppingsSurcharge = (toppings: string[]) => {
     const isCabang2 = userEmail === "miejebew.depok@gmail.com";
-    const premiumKeys = isCabang2 
-      ? ["Telur"] 
-      : ["Beef Slice", "Keju Slice", "Telur"];
+    
+    // Group toppings:
+    // 1. Premium Toppings (Telur is +4k for all, Keju Slice is +3k for Cabang 1)
+    // 2. Special Toppings (Ceker, Kulit Ayam, Pangsit Goreng are +2.5k for Cabang 2; Beef Slice is +2.5k for Cabang 1)
+    // 3. Promo Toppings (Everything else normally +2k, eligible for 3 for 5k and 7 for 10k)
+    
+    const premiumKeys = isCabang2 ? ["Telur"] : ["Telur", "Keju Slice"];
+    const specialKeys = isCabang2 
+      ? ["Ceker", "Kulit Ayam", "Pangsit Goreng"] 
+      : ["Beef Slice"];
       
     const premiumToppings = toppings.filter((t) => premiumKeys.includes(t));
-    const standardToppings = toppings.filter((t) => !premiumKeys.includes(t));
+    const specialToppings = toppings.filter((t) => specialKeys.includes(t));
+    const promoToppings = toppings.filter((t) => !premiumKeys.includes(t) && !specialKeys.includes(t));
     
-    const stdCount = standardToppings.length;
-    let stdSurcharge = 0;
+    // Calculate Promo Toppings with greedy standard logic (groups of 7 for 10k, groups of 3 for 5k, rest 2k each)
+    let promoSurcharge = 0;
+    let remCount = promoToppings.length;
     
-    if (stdCount === 3) {
-      stdSurcharge = 5000;
-    } else if (stdCount === 7) {
-      stdSurcharge = 10000;
-    } else {
-      standardToppings.forEach((t) => {
-        if (isCabang2) {
-          if (["Ceker", "Kulit Ayam", "Pangsit Goreng"].includes(t)) {
-            stdSurcharge += 2500;
-          } else {
-            stdSurcharge += 2000;
-          }
-        } else {
-          stdSurcharge += 2000;
-        }
-      });
-    }
-        
+    const sevens = Math.floor(remCount / 7);
+    promoSurcharge += sevens * 10000;
+    remCount %= 7;
+    
+    const threes = Math.floor(remCount / 3);
+    promoSurcharge += threes * 5000;
+    remCount %= 3;
+    
+    promoSurcharge += remCount * 2000;
+    
+    // Calculate Special Toppings (Rp 2.500 each)
+    const specialSurcharge = specialToppings.length * 2500;
+    
+    // Calculate Premium Toppings (Telur +4k, Keju Slice +3k)
     let premiumSurcharge = 0;
     premiumToppings.forEach((t) => {
-      if (t === "Beef Slice") premiumSurcharge += 2500;
-      else if (t === "Telur") premiumSurcharge += 4000;
+      if (t === "Telur") premiumSurcharge += 4000;
       else if (t === "Keju Slice") premiumSurcharge += 3000;
     });
     
-    return stdSurcharge + premiumSurcharge;
+    return promoSurcharge + specialSurcharge + premiumSurcharge;
   };
 
   const defaultCategories = useMemo(() => {

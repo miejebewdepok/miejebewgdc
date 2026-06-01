@@ -32,7 +32,9 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
   const { expenses, addExpense, deleteExpense, settings } = useAppState();
   const { data: session } = useSession();
   const userEmail = session?.user?.email;
-  const isCabang2 = userEmail === "miejebew.depok@gmail.com";
+  const isCabang2 = userEmail === "miejebew.depok@gmail.com" || 
+                    settings.storeName?.toLowerCase().includes("depok") || 
+                    settings.merchantName?.toLowerCase().includes("depok");
 
   const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month'>('today');
   const [activeTab, setActiveTab] = useState<'sales' | 'expenses' | 'shift'>('sales');
@@ -177,7 +179,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
   // Product sales breakdown (dynamically computed from all actual items sold)
   const salesByCategory = useMemo(() => {
     const defaultCats = isCabang2
-      ? ['Mie Tek Tek', 'Pangsit', 'Tea Series', 'Delight Series']
+      ? ['Mie Pedas', 'Mie Tek Tek', 'Pangsit', 'Tea Series', 'Delight Series']
       : ['Mie Pedas', 'Lumpia Beef', 'Kebab', 'Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'];
 
     const categories: Record<string, number> = {};

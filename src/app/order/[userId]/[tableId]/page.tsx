@@ -437,27 +437,22 @@ export default function CustomerOrderPage(props: {
 
     // Toppings surcharge logic
     const specialKeys = isCabang2 
-      ? ["Ceker", "Kulit Ayam", "Pangsit Goreng", "Telur"] 
+      ? ["Telur"] 
       : ["Beef Slice", "Keju Slice", "Telur"];
 
     const specialToppings = toppings.filter((t) => specialKeys.includes(t));
     const standardToppings = toppings.filter((t) => !specialKeys.includes(t));
 
     const stdCount = standardToppings.length;
-    const stdSurcharge = isCabang2 
-      ? 0 
-      : (stdCount === 3 
-        ? 5000 
-        : (stdCount === 7 
-          ? 10000 
-          : stdCount * 2000));
+    const stdSurcharge = stdCount === 3 
+      ? 5000 
+      : (stdCount === 7 
+        ? 10000 
+        : stdCount * 2000);
 
     let specialSurcharge = 0;
     specialToppings.forEach((t) => {
       if (t === "Beef Slice") specialSurcharge += 2500;
-      else if (t === "Ceker") specialSurcharge += 2500;
-      else if (t === "Kulit Ayam") specialSurcharge += 2500;
-      else if (t === "Pangsit Goreng") specialSurcharge += 2500;
       else if (t === "Telur") specialSurcharge += 4000;
       else if (t === "Keju Slice") specialSurcharge += 3000;
     });
@@ -1233,10 +1228,10 @@ export default function CustomerOrderPage(props: {
                   <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1 no-scrollbar">
                     {toppingsList.map((t) => {
                       const isPremium = isCabang2 
-                        ? ["Ceker", "Kulit Ayam", "Pangsit Goreng", "Telur"].includes(t)
+                        ? ["Telur"].includes(t)
                         : ["Beef Slice", "Keju Slice", "Telur"].includes(t);
                       const premiumPrice = isCabang2 
-                        ? (t === "Telur" ? 4000 : 2500)
+                        ? (t === "Telur" ? 4000 : 0)
                         : (t === "Beef Slice" ? 2500 : t === "Telur" ? 4000 : 3000);
                       return (
                         <button
@@ -1253,7 +1248,7 @@ export default function CustomerOrderPage(props: {
                           <span className={`text-[9.5px] font-mono font-bold leading-none mt-1 select-none ${
                             isPremium ? "text-yellow-400 font-extrabold" : "text-slate-500"
                           }`}>
-                            {isPremium ? `+${formatRupiah(premiumPrice)}` : (isCabang2 ? "Gratis" : "+Rp 2.000")}
+                            {isPremium ? `+${formatRupiah(premiumPrice)}` : "+Rp 2.000"}
                           </span>
                         </button>
                       );

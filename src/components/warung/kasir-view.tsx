@@ -125,33 +125,42 @@ export function KasirView() {
 
   const calculateToppingsSurcharge = (toppings: string[]) => {
     const isCabang2 = userEmail === "miejebew.depok@gmail.com";
-    const specialKeys = isCabang2 
-      ? ["Ceker", "Kulit Ayam", "Pangsit Goreng", "Telur"] 
+    const premiumKeys = isCabang2 
+      ? ["Telur"] 
       : ["Beef Slice", "Keju Slice", "Telur"];
       
-    const specialToppings = toppings.filter((t) => specialKeys.includes(t));
-    const standardToppings = toppings.filter((t) => !specialKeys.includes(t));
+    const premiumToppings = toppings.filter((t) => premiumKeys.includes(t));
+    const standardToppings = toppings.filter((t) => !premiumKeys.includes(t));
     
     const stdCount = standardToppings.length;
-    const stdSurcharge = isCabang2 
-      ? 0 
-      : (stdCount === 3 
-        ? 5000 
-        : (stdCount === 7 
-          ? 10000 
-          : stdCount * 2000));
+    let stdSurcharge = 0;
+    
+    if (stdCount === 3) {
+      stdSurcharge = 5000;
+    } else if (stdCount === 7) {
+      stdSurcharge = 10000;
+    } else {
+      standardToppings.forEach((t) => {
+        if (isCabang2) {
+          if (["Ceker", "Kulit Ayam", "Pangsit Goreng"].includes(t)) {
+            stdSurcharge += 2500;
+          } else {
+            stdSurcharge += 2000;
+          }
+        } else {
+          stdSurcharge += 2000;
+        }
+      });
+    }
         
-    let specialSurcharge = 0;
-    specialToppings.forEach((t) => {
-      if (t === "Beef Slice") specialSurcharge += 2500;
-      else if (t === "Ceker") specialSurcharge += 2500;
-      else if (t === "Kulit Ayam") specialSurcharge += 2500;
-      else if (t === "Pangsit Goreng") specialSurcharge += 2500;
-      else if (t === "Telur") specialSurcharge += 4000;
-      else if (t === "Keju Slice") specialSurcharge += 3000;
+    let premiumSurcharge = 0;
+    premiumToppings.forEach((t) => {
+      if (t === "Beef Slice") premiumSurcharge += 2500;
+      else if (t === "Telur") premiumSurcharge += 4000;
+      else if (t === "Keju Slice") premiumSurcharge += 3000;
     });
     
-    return stdSurcharge + specialSurcharge;
+    return stdSurcharge + premiumSurcharge;
   };
 
   const defaultCategories = useMemo(() => {
@@ -1016,18 +1025,45 @@ export function KasirView() {
                       >
                         <div className="flex flex-col text-left leading-tight min-w-0">
                           <span className="truncate block font-extrabold text-[10px]">{topping}</span>
-                          {((userEmail === "miejebew.depok@gmail.com"
-                            ? ["Ceker", "Kulit Ayam", "Pangsit Goreng", "Telur"]
-                            : ["Beef Slice", "Keju Slice", "Telur"]
-                          ).includes(topping)) ? (
-                            <span className="text-[8px] font-black text-amber-600 dark:text-amber-500 leading-none mt-0.5">
-                              +Rp {topping === "Telur" ? "4k" : (topping === "Keju Slice" ? "3k" : "2.5k")}
-                            </span>
-                          ) : (
-                            <span className="text-[8px] font-black text-slate-550 dark:text-slate-400 leading-none mt-0.5">
-                              {userEmail === "miejebew.depok@gmail.com" ? "Gratis" : "+Rp 2k"}
-                            </span>
-                          )}
+                          {(() => {
+                            const isCabang2 = userEmail === "miejebew.depok@gmail.com";
+                            if (topping === "Telur") {
+                              return (
+                                <span className="text-[8px] font-black text-yellow-500 leading-none mt-0.5 animate-pulse">
+                                  +Rp 4k (Premium)
+                                </span>
+                              );
+                            }
+                            if (isCabang2) {
+                              if (["Ceker", "Kulit Ayam", "Pangsit Goreng"].includes(topping)) {
+                                return (
+                                  <span className="text-[8px] font-black text-amber-600 dark:text-amber-500 leading-none mt-0.5">
+                                    +Rp 2.5k
+                                  </span>
+                                );
+                              }
+                            } else {
+                              if (topping === "Beef Slice") {
+                                return (
+                                  <span className="text-[8px] font-black text-yellow-500 leading-none mt-0.5">
+                                    +Rp 2.5k (Premium)
+                                  </span>
+                                );
+                              }
+                              if (topping === "Keju Slice") {
+                                return (
+                                  <span className="text-[8px] font-black text-yellow-500 leading-none mt-0.5">
+                                    +Rp 3k (Premium)
+                                  </span>
+                                );
+                              }
+                            }
+                            return (
+                              <span className="text-[8px] font-black text-slate-550 dark:text-slate-400 leading-none mt-0.5">
+                                +Rp 2k
+                              </span>
+                            );
+                          })()}
                         </div>
                         
                         {count === 0 ? (
@@ -1128,18 +1164,18 @@ export function KasirView() {
               {selectedToppings.length > 0 && (() => {
                 const totalSurcharge = calculateToppingsSurcharge(selectedToppings);
                 const isCabang2 = userEmail === "miejebew.depok@gmail.com";
-                const specialKeys = isCabang2 
-                  ? ["Ceker", "Kulit Ayam", "Pangsit Goreng", "Telur"] 
+                const premiumKeys = isCabang2 
+                  ? ["Telur"] 
                   : ["Beef Slice", "Keju Slice", "Telur"];
-                const specialToppings = selectedToppings.filter((t) => specialKeys.includes(t));
-                const standardToppings = selectedToppings.filter((t) => !specialKeys.includes(t));
+                const premiumToppings = selectedToppings.filter((t) => premiumKeys.includes(t));
+                const standardToppings = selectedToppings.filter((t) => !premiumKeys.includes(t));
                 const stdCount = standardToppings.length;
                 return (
                   <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
                     <span>
                       Tambahan {selectedToppings.length} Topping 
                       {stdCount > 0 && ` (${stdCount} Std${stdCount === 3 ? " Paket 3" : stdCount === 7 ? " Paket 7" : ""})`}
-                      {specialToppings.length > 0 && ` (${specialToppings.length} Premium)`}
+                      {premiumToppings.length > 0 && ` (${premiumToppings.length} Premium)`}
                     </span>
                     <span className="font-mono">
                       + Rp {totalSurcharge.toLocaleString('id-ID')}

@@ -24,7 +24,8 @@ interface ProductCardProps {
   isDragOver?: boolean;
 }
 
-export default function ProductCard({
+const ProductCard = React.memo(
+  function ProductCard({
   product,
   onAddToCart,
   isArrangeMode = false,
@@ -255,5 +256,22 @@ export default function ProductCard({
       )}
     </div>
   );
-}
+},
+  (prevProps, nextProps) => {
+    return (
+      prevProps.product.id === nextProps.product.id &&
+      prevProps.product.name === nextProps.product.name &&
+      prevProps.product.stock === nextProps.product.stock &&
+      prevProps.product.sellPrice === nextProps.product.sellPrice &&
+      prevProps.product.imageUrl === nextProps.product.imageUrl &&
+      prevProps.product.category === nextProps.product.category &&
+      prevProps.isArrangeMode === nextProps.isArrangeMode &&
+      prevProps.index === nextProps.index &&
+      prevProps.isDragging === nextProps.isDragging &&
+      prevProps.isDragOver === nextProps.isDragOver
+    );
+  }
+);
+
+export default ProductCard;
 

@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, gte, inArray } from "drizzle-orm";
 import { db, pool } from "@/db/client";
 import {
   debts,
@@ -314,6 +314,10 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
     throw new Error("Profil warung tidak ditemukan.");
   }
 
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - 45);
+  const cutoffIso = cutoffDate.toISOString();
+
   const productRows = await db
     .select()
     .from(products)
@@ -323,7 +327,12 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
   const transactionRows = await db
     .select()
     .from(transactions)
-    .where(eq(transactions.userId, userId))
+    .where(
+      and(
+        eq(transactions.userId, userId),
+        gte(transactions.createdAt, cutoffIso)
+      )
+    )
     .orderBy(desc(transactions.createdAt));
 
   const transactionIds = transactionRows.map((transaction) => transaction.id);
@@ -344,7 +353,12 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
   const expenseRows = await db
     .select()
     .from(expenses)
-    .where(eq(expenses.userId, userId))
+    .where(
+      and(
+        eq(expenses.userId, userId),
+        gte(expenses.createdAt, cutoffIso)
+      )
+    )
     .orderBy(desc(expenses.createdAt));
 
   const savedBillRows = await db

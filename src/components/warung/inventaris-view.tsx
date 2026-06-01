@@ -164,7 +164,7 @@ export function InventarisView() {
               sellPrice: p.price ?? 0,
               stock: p.stock !== undefined ? p.stock : 50,
               minimumStock: 5,
-              description: "Menu asli Mie Jebew GDC",
+              description: p.description || "Menu asli Mie Jebew GDC",
               imageUrl: p.image || null,
             });
           } catch (err: any) {
@@ -181,7 +181,7 @@ export function InventarisView() {
               sellPrice: p.price ?? p.sellPrice ?? 0,
               stock: p.stock !== undefined ? p.stock : 50,
               minimumStock: 5,
-              description: "Menu asli Mie Jebew GDC",
+              description: p.description !== undefined ? p.description : "Menu asli Mie Jebew GDC",
               imageUrl: p.image || p.imageUrl || null,
             });
           } catch (err: any) {

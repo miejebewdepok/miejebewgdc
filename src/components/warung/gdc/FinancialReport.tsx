@@ -905,7 +905,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
 
             {/* Progress stack */}
             <div className="flex-1 flex flex-col gap-5 justify-center mb-6">
-              {salesByCategory.slice(0, 6).map((category, index) => {
+              {salesByCategory.slice(0, 8).map((category, index) => {
                 const maxCategoryVal = Math.max(...salesByCategory.map(c => c.value)) || 1;
                 const barPercent = maxCategoryVal === 0 ? 0 : Math.round((category.value / maxCategoryVal) * 100);
 
@@ -915,6 +915,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
                   'from-orange-500 to-amber-400',
                   'from-amber-500 to-yellow-400',
                   'from-yellow-500 to-yellow-300',
+                  'from-emerald-500 to-teal-400',
                   'from-slate-400 to-slate-300'
                 ];
                 const gradientClass = gradients[Math.min(index, gradients.length - 1)];

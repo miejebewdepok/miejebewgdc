@@ -12,7 +12,7 @@ export function InventarisView() {
 
   const defaultCategories = useMemo(() => {
     if (userEmail === "miejebew.depok@gmail.com") {
-      return ["Mie Tek Tek", "Pangsit", "Tea Series", "Delight Series"];
+      return ["Mie Pedas", "Mie Tek Tek", "Pangsit", "Tea Series", "Delight Series"];
     }
     if (
       userEmail === "taufiqrusdhi.ez@gmail.com" ||
@@ -42,7 +42,7 @@ export function InventarisView() {
 
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (userEmail === "miejebew.depok@gmail.com" && parsed.includes("Mie Pedas")) {
+        if (userEmail === "miejebew.depok@gmail.com" && !parsed.includes("Mie Pedas")) {
           setLocalCategories(defaultCategories);
           localStorage.setItem(storageKey, JSON.stringify(defaultCategories));
         } else {
@@ -70,16 +70,16 @@ export function InventarisView() {
 
     const CATEGORY_WEIGHT: Record<string, number> = {
       'Mie Pedas':    1,
-      'Lumpia Beef':  2,
-      'Kebab':        3,
-      'Snack':        4,
-      'Qalla Coffee': 5,
-      'Qalla Tea':    6,
-      'Qalla Juice':  7,
-      'Mie Tek Tek':  1,
-      'Pangsit':      2,
-      'Tea Series':   3,
-      'Delight Series': 4,
+      'Mie Tek Tek':  2,
+      'Pangsit':      3,
+      'Tea Series':   4,
+      'Delight Series': 5,
+      'Lumpia Beef':  12,
+      'Kebab':        13,
+      'Snack':        14,
+      'Qalla Coffee': 15,
+      'Qalla Tea':    16,
+      'Qalla Juice':  17,
     };
 
     list.sort((a, b) => {

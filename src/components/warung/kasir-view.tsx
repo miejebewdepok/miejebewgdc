@@ -412,7 +412,11 @@ export function KasirView() {
       }
     }
     if (line.filling) {
-      notesArr.push(`Varian Isi: ${line.filling}`);
+      if (line.product.name.toLowerCase().includes("risoles")) {
+        notesArr.push(`Rasa: ${line.filling}`);
+      } else {
+        notesArr.push(`Varian Isi: ${line.filling}`);
+      }
     }
     if (line.toppings && line.toppings.length > 0 && !isBypassed) {
       const counts: Record<string, number> = {};
@@ -585,7 +589,8 @@ export function KasirView() {
                       const isBypassedCategory = isCabang2 
                         ? (product.category === 'Tea Series' || product.category === 'Delight Series' || product.category?.toLowerCase() === 'chocolatte')
                         : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(product.category);
-                      if (isBypassedCategory) {
+                      const isRisoles = product.name.toLowerCase().includes("risoles");
+                      if (isBypassedCategory && !isRisoles) {
                         addToCart(product.id, 0, []);
                         toast.success(`${product.name} berhasil ditambahkan ke keranjang.`);
                         return;
@@ -595,7 +600,7 @@ export function KasirView() {
                       setSelectedSpicyLevel(0);
                       setSelectedToppings([]);
                       setIsToppingsExpanded(false);
-                      setSelectedFilling("Beef Slice");
+                      setSelectedFilling(isRisoles ? "Mayo" : "Beef Slice");
                       setSelectedSize(isSpaghetti ? "Single" : "REGULER");
                     }}
                   />
@@ -635,18 +640,72 @@ export function KasirView() {
       {customizingProduct && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-all duration-300">
           <div className="glass-morphism rounded-[24px] sm:rounded-3xl bg-sidebar/95 dark:bg-slate-950/95 border border-sidebar-border dark:border-white/10 p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto no-scrollbar shadow-2xl flex flex-col gap-5 sm:gap-6 text-foreground dark:text-white relative animate-in fade-in zoom-in-95 duration-200">
+            {/* Elegant Image Preview */}
+            <div className="w-full h-40 relative rounded-2xl overflow-hidden bg-slate-900 border border-white/5 flex items-center justify-center p-2">
+              <img 
+                src={(() => {
+                  if (customizingProduct.name.toLowerCase().includes("risoles")) {
+                    if (selectedFilling === "Mentai") return "/risoles_mentai.png";
+                    if (selectedFilling === "Ragout") return "/risoles_ragout.png";
+                    return customizingProduct.imageUrl || "https://i.ibb.co.com/bnd8T4c/RISOLES-KAKEK-MAYO.webp";
+                  }
+                  return customizingProduct.imageUrl || "/logo.png";
+                })()} 
+                alt={customizingProduct.name} 
+                className="max-w-full max-h-full w-auto h-auto object-contain rounded-xl transition-all duration-500 animate-in fade-in zoom-in-95"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 to-transparent pointer-events-none" />
+            </div>
+
             {/* Close Button / Header */}
             <div>
               <span className="text-[10px] font-extrabold text-red-500 uppercase tracking-widest font-mono block mb-1">
                 Kustomisasi Menu
               </span>
               <h3 className="text-lg font-black tracking-tight leading-snug">
-                {customizingProduct.name}
+                {customizingProduct.name.toLowerCase().includes("risoles") 
+                  ? `Risoles ${selectedFilling}` 
+                  : customizingProduct.name}
               </h3>
               <p className="text-xs text-muted-foreground mt-1">
-                Pilih level kepedasan dan topping tambahan di bawah ini.
+                {customizingProduct.name.toLowerCase().includes("risoles")
+                  ? "Pilih varian rasa Risoles premium di bawah ini."
+                  : "Pilih level kepedasan dan topping tambahan di bawah ini."}
               </p>
             </div>
+
+            {/* Rasa Selection (Only for Risoles) */}
+            {customizingProduct.name.toLowerCase().includes("risoles") && (
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                  Pilihan Rasa
+                </span>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: "Mayo" },
+                    { label: "Mentai" },
+                    { label: "Ragout" },
+                  ].map((flavor) => {
+                    const isSelected = selectedFilling === flavor.label;
+                    return (
+                      <button
+                        key={flavor.label}
+                        type="button"
+                        onClick={() => setSelectedFilling(flavor.label)}
+                        className={cn(
+                          "py-2.5 px-3 rounded-2xl text-xs font-bold font-sans cursor-pointer transition-all duration-200 flex flex-col items-center justify-center border",
+                          isSelected
+                            ? "bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/35"
+                            : "bg-sidebar-accent/50 dark:bg-white/5 border-sidebar-border dark:border-white/5 text-foreground/80 dark:text-slate-200 hover:bg-sidebar-accent dark:hover:bg-white/10"
+                        )}
+                      >
+                        <span className="text-center leading-tight">{flavor.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Spicy Levels */}
             {!(userEmail === "miejebew.depok@gmail.com"
@@ -1110,11 +1169,13 @@ export function KasirView() {
               <button
                 type="button"
                 onClick={() => {
-                  const fillingToPass = (customizingProduct.category === 'Lumpia Beef' || customizingProduct.category === 'Kebab') ? selectedFilling : undefined;
+                  const isRisoles = customizingProduct.name.toLowerCase().includes("risoles");
+                  const fillingToPass = (customizingProduct.category === 'Lumpia Beef' || customizingProduct.category === 'Kebab' || isRisoles) ? selectedFilling : undefined;
                   const isSpaghetti = customizingProduct.name.toLowerCase().includes("spaghetti");
                   const sizeToPass = (customizingProduct.category === 'Kebab' || isSpaghetti) ? selectedSize : undefined;
                   addToCart(customizingProduct.id, selectedSpicyLevel, selectedToppings, fillingToPass, sizeToPass);
-                  toast.success(`${customizingProduct.name} ditambah.`);
+                  const displayName = isRisoles ? `Risoles ${selectedFilling}` : customizingProduct.name;
+                  toast.success(`${displayName} ditambah.`);
                   setCustomizingProduct(null);
                 }}
                 className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-red-600/35 transition-all duration-200 cursor-pointer text-center animate-pulse-subtle"

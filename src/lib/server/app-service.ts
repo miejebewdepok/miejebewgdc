@@ -637,8 +637,10 @@ export async function createTransaction(
     }
 
     let unitPrice = 0;
+    let costPrice = 0;
     if (item.productId === "promo_jasmine_tea") {
       unitPrice = 0;
+      costPrice = 0;
     } else {
       // Calculate price with surcharge for levels 4-5 and toppings (+2000 each, promo: 3 toppings = 5000, 7 toppings = 10000)
       const spicySurcharge = (item.spicyLevel === 4 || item.spicyLevel === 5) ? 2000 : 0;
@@ -666,6 +668,10 @@ export async function createTransaction(
       const spaghettiSurcharge = (isSpaghetti && item.size === "Double") ? 4000 : 0;
 
       unitPrice = product.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
+      
+      // Dynamic HPP: base buyPrice + 60% of any visual options surcharges!
+      const totalSurcharges = spicySurcharge + toppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
+      costPrice = product.buyPrice + Math.round(totalSurcharges * 0.6);
     }
 
     // Construct a beautiful name incorporating spicy level and toppings
@@ -706,6 +712,7 @@ export async function createTransaction(
       product,
       quantity: item.quantity,
       unitPrice,
+      costPrice,
       productName: finalName,
     };
   });
@@ -737,7 +744,7 @@ export async function createTransaction(
         productName: item.productName,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
-        costPrice: item.product.buyPrice,
+        costPrice: item.costPrice,
       }))
     );
 

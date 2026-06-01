@@ -769,51 +769,6 @@ export async function createTransaction(
         .catch((err) => console.error("[WHATSAPP-STOK] Gagal mengirim notifikasi stok menipis:", err));
     }
   }
-
-  // ── Kirim webhook ke Rania Finance (fire & forget) ──────────────────────
-  const raniaWebhookUrl = process.env.RANIA_FINANCE_WEBHOOK_URL;
-  const raniaWebhookSecret = process.env.RANIA_FINANCE_WEBHOOK_SECRET;
-  if (raniaWebhookUrl && raniaWebhookSecret) {
-    const hpp = transaction.items.reduce(
-      (sum, item) => sum + (item.costPrice ?? 0) * item.quantity,
-      0
-    );
-    const itemsText = transaction.items
-      .map((i) => `${i.productName} x${i.quantity}`)
-      .join("\n");
-    const saleDate = new Date(transaction.createdAt).toISOString().split("T")[0];
-    const branchName = userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5"
-      ? "Cabang 2 (Depok)"
-      : "Cabang 1 (GDC)";
-    const branchCode = userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5"
-      ? "DEPOK"
-      : "GDC";
-    const payload = {
-      orderId: transaction.id,
-      date: saleDate,
-      channel: "Offline",
-      items: itemsText,
-      total: transaction.total,
-      hpp,
-      platformFee: 0,
-      profit: transaction.total - hpp,
-      discount: 0,
-      promoName: branchName,
-      branchCode,             // GDC atau DEPOK — field eksplisit untuk identifikasi cabang
-      sourceUserId: userId,   // userId asli dari Kasir untuk verifikasi
-    };
-    void fetch(raniaWebhookUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-webhook-secret": raniaWebhookSecret,
-      },
-      body: JSON.stringify(payload),
-    }).catch((err) =>
-      console.error("[RANIA_WEBHOOK] Gagal kirim webhook transaksi:", err)
-    );
-  }
-
   return {
     transaction,
     products: nextState.products,

@@ -142,19 +142,37 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
     return filteredTransactions.reduce((sum, tx) => sum + (tx.total || 0), 0);
   }, [filteredTransactions]);
 
+  // dynamic Cost of Goods Sold (COGS/HPP) calculation from transaction items
+  const totalHPP = useMemo(() => {
+    return filteredTransactions.reduce((sum, tx) => {
+      const txHPP = (tx.items || []).reduce((itemSum, item) => {
+        // Use costPrice or product's buyPrice, fallback to 60% of unitPrice
+        const cost = item.costPrice || item.product?.buyPrice || (item.unitPrice * 0.6);
+        return itemSum + (cost * (item.quantity || 0));
+      }, 0);
+      return sum + txHPP;
+    }, 0);
+  }, [filteredTransactions]);
+
   const totalExpenses = useMemo(() => {
     return filteredExpenses.reduce((sum, exp) => sum + (exp.amount || 0), 0);
   }, [filteredExpenses]);
 
+  // Real Net Profit = Gross Revenue - dynamic Cost of Goods Sold (COGS/HPP) - Expenses
   const netProfit = useMemo(() => {
-    return totalGrossRevenue - totalExpenses;
-  }, [totalGrossRevenue, totalExpenses]);
+    return totalGrossRevenue - totalHPP - totalExpenses;
+  }, [totalGrossRevenue, totalHPP, totalExpenses]);
 
   const transactionCount = filteredTransactions.length;
 
   const averageTransactionValue = useMemo(() => {
     return transactionCount > 0 ? Math.round(totalGrossRevenue / transactionCount) : 0;
   }, [totalGrossRevenue, transactionCount]);
+
+  // Profit Margin %
+  const netProfitMargin = useMemo(() => {
+    return totalGrossRevenue > 0 ? Math.round((netProfit / totalGrossRevenue) * 100) : 0;
+  }, [netProfit, totalGrossRevenue]);
 
   // Product sales breakdown (dynamically computed from all actual items sold)
   const salesByCategory = useMemo(() => {
@@ -546,16 +564,26 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
 
         <div className="grid grid-cols-2 gap-4 mb-6 border p-4 rounded-lg bg-gray-50">
           <div>
-            <span className="text-[10px] text-gray-500 uppercase font-bold block">Omset Kotor</span>
-            <span className="text-lg font-black text-black font-mono">{formatRupiah(totalGrossRevenue)}</span>
+            <span className="text-[10px] text-gray-500 uppercase font-bold block">Omset Kotor (Revenue)</span>
+            <span className="text-sm font-black text-black font-mono">{formatRupiah(totalGrossRevenue)}</span>
           </div>
           <div>
-            <span className="text-[10px] text-gray-500 uppercase font-bold block">Total Pengeluaran Kas Kecil</span>
-            <span className="text-lg font-black text-black font-mono">{formatRupiah(totalExpenses)}</span>
+            <span className="text-[10px] text-gray-500 uppercase font-bold block">Beban Bahan Baku (HPP)</span>
+            <span className="text-sm font-black text-red-650 font-mono">{formatRupiah(totalHPP)}</span>
+          </div>
+          <div>
+            <span className="text-[10px] text-gray-500 uppercase font-bold block">Kas Keluar Operasional</span>
+            <span className="text-sm font-black text-red-650 font-mono">{formatRupiah(totalExpenses)}</span>
+          </div>
+          <div>
+            <span className="text-[10px] text-gray-500 uppercase font-bold block">Margin Keuntungan Bersih</span>
+            <span className={`text-sm font-black font-mono ${netProfitMargin >= 20 ? 'text-emerald-600' : 'text-amber-600'}`}>
+              {netProfitMargin}%
+            </span>
           </div>
           <div className="col-span-2 border-t pt-2 mt-2">
-            <span className="text-[10px] text-gray-500 uppercase font-bold block">Laba Bersih</span>
-            <span className="text-xl font-black text-black font-mono">{formatRupiah(netProfit)}</span>
+            <span className="text-[10px] text-gray-500 uppercase font-bold block">Laba Bersih Riil (Net Profit)</span>
+            <span className="text-lg font-black text-emerald-600 font-mono">{formatRupiah(netProfit)}</span>
           </div>
         </div>
 
@@ -716,7 +744,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
 
       {/* KPI Cards Grid - Premium Cohesive Look (Hanya tampil di tab Ringkasan Penjualan) */}
       {activeTab === 'sales' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 no-print animate-in fade-in duration-300">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-5 no-print animate-in fade-in duration-300">
           
           {/* Gross Revenue Card */}
           <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-slate-200/50 dark:border-white/5 relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
@@ -727,12 +755,29 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
                 <DollarSign className="w-4 h-4" />
               </div>
             </div>
-            <span className="text-2xl font-black font-mono text-slate-800 dark:text-white tracking-tight block relative z-10">
+            <span className="text-xl font-black font-mono text-slate-800 dark:text-white tracking-tight block relative z-10">
               {formatRupiah(totalGrossRevenue)}
             </span>
-            <div className="flex items-center gap-1.5 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-2">
-              <TrendingUp className="w-3 h-3" />
-              <span>Target Tercapai</span>
+            <div className="flex items-center gap-1.5 text-[9px] text-slate-550 dark:text-slate-400 font-bold mt-2">
+              <Activity className="w-3 h-3 text-amber-500" />
+              <span>{transactionCount} Bill ({formatRupiah(averageTransactionValue)}/bill)</span>
+            </div>
+          </div>
+
+          {/* HPP Card */}
+          <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-slate-200/50 dark:border-white/5 relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl group-hover:bg-rose-500/20 transition-all pointer-events-none"></div>
+            <div className="flex justify-between items-start mb-3 relative z-10">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase">Beban HPP / COGS</span>
+              <div className="p-1.5 bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl group-hover:scale-110 transition-transform">
+                <Layers className="w-4 h-4" />
+              </div>
+            </div>
+            <span className="text-xl font-black font-mono text-slate-800 dark:text-white tracking-tight block relative z-10">
+              {formatRupiah(totalHPP)}
+            </span>
+            <div className="flex items-center gap-1.5 text-[9px] text-rose-500 dark:text-rose-400 font-bold mt-2">
+              <span>Beban Bahan Baku Menu</span>
             </div>
           </div>
 
@@ -745,46 +790,46 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
                 <TrendingDown className="w-4 h-4" />
               </div>
             </div>
-            <span className="text-2xl font-black font-mono text-slate-800 dark:text-white tracking-tight block relative z-10">
+            <span className="text-xl font-black font-mono text-slate-800 dark:text-white tracking-tight block relative z-10">
               {formatRupiah(totalExpenses)}
             </span>
-            <div className="flex items-center gap-1.5 text-[10px] text-red-500 dark:text-red-400 font-bold mt-2">
-              <span>{filteredExpenses.length} Transaksi Tercatat</span>
+            <div className="flex items-center gap-1.5 text-[9px] text-red-550 dark:text-red-400 font-bold mt-2">
+              <span>{filteredExpenses.length} Operasional Tercatat</span>
             </div>
           </div>
 
           {/* Laba Bersih Card */}
-          <div className="bg-gradient-to-br from-red-50 to-white dark:from-red-950/20 dark:to-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-red-200/50 dark:border-red-500/10 relative overflow-hidden group hover:shadow-xl hover:shadow-red-500/10 hover:-translate-y-1 transition-all duration-300">
-            <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-red-500/20 dark:bg-red-500/10 rounded-full blur-3xl group-hover:bg-red-500/30 transition-all pointer-events-none"></div>
+          <div className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-emerald-200/50 dark:border-emerald-500/10 relative overflow-hidden group hover:shadow-xl hover:shadow-emerald-500/10 hover:-translate-y-1 transition-all duration-300">
+            <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-emerald-500/20 dark:bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/30 transition-all pointer-events-none"></div>
             <div className="flex justify-between items-start mb-3 relative z-10">
-              <span className="text-[10px] text-red-800/70 dark:text-red-300/70 font-bold tracking-widest uppercase">Laba Bersih</span>
-              <div className="p-1.5 bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl group-hover:scale-110 transition-transform">
+              <span className="text-[10px] text-emerald-800/70 dark:text-emerald-300/70 font-bold tracking-widest uppercase">Laba Bersih Riil</span>
+              <div className="p-1.5 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl group-hover:scale-110 transition-transform">
                 <Sparkles className="w-4 h-4" />
               </div>
             </div>
-            <span className="text-2xl font-black font-mono text-red-700 dark:text-red-400 tracking-tight block relative z-10">
+            <span className="text-xl font-black font-mono text-emerald-600 dark:text-emerald-400 tracking-tight block relative z-10">
               {formatRupiah(netProfit)}
             </span>
-            <div className="flex items-center gap-1.5 text-[10px] text-red-600/80 dark:text-red-400/80 font-bold mt-2 relative z-10">
+            <div className="flex items-center gap-1.5 text-[9px] text-emerald-600/80 dark:text-emerald-400/80 font-bold mt-2 relative z-10">
               <Award className="w-3 h-3" />
-              <span>Margin Operasional Real</span>
+              <span>Bersih Setelah HPP & Operasional</span>
             </div>
           </div>
 
-          {/* Ticket Stats Card */}
-          <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-slate-200/50 dark:border-white/5 relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all pointer-events-none"></div>
+          {/* Profit Margin Card */}
+          <div className="bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/20 dark:to-slate-900/40 backdrop-blur-xl rounded-[24px] p-5 border border-indigo-200/50 dark:border-indigo-500/10 relative overflow-hidden group hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1 transition-all duration-300">
+            <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-indigo-500/20 dark:bg-indigo-500/10 rounded-full blur-3xl group-hover:bg-indigo-500/30 transition-all pointer-events-none"></div>
             <div className="flex justify-between items-start mb-3 relative z-10">
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase">Nota Terbayar</span>
-              <div className="p-1.5 bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-xl group-hover:scale-110 transition-transform">
-                <Activity className="w-4 h-4" />
+              <span className="text-[10px] text-indigo-800/70 dark:text-indigo-300/70 font-bold tracking-widest uppercase">Margin Keuntungan</span>
+              <div className="p-1.5 bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-xl group-hover:scale-110 transition-transform">
+                <TrendingUp className="w-4 h-4" />
               </div>
             </div>
-            <span className="text-2xl font-black font-mono text-slate-800 dark:text-white tracking-tight block relative z-10">
-              {transactionCount} Bill
+            <span className={`text-2xl font-black font-mono tracking-tight block relative z-10 ${netProfitMargin >= 20 ? 'text-indigo-600 dark:text-indigo-450' : 'text-amber-600 dark:text-indigo-400'}`}>
+              {netProfitMargin}%
             </span>
-            <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400 font-bold font-mono mt-2 relative z-10">
-              <span>Rerata {formatRupiah(averageTransactionValue)}</span>
+            <div className="flex items-center gap-1.5 text-[9px] text-indigo-650 dark:text-indigo-400 font-bold mt-2 relative z-10">
+              <span>Rasio Efisiensi Penjualan</span>
             </div>
           </div>
         </div>

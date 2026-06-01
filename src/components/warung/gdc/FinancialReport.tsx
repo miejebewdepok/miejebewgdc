@@ -176,6 +176,52 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
     return totalGrossRevenue > 0 ? Math.round((netProfit / totalGrossRevenue) * 100) : 0;
   }, [netProfit, totalGrossRevenue]);
 
+  // Detailed HPP Breakdown by sold products
+  const hppBreakdown = useMemo(() => {
+    const productsMap: Record<string, {
+      name: string;
+      category: string;
+      quantity: number;
+      unitPrice: number;
+      unitHPP: number;
+      totalHPP: number;
+      totalRevenue: number;
+    }> = {};
+
+    filteredTransactions.forEach(tx => {
+      (tx.items || []).forEach(item => {
+        const key = item.productId || item.productName || item.id;
+        if (!key) return;
+
+        // Use costPrice or product's buyPrice, fallback to 60% of unitPrice
+        const cost = item.costPrice || item.product?.buyPrice || (item.unitPrice * 0.6);
+        const qty = item.quantity || 0;
+        const price = item.sellPrice || item.unitPrice || 0;
+        
+        if (!productsMap[key]) {
+          let cleanName = item.productName || item.product?.name || "Menu";
+          cleanName = cleanName.split('\n')[0].trim();
+          
+          productsMap[key] = {
+            name: cleanName,
+            category: item.category || item.product?.category || "Lainnya",
+            quantity: 0,
+            unitPrice: price,
+            unitHPP: cost,
+            totalHPP: 0,
+            totalRevenue: 0
+          };
+        }
+
+        productsMap[key].quantity += qty;
+        productsMap[key].totalHPP += (cost * qty);
+        productsMap[key].totalRevenue += (price * qty);
+      });
+    });
+
+    return Object.values(productsMap).sort((a, b) => b.totalHPP - a.totalHPP);
+  }, [filteredTransactions]);
+
   // Product sales breakdown (dynamically computed from all actual items sold)
   const salesByCategory = useMemo(() => {
     const defaultCats = isCabang2
@@ -957,6 +1003,87 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
                 </span>
               </div>
             </div>
+          </div>
+
+          {/* Detailed HPP Breakdown Section */}
+          <div className="lg:col-span-12 bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200/50 dark:border-white/5 rounded-[32px] p-5 sm:p-6 shadow-sm mt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-black/10 dark:border-white/5 pb-4">
+              <div>
+                <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                  <Layers className="text-red-500 w-4 h-4" /> Perincian Beban Bahan Baku (HPP) & Margin
+                </h3>
+                <p className="text-slate-550 dark:text-slate-400 text-xs mt-1">
+                  Analisis laba kotor, HPP, dan margin keuntungan per varian menu terjual
+                </p>
+              </div>
+            </div>
+
+            {hppBreakdown.length === 0 ? (
+              <div className="py-10 text-center text-slate-500 dark:text-slate-400 text-xs font-bold bg-black/2 dark:bg-white/2 rounded-2xl border border-dashed border-black/10 dark:border-white/5">
+                Belum ada transaksi pada periode ini untuk memetakan HPP
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-black/15 dark:border-white/10 text-slate-550 dark:text-slate-400 font-semibold uppercase tracking-wider">
+                      <th className="pb-3 pr-2">Menu Produk</th>
+                      <th className="pb-3 px-2 text-center">Qty Terjual</th>
+                      <th className="pb-3 px-2 text-right">Harga Jual</th>
+                      <th className="pb-3 px-2 text-right">HPP Satuan</th>
+                      <th className="pb-3 px-2 text-right">Total HPP</th>
+                      <th className="pb-3 px-2 text-right">Beban Share (%)</th>
+                      <th className="pb-3 pl-2 text-right">Margin Keuntungan (Gross)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-black/5 dark:divide-white/5 font-medium">
+                    {hppBreakdown.map((item) => {
+                      const sharePercent = totalHPP > 0 ? Math.round((item.totalHPP / totalHPP) * 100) : 0;
+                      const unitMargin = item.unitPrice - item.unitHPP;
+                      const marginPercent = item.unitPrice > 0 ? Math.round((unitMargin / item.unitPrice) * 100) : 0;
+
+                      return (
+                        <tr key={item.name} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                          <td className="py-3.5 pr-2">
+                            <span className="font-extrabold text-slate-800 dark:text-slate-200 block">
+                              {item.name}
+                            </span>
+                            <span className="text-[9px] uppercase tracking-wider font-bold text-red-500">
+                              {item.category}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-2 text-center font-mono font-bold text-slate-700 dark:text-slate-350">
+                            {item.quantity} porsi
+                          </td>
+                          <td className="py-3.5 px-2 text-right font-mono text-slate-500 dark:text-slate-400">
+                            {formatRupiah(item.unitPrice)}
+                          </td>
+                          <td className="py-3.5 px-2 text-right font-mono text-slate-500 dark:text-slate-400">
+                            {formatRupiah(item.unitHPP)}
+                          </td>
+                          <td className="py-3.5 px-2 text-right font-mono font-extrabold text-slate-800 dark:text-white">
+                            {formatRupiah(item.totalHPP)}
+                          </td>
+                          <td className="py-3.5 px-2 text-right">
+                            <span className="font-mono text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-lg">
+                              {sharePercent}%
+                            </span>
+                          </td>
+                          <td className="py-3.5 pl-2 text-right">
+                            <div className="font-mono font-extrabold text-emerald-600 dark:text-emerald-400">
+                              +{formatRupiah(unitMargin * item.quantity)}
+                            </div>
+                            <div className="text-[10px] text-slate-400 font-bold">
+                              Margin: {marginPercent}%
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}

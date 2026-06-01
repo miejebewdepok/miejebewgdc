@@ -139,8 +139,8 @@ export default function Dashboard({
         </div>
       </div>
 
-      {/* 4 BENTO STATS CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* 3 BENTO STATS CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         
         {/* Card 1: Omzet Hari Ini */}
         <div className="glass-morphism rounded-3xl p-5 relative overflow-hidden group hover:border-red-500/20 transition-all duration-300">
@@ -186,39 +186,7 @@ export default function Dashboard({
           </div>
         </div>
 
-        {/* Card 3: Status Stok Inventaris */}
-        <div className="glass-morphism rounded-3xl p-5 relative overflow-hidden group hover:border-red-500/20 transition-all duration-300">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <Package className="w-16 h-16 text-foreground dark:text-white" />
-          </div>
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-extrabold uppercase tracking-widest block">VOLUME STOK FISIK</span>
-          <h3 className="text-2xl font-black text-foreground dark:text-white font-mono tracking-tight mt-1">
-            {totalStokFisik} <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 font-sans">Unit</span>
-          </h3>
-          <div className="flex flex-wrap gap-1.5 mt-2">
-            {outOfStockProducts.length > 0 && (
-              <span className="text-[9px] bg-red-550/10 text-red-600 dark:text-red-400 border border-red-500/20 px-1.5 py-0.5 rounded font-extrabold">
-                {outOfStockProducts.length} Habis
-              </span>
-            )}
-            {lowStockProducts.length > 0 && (
-              <span className="text-[9px] bg-amber-500/10 text-amber-600 dark:text-yellow-400 border border-amber-500/20 px-1.5 py-0.5 rounded font-extrabold">
-                {lowStockProducts.length} Kritis
-              </span>
-            )}
-            {outOfStockProducts.length === 0 && lowStockProducts.length === 0 && (
-              <span className="text-[9px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-extrabold">
-                Semua Aman✓
-              </span>
-            )}
-          </div>
-          <div className="border-t border-black/5 dark:border-white/5 mt-3 pt-2 flex justify-between text-[10px] text-slate-500">
-            <span>Rerata per menu:</span>
-            <span className="text-foreground dark:text-white font-bold">{Math.round(totalStokFisik / totalProductsCount || 0)} Unit</span>
-          </div>
-        </div>
-
-        {/* Card 4: Produk Aktif / Menu */}
+        {/* Card 3: Produk Aktif / Menu */}
         <div className="glass-morphism rounded-3xl p-5 relative overflow-hidden group hover:border-red-500/20 transition-all duration-300">
           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <Coffee className="w-16 h-16 text-foreground dark:text-white" />

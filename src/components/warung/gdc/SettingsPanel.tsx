@@ -69,6 +69,9 @@ interface SettingsPanelProps {
 
 export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPanelProps) {
   const { userId } = useAppState();
+  const isCabang2 = userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" || 
+                    settings.storeName?.toLowerCase().includes("depok") || 
+                    settings.merchantName?.toLowerCase().includes("depok");
   // Local state for forms
   const [isSaving, setIsSaving] = useState(false);
   const [merchantName, setMerchantName] = useState(settings.merchantName || '');
@@ -591,7 +594,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
   };
 
   const handleDeleteClaim = async (id: string, name: string) => {
-    if (!confirm(`Apakah Anda yakin ingin menghapus data klaim milik "${name}"? Pelanggan tersebut akan bisa mengklaim promo ${userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" ? "Es Teh Tawar" : "Jasmine Tea"} gratis kembali.`)) {
+    if (!confirm(`Apakah Anda yakin ingin menghapus data klaim milik "${name}"? Pelanggan tersebut akan bisa mengklaim promo ${isCabang2 ? "Es Teh Tawar" : "Jasmine Tea"} gratis kembali.`)) {
       return;
     }
     try {
@@ -957,7 +960,6 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                 {Array.from({ length: tableCount }).map((_, idx) => {
                   const tableNum = idx + 1;
                   const tableName = `${tableNum}`;
-                  const isCabang2 = userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5";
                   const tableUrl = isCabang2 ? `${origin}/o/c2-${tableName}` : `${origin}/o/${tableName}`;
 
                   return (
@@ -1540,7 +1542,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                   </span>
 
                   <div className="flex flex-col gap-3.5 max-h-[300px] overflow-y-auto pr-1 no-scrollbar">
-                    {(userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" ? [
+                    {(isCabang2 ? [
                       { label: "Ceker (+Rp 2.500)", key: "Ceker", def: 1500 },
                       { label: "Kulit Ayam (+Rp 2.500)", key: "Kulit Ayam", def: 1500 },
                       { label: "Pangsit Goreng (+Rp 2.500)", key: "Pangsit Goreng", def: 1500 },
@@ -1760,7 +1762,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                     <div className="w-36 h-36 bg-white border border-slate-200 p-2 flex items-center justify-center my-2 shadow-inner">
                       <img 
                         src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
-                          `${origin}/o/${userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" ? `c2-${selectedQrTable}` : selectedQrTable}`
+                          `${origin}/o/${isCabang2 ? `c2-${selectedQrTable}` : selectedQrTable}`
                         )}`}
                         alt="Order QR Code" 
                         className="w-full h-full object-contain"

@@ -34,6 +34,7 @@ export default function ManageProductsModal({
   // Form states for Product
   const [name, setName] = useState('');
   const [price, setPrice] = useState<number>(0);
+  const [buyPrice, setBuyPrice] = useState<number>(0);
   const [category, setCategory] = useState(categories[0] || 'Mie Pedas');
   const [image, setImage] = useState('');
   const [bestSeller, setBestSeller] = useState(false);
@@ -78,6 +79,7 @@ export default function ManageProductsModal({
     setEditingProduct(null);
     setName('');
     setPrice(0);
+    setBuyPrice(0);
     setCategory(categories[0] || 'Mie Pedas');
     setImage('');
     setBestSeller(false);
@@ -90,6 +92,7 @@ export default function ManageProductsModal({
     setEditingProduct(prod);
     setName(prod.name);
     setPrice(prod.sellPrice);
+    setBuyPrice(prod.buyPrice || 0);
     setCategory(prod.category);
     setImage(prod.imageUrl || '');
     setBestSeller(prod.bestSeller || false);
@@ -107,6 +110,7 @@ export default function ManageProductsModal({
         ...editingProduct,
         name: name.trim(),
         price,
+        buyPrice,
         category,
         image,
         bestSeller,
@@ -117,6 +121,7 @@ export default function ManageProductsModal({
       onAddProduct({
         name: name.trim(),
         price,
+        buyPrice,
         category,
         image,
         bestSeller,
@@ -223,7 +228,7 @@ export default function ManageProductsModal({
                   <tr className="border-b border-black/15 dark:border-white/10 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">
                     <th className="pb-3 pr-2">Nama Menu</th>
                     <th className="pb-3 px-2">Kategori</th>
-                    <th className="pb-3 px-2">Harga</th>
+                    <th className="pb-3 px-2">Harga (HPP)</th>
                     <th className="pb-3 px-2">Stok Fisik</th>
                     <th className="pb-3 px-2">Status</th>
                     <th className="pb-3 pl-2 text-right">Opsi</th>
@@ -256,8 +261,9 @@ export default function ManageProductsModal({
                       <td className="py-3.5 px-2 text-xs font-mono font-bold text-red-650 dark:text-red-500">
                         {prod.category}
                       </td>
-                      <td className="py-3.5 px-2 font-mono font-extrabold text-foreground dark:text-white">
-                        {formatRupiah(prod.sellPrice)}
+                      <td className="py-3.5 px-2 font-mono text-foreground dark:text-white">
+                        <div className="text-xs font-extrabold">{formatRupiah(prod.sellPrice)}</div>
+                        <div className="text-[10px] text-slate-400 font-medium">HPP: {formatRupiah(prod.buyPrice || 0)}</div>
                       </td>
                       <td className="py-3.5 px-2 font-mono font-bold text-zinc-700 dark:text-zinc-300">
                         {prod.stock !== undefined ? prod.stock : '-'} pkt
@@ -520,6 +526,19 @@ export default function ManageProductsModal({
                     value={price || ''}
                     onChange={(e) => setPrice(parseInt(e.target.value, 10) || 0)}
                     className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl py-2 px-3 text-xs text-foreground dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-red-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold">HARGA MODAL / HPP (RP)</label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    value={buyPrice || ''}
+                    onChange={(e) => setBuyPrice(parseInt(e.target.value, 10) || 0)}
+                    className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl py-2 px-3 text-xs text-foreground dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-red-500"
+                    placeholder="e.g. 7000"
                   />
                 </div>
 

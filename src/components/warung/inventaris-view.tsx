@@ -160,7 +160,7 @@ export function InventarisView() {
             await addProduct({
               name: p.name,
               category: p.category,
-              buyPrice: p.price ? Math.round(p.price * 0.7) : 0,
+              buyPrice: p.buyPrice !== undefined ? p.buyPrice : (p.price ? Math.round(p.price * 0.7) : 0),
               sellPrice: p.price ?? 0,
               stock: p.stock !== undefined ? p.stock : 50,
               minimumStock: 5,
@@ -177,7 +177,7 @@ export function InventarisView() {
             await updateProduct(p.id, {
               name: p.name,
               category: p.category,
-              buyPrice: p.price ? Math.round(p.price * 0.7) : 0,
+              buyPrice: p.buyPrice !== undefined ? p.buyPrice : (p.sellPrice ? p.buyPrice : (p.price ? Math.round(p.price * 0.7) : 0)),
               sellPrice: p.price ?? p.sellPrice ?? 0,
               stock: p.stock !== undefined ? p.stock : 50,
               minimumStock: 5,

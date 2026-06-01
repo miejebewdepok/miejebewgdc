@@ -133,11 +133,13 @@ export function KasirView() {
     const standardToppings = toppings.filter((t) => !specialKeys.includes(t));
     
     const stdCount = standardToppings.length;
-    const stdSurcharge = stdCount === 3 
-      ? 5000 
-      : (stdCount === 7 
-        ? 10000 
-        : stdCount * 2000);
+    const stdSurcharge = isCabang2 
+      ? 0 
+      : (stdCount === 3 
+        ? 5000 
+        : (stdCount === 7 
+          ? 10000 
+          : stdCount * 2000));
         
     let specialSurcharge = 0;
     specialToppings.forEach((t) => {
@@ -947,9 +949,13 @@ export function KasirView() {
                           {((userEmail === "miejebew.depok@gmail.com"
                             ? ["Ceker", "Kulit Ayam", "Pangsit Goreng", "Telur"]
                             : ["Beef Slice", "Keju Slice", "Telur"]
-                          ).includes(topping)) && (
+                          ).includes(topping)) ? (
                             <span className="text-[8px] font-black text-amber-600 dark:text-amber-500 leading-none mt-0.5">
                               +Rp {topping === "Telur" ? "4k" : (topping === "Keju Slice" ? "3k" : "2.5k")}
+                            </span>
+                          ) : (
+                            <span className="text-[8px] font-black text-slate-550 dark:text-slate-400 leading-none mt-0.5">
+                              {userEmail === "miejebew.depok@gmail.com" ? "Gratis" : "+Rp 2k"}
                             </span>
                           )}
                         </div>

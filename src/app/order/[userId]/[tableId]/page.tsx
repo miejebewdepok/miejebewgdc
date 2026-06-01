@@ -444,11 +444,13 @@ export default function CustomerOrderPage(props: {
     const standardToppings = toppings.filter((t) => !specialKeys.includes(t));
 
     const stdCount = standardToppings.length;
-    const stdSurcharge = stdCount === 3 
-      ? 5000 
-      : (stdCount === 7 
-        ? 10000 
-        : stdCount * 2000);
+    const stdSurcharge = isCabang2 
+      ? 0 
+      : (stdCount === 3 
+        ? 5000 
+        : (stdCount === 7 
+          ? 10000 
+          : stdCount * 2000));
 
     let specialSurcharge = 0;
     specialToppings.forEach((t) => {
@@ -1251,7 +1253,7 @@ export default function CustomerOrderPage(props: {
                           <span className={`text-[9.5px] font-mono font-bold leading-none mt-1 select-none ${
                             isPremium ? "text-yellow-400 font-extrabold" : "text-slate-500"
                           }`}>
-                            {isPremium ? `+${formatRupiah(premiumPrice)}` : "+Rp 2.000"}
+                            {isPremium ? `+${formatRupiah(premiumPrice)}` : (isCabang2 ? "Gratis" : "+Rp 2.000")}
                           </span>
                         </button>
                       );

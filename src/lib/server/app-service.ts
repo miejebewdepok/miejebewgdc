@@ -579,11 +579,11 @@ export async function createTransaction(
     .from(products)
     .where(and(eq(products.userId, userId), inArray(products.id, productIds))) : [];
 
+  const isCabang2 = userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5";
   const productMap = new Map(productRows.map((product) => [product.id, product]));
   const lineItems = payload.items.map((item) => {
     let product: any;
     if (item.productId === "promo_jasmine_tea") {
-      const isCabang2 = userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5";
       const nonPromoSubtotal = payload.items
         .filter(it => it.productId !== "promo_jasmine_tea")
         .reduce((sum, it) => {
@@ -591,11 +591,16 @@ export async function createTransaction(
           if (!p) return sum;
           const spicySurcharge = (it.spicyLevel === 4 || it.spicyLevel === 5) ? 2000 : 0;
           const toppingsCount = it.toppings ? it.toppings.length : 0;
-          const toppingsSurcharge = toppingsCount === 3 
-            ? 5000 
-            : toppingsCount === 7 
-            ? 10000 
-            : toppingsCount * 2000;
+          const toppingsSurcharge = isCabang2 
+            ? (it.toppings || []).filter(t => ["Ceker", "Kulit Ayam", "Pangsit Goreng", "Telur"].includes(t)).reduce((sum, t) => {
+                if (t === "Telur") return sum + 4000;
+                return sum + 2500;
+              }, 0)
+            : (toppingsCount === 3 
+              ? 5000 
+              : toppingsCount === 7 
+              ? 10000 
+              : toppingsCount * 2000);
           let fillingSurcharge = 0;
           if (p.category === 'Kebab') {
             if (it.size === 'REGULER') {
@@ -659,11 +664,16 @@ export async function createTransaction(
       // Calculate price with surcharge for levels 4-5 and toppings (+2000 each, promo: 3 toppings = 5000, 7 toppings = 10000)
       const spicySurcharge = (item.spicyLevel === 4 || item.spicyLevel === 5) ? 2000 : 0;
       const toppingsCount = item.toppings ? item.toppings.length : 0;
-      const toppingsSurcharge = toppingsCount === 3 
-        ? 5000 
-        : toppingsCount === 7 
-        ? 10000 
-        : toppingsCount * 2000;
+      const toppingsSurcharge = isCabang2 
+        ? (item.toppings || []).filter(t => ["Ceker", "Kulit Ayam", "Pangsit Goreng", "Telur"].includes(t)).reduce((sum, t) => {
+            if (t === "Telur") return sum + 4000;
+            return sum + 2500;
+          }, 0)
+        : (toppingsCount === 3 
+          ? 5000 
+          : toppingsCount === 7 
+          ? 10000 
+          : toppingsCount * 2000);
         
       let fillingSurcharge = 0;
       if (product.category === 'Kebab') {

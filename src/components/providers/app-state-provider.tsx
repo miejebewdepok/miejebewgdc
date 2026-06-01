@@ -499,7 +499,7 @@ export function AppStateProvider({
           const specialToppings = toppings.filter((t) => specialKeys.includes(t));
           const standardToppings = toppings.filter((t) => !specialKeys.includes(t));
           const stdCount = standardToppings.length;
-          const stdSurcharge = stdCount === 3 ? 5000 : (stdCount === 7 ? 10000 : stdCount * 2000);
+          const stdSurcharge = isCabang2 ? 0 : (stdCount === 3 ? 5000 : (stdCount === 7 ? 10000 : stdCount * 2000));
           let specialSurcharge = 0;
           specialToppings.forEach((t) => {
             if (t === "Beef Slice") specialSurcharge += 2500;
@@ -567,11 +567,13 @@ export function AppStateProvider({
     const standardToppings = toppings.filter((t) => !specialKeys.includes(t));
 
     const stdCount = standardToppings.length;
-    const stdSurcharge = stdCount === 3 
-      ? 5000 
-      : (stdCount === 7 
-        ? 10000 
-        : stdCount * 2000);
+    const stdSurcharge = isCabang2 
+      ? 0 
+      : (stdCount === 3 
+        ? 5000 
+        : (stdCount === 7 
+          ? 10000 
+          : stdCount * 2000));
 
     let specialSurcharge = 0;
     specialToppings.forEach((t) => {

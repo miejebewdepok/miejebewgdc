@@ -40,6 +40,8 @@ export default function ManageProductsModal({
   const [bestSeller, setBestSeller] = useState(false);
   const [isAvailable, setIsAvailable] = useState(true);
   const [stock, setStock] = useState<number>(50);
+  const [mentaiImage, setMentaiImage] = useState('');
+  const [ragoutImage, setRagoutImage] = useState('');
 
   // Filter products based on search
   const filteredProducts = products.filter(prod => 
@@ -85,6 +87,8 @@ export default function ManageProductsModal({
     setBestSeller(false);
     setIsAvailable(true);
     setStock(50);
+    setMentaiImage('');
+    setRagoutImage('');
     setIsEditing(true);
   };
 
@@ -98,12 +102,35 @@ export default function ManageProductsModal({
     setBestSeller(prod.bestSeller || false);
     setIsAvailable(prod?.stock > 0);
     setStock(prod.stock !== undefined ? prod.stock : 50);
+    const isRisoles = prod.name.toLowerCase().includes("risoles");
+    let mentaiImg = "";
+    let ragoutImg = "";
+    if (isRisoles && prod.description) {
+      try {
+        if (prod.description.trim().startsWith("{")) {
+          const parsed = JSON.parse(prod.description);
+          mentaiImg = parsed.mentaiImageUrl || "";
+          ragoutImg = parsed.ragoutImageUrl || "";
+        }
+      } catch (e) {}
+    }
+    setMentaiImage(mentaiImg);
+    setRagoutImage(ragoutImg);
     setIsEditing(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || price <= 0) return;
+
+    let finalDescription = editingProduct ? editingProduct.description || "" : "";
+    if (name.toLowerCase().includes("risoles")) {
+      finalDescription = JSON.stringify({
+        text: "Menu asli Mie Jebew GDC",
+        mentaiImageUrl: mentaiImage.trim(),
+        ragoutImageUrl: ragoutImage.trim()
+      });
+    }
 
     if (editingProduct) {
       onUpdateProduct({
@@ -115,7 +142,8 @@ export default function ManageProductsModal({
         image,
         bestSeller,
         isAvailable,
-        stock
+        stock,
+        description: finalDescription
       });
     } else {
       onAddProduct({
@@ -126,7 +154,8 @@ export default function ManageProductsModal({
         image,
         bestSeller,
         isAvailable,
-        stock
+        stock,
+        description: finalDescription
       });
     }
 
@@ -567,6 +596,74 @@ export default function ManageProductsModal({
                     placeholder="50"
                   />
                 </div>
+
+                {name.toLowerCase().includes("risoles") && (
+                  <>
+                    <div>
+                      <label className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1 font-bold uppercase tracking-wider">FOTO RISOLES MENTAI</label>
+                      <div className="flex flex-col gap-2 mb-2">
+                        {mentaiImage && (
+                          <div className="w-full h-20 rounded-xl relative overflow-hidden bg-black/10 dark:bg-slate-950/60 border border-black/5 dark:border-white/5 flex items-center justify-center p-1">
+                            <img 
+                              src={mentaiImage} 
+                              alt="Pratinjau Mentai" 
+                              className="w-full h-full object-cover rounded-lg"
+                              referrerPolicy="no-referrer"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setMentaiImage('')}
+                              className="absolute top-2 right-2 bg-red-650 text-white rounded p-1 hover:bg-red-700 transition"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
+                        <div className="flex gap-1.5">
+                          <input
+                            type="text"
+                            placeholder="URL Foto Mentai (https://...)"
+                            value={mentaiImage}
+                            onChange={(e) => setMentaiImage(e.target.value)}
+                            className="flex-1 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl py-2 px-3 text-[11px] text-foreground dark:text-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1 font-bold uppercase tracking-wider">FOTO RISOLES RAGOUT</label>
+                      <div className="flex flex-col gap-2 mb-2">
+                        {ragoutImage && (
+                          <div className="w-full h-20 rounded-xl relative overflow-hidden bg-black/10 dark:bg-slate-950/60 border border-black/5 dark:border-white/5 flex items-center justify-center p-1">
+                            <img 
+                              src={ragoutImage} 
+                              alt="Pratinjau Ragout" 
+                              className="w-full h-full object-cover rounded-lg"
+                              referrerPolicy="no-referrer"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setRagoutImage('')}
+                              className="absolute top-2 right-2 bg-red-650 text-white rounded p-1 hover:bg-red-700 transition"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
+                        <div className="flex gap-1.5">
+                          <input
+                            type="text"
+                            placeholder="URL Foto Ragout (https://...)"
+                            value={ragoutImage}
+                            onChange={(e) => setRagoutImage(e.target.value)}
+                            className="flex-1 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl py-2 px-3 text-[11px] text-foreground dark:text-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <div>
                   <label className="text-[10px] text-slate-500 dark:text-slate-400 block mb-1 font-bold uppercase tracking-wider">GAMBAR MENU / FOTO PRODUK</label>

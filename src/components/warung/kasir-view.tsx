@@ -645,8 +645,19 @@ export function KasirView() {
               <img 
                 src={(() => {
                   if (customizingProduct.name.toLowerCase().includes("risoles")) {
-                    if (selectedFilling === "Mentai") return "/risoles_mentai.png";
-                    if (selectedFilling === "Ragout") return "/risoles_ragout.png";
+                    let mentaiImg = "/risoles_mentai.png";
+                    let ragoutImg = "/risoles_ragout.png";
+                    if (customizingProduct.description) {
+                      try {
+                        if (customizingProduct.description.trim().startsWith("{")) {
+                          const parsed = JSON.parse(customizingProduct.description);
+                          if (parsed.mentaiImageUrl) mentaiImg = parsed.mentaiImageUrl;
+                          if (parsed.ragoutImageUrl) ragoutImg = parsed.ragoutImageUrl;
+                        }
+                      } catch (e) {}
+                    }
+                    if (selectedFilling === "Mentai") return mentaiImg;
+                    if (selectedFilling === "Ragout") return ragoutImg;
                     return customizingProduct.imageUrl || "https://i.ibb.co.com/bnd8T4c/RISOLES-KAKEK-MAYO.webp";
                   }
                   return customizingProduct.imageUrl || "/logo.png";

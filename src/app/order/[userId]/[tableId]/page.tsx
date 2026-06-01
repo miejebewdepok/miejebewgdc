@@ -52,7 +52,7 @@ export default function CustomerOrderPage(props: {
   const tableId = decodeURIComponent(rawTableId);
   const tableNumOnly = tableId.replace(/^(meja|order)[\s\-_]*/i, "");
   
-  const isCabang2 = userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5";
+  const isCabang2 = userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5";
 
   // States
   const [loading, setLoading] = useState(true);

@@ -479,7 +479,7 @@ export function AppStateProvider({
     
     // In-memory fallback mock for dynamic promo Jasmine Tea product
     if (!product && line.productId === "promo_jasmine_tea") {
-      const isCabang2 = sessionUserId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5";
+      const isCabang2 = sessionUserId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" || pathname?.toLowerCase().includes("rwtvcmmleowlwyhdjnnnnlewrlys26fc5");
       const nonPromoTotal = state.cart
         .filter(it => it.productId !== "promo_jasmine_tea")
         .reduce((sum, line) => {
@@ -552,7 +552,7 @@ export function AppStateProvider({
     const toppings = line.toppings ?? [];
     const filling = line.filling;
     const size = line.size;
-    const isCabang2 = sessionUserId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5";
+    const isCabang2 = sessionUserId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" || pathname?.toLowerCase().includes("rwtvcmmleowlwyhdjnnnnlewrlys26fc5");
     const isBypassed = isCabang2 
       ? (product.category === 'Tea Series' || product.category === 'Delight Series' || product.category.toLowerCase() === 'chocolatte')
       : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(product.category);

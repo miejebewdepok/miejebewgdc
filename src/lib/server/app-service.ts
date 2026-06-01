@@ -583,7 +583,7 @@ export async function createTransaction(
   const lineItems = payload.items.map((item) => {
     let product: any;
     if (item.productId === "promo_jasmine_tea") {
-      const isCabang2 = userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5";
+      const isCabang2 = userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5";
       const nonPromoSubtotal = payload.items
         .filter(it => it.productId !== "promo_jasmine_tea")
         .reduce((sum, it) => {

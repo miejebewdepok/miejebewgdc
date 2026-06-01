@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       const digitsOnly = waClean.replace(/\D/g, "");
       const normalizedWa = digitsOnly ? (digitsOnly.startsWith("0") ? "62" + digitsOnly.slice(1) : digitsOnly) : "";
 
-      const isCabang2 = userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5";
+      const isCabang2 = userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5";
       const promoType = isCabang2
         ? (isVipBypass ? "Free Es Teh Manis (VIP)" : "Free Es Teh Tawar")
         : "Free Jasmine Tea";

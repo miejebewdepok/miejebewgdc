@@ -1,0 +1,164 @@
+[
+  {
+    "name": "Mie Jebew",
+    "category": "Mie Pedas",
+    "buyPrice": 5500,
+    "sellPrice": 12000,
+    "stock": 100,
+    "minStock": 5,
+    "desc": "Mie pedas khas Jebew dengan level 0-5"
+  },
+  {
+    "name": "Spaghetti Goreng",
+    "category": "Mie Pedas",
+    "buyPrice": 6000,
+    "sellPrice": 14000,
+    "stock": 100,
+    "minStock": 5,
+    "desc": "Spaghetti goreng porsi Single/Double"
+  },
+  {
+    "name": "Lumpia Beef",
+    "category": "Lumpia Beef",
+    "buyPrice": 4500,
+    "sellPrice": 8000,
+    "stock": 50,
+    "minStock": 5,
+    "desc": "Lumpia isi daging sapi pilihan"
+  },
+  {
+    "name": "Kebab",
+    "category": "Kebab",
+    "buyPrice": 5000,
+    "sellPrice": 12000,
+    "stock": 50,
+    "minStock": 5,
+    "desc": "Kebab ukuran Reguler/Large dengan varian isi"
+  },
+  {
+    "name": "Lumpia Udang",
+    "category": "Snack",
+    "buyPrice": 3500,
+    "sellPrice": 8000,
+    "stock": 50,
+    "minStock": 5,
+    "desc": "Lumpia udang renyah"
+  },
+  {
+    "name": "Udang Keju",
+    "category": "Snack",
+    "buyPrice": 4000,
+    "sellPrice": 8000,
+    "stock": 50,
+    "minStock": 5,
+    "desc": "Udang keju goreng krispi"
+  },
+  {
+    "name": "Chicken Katsu",
+    "category": "Snack",
+    "buyPrice": 5000,
+    "sellPrice": 10000,
+    "stock": 50,
+    "minStock": 5,
+    "desc": "Chicken katsu renyah"
+  },
+  {
+    "name": "Risoles",
+    "category": "Snack",
+    "buyPrice": 2500,
+    "sellPrice": 5000,
+    "stock": 50,
+    "minStock": 5,
+    "desc": "Risoles isi ragout"
+  },
+  {
+    "name": "Americano",
+    "category": "Qalla Coffee",
+    "buyPrice": 3000,
+    "sellPrice": 10000,
+    "stock": 100,
+    "minStock": 5,
+    "desc": "Espresso + air panas"
+  },
+  {
+    "name": "Cappuccino",
+    "category": "Qalla Coffee",
+    "buyPrice": 4000,
+    "sellPrice": 12000,
+    "stock": 100,
+    "minStock": 5,
+    "desc": "Espresso + steamed milk + foam"
+  },
+  {
+    "name": "Cafe Latte",
+    "category": "Qalla Coffee",
+    "buyPrice": 4000,
+    "sellPrice": 12000,
+    "stock": 100,
+    "minStock": 5,
+    "desc": "Espresso + susu segar"
+  },
+  {
+    "name": "Es Kopi Susu",
+    "category": "Qalla Coffee",
+    "buyPrice": 4500,
+    "sellPrice": 12000,
+    "stock": 100,
+    "minStock": 5,
+    "desc": "Kopi susu kekinian"
+  },
+  {
+    "name": "Jasmine Tea",
+    "category": "Qalla Tea",
+    "buyPrice": 2000,
+    "sellPrice": 8000,
+    "stock": 100,
+    "minStock": 5,
+    "desc": "Teh melati premium"
+  },
+  {
+    "name": "Lemon Tea",
+    "category": "Qalla Tea",
+    "buyPrice": 2500,
+    "sellPrice": 8000,
+    "stock": 100,
+    "minStock": 5,
+    "desc": "Teh lemon segar"
+  },
+  {
+    "name": "Lychee Tea",
+    "category": "Qalla Tea",
+    "buyPrice": 2500,
+    "sellPrice": 10000,
+    "stock": 100,
+    "minStock": 5,
+    "desc": "Teh leci manis"
+  },
+  {
+    "name": "Honey Lemonade",
+    "category": "Qalla Tea",
+    "buyPrice": 3000,
+    "sellPrice": 10000,
+    "stock": 100,
+    "minStock": 5,
+    "desc": "Lemonade madu segar"
+  },
+  {
+    "name": "Strawberry Juice",
+    "category": "Qalla Juice",
+    "buyPrice": 3500,
+    "sellPrice": 12000,
+    "stock": 100,
+    "minStock": 5,
+    "desc": "Jus stroberi segar"
+  },
+  {
+    "name": "Mango Juice",
+    "category": "Qalla Juice",
+    "buyPrice": 3500,
+    "sellPrice": 12000,
+    "stock": 100,
+    "minStock": 5,
+    "desc": "Jus mangga segar"
+  }
+]

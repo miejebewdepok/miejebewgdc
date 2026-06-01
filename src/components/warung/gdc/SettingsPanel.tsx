@@ -911,9 +911,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                 </div>
               </div>  </div>
 
-            </div>
-
-            {/* PENGATURAN HPP KUSTOM (TOPPING & LEVEL PEDAS) */}
+                       {/* PENGATURAN HPP KUSTOM (TOPPING & LEVEL PEDAS) */}
             <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-5">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl">
@@ -923,7 +921,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
               </div>
 
               <p className="text-[11px] text-slate-500 dark:text-slate-400 -mt-2 leading-relaxed">
-                Atur harga modal (HPP) untuk setiap topping tambahan dan tingkat kepedasan secara spesifik. Jika kosong, sistem otomatis menaksir HPP sebesar 60% dari harga jual tambahan.
+                Atur harga modal (HPP) untuk setiap kustomisasi topping, level pedas, varian isi, dan porsi secara spesifik per cabang. Jika kosong, sistem otomatis menaksir HPP sebesar 60% dari harga jual tambahan.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-black/5 dark:border-white/5 pt-4">
@@ -934,19 +932,24 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                   </span>
 
                   <div className="flex flex-col gap-3.5 max-h-[300px] overflow-y-auto pr-1 no-scrollbar">
-                    {[
-                      { label: "Telur (+Rp 4.000)", key: "Telur", def: 2400 },
-                      { label: "Beef Slice (+Rp 2.500)", key: "Beef Slice", def: 1500 },
-                      { label: "Keju Slice (+Rp 3.000)", key: "Keju Slice", def: 1800 },
+                    {(userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5" ? [
                       { label: "Ceker (+Rp 2.500)", key: "Ceker", def: 1500 },
                       { label: "Kulit Ayam (+Rp 2.500)", key: "Kulit Ayam", def: 1500 },
                       { label: "Pangsit Goreng (+Rp 2.500)", key: "Pangsit Goreng", def: 1500 },
+                      { label: "Telur (+Rp 4.000)", key: "Telur", def: 2400 },
+                    ] : [
+                      { label: "Telur (+Rp 4.000)", key: "Telur", def: 2400 },
+                      { label: "Beef Slice (+Rp 2.500)", key: "Beef Slice", def: 1500 },
+                      { label: "Keju Slice (+Rp 3.000)", key: "Keju Slice", def: 1800 },
                       { label: "Bakso (+Rp 2.000)", key: "Bakso", def: 1200 },
                       { label: "Sosis (+Rp 2.000)", key: "Sosis", def: 1200 },
                       { label: "Nugget (+Rp 2.000)", key: "Nugget", def: 1200 },
                       { label: "Otak-Otak (+Rp 2.000)", key: "Otak-Otak", def: 1200 },
+                      { label: "Scallop (+Rp 2.000)", key: "Scallop", def: 1200 },
+                      { label: "Tahu Aci (+Rp 2.000)", key: "Tahu Aci", def: 1200 },
+                      { label: "Bakso Ikan (+Rp 2.000)", key: "Bakso Ikan", def: 1200 },
                       { label: "Cireng (+Rp 2.000)", key: "Cireng", def: 1200 },
-                    ].map((top) => (
+                    ]).map((top) => (
                       <div key={top.key} className="flex items-center justify-between gap-3">
                         <div className="flex flex-col">
                           <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{top.label}</span>
@@ -976,47 +979,68 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                   </div>
                 </div>
 
-                {/* Right Column: Spicy Levels HPP */}
+                {/* Right Column: Spicy Levels, kebab sizes, and lumpia fillings HPP */}
                 <div className="flex flex-col gap-4">
                   <span className="text-[10px] text-slate-700 dark:text-slate-350 font-black uppercase tracking-wider block border-b border-black/5 dark:border-white/5 pb-2">
-                    Harga Pokok (HPP) Level Pedas
+                    Harga Pokok Varian & Kepedasan
                   </span>
 
-                  <div className="flex flex-col gap-3.5">
-                    {[
-                      { label: "Level 4 Pedas (+Rp 2.000)", key: "level_4", def: 1200 },
-                      { label: "Level 5 Pedas (+Rp 2.000)", key: "level_5", def: 1200 },
-                    ].map((lvl) => (
-                      <div key={lvl.key} className="flex items-center justify-between gap-3">
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{lvl.label}</span>
-                          <span className="text-[9px] text-slate-500 font-mono">Bawaan: Rp {lvl.def.toLocaleString()}</span>
+                  <div className="flex flex-col gap-3.5 max-h-[300px] overflow-y-auto pr-1 no-scrollbar">
+                    {(userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5" ? [
+                      { label: "Level 4 Pedas (+Rp 2.000)", key: "level_4", def: 1200, type: "spicy" },
+                      { label: "Level 5 Pedas (+Rp 2.000)", key: "level_5", def: 1200, type: "spicy" },
+                    ] : [
+                      { label: "Level 4 Pedas (+Rp 2.000)", key: "level_4", def: 1200, type: "spicy" },
+                      { label: "Level 5 Pedas (+Rp 2.000)", key: "level_5", def: 1200, type: "spicy" },
+                      // Lumpia Beef Fillings
+                      { label: "Lumpia - Beef Patty (+Rp 5.000)", key: "filling_Beef Patty", def: 3000, type: "filling" },
+                      { label: "Lumpia - Chicken Katsu (+Rp 5.000)", key: "filling_Chicken Katsu", def: 3000, type: "filling" },
+                      { label: "Lumpia - Special (+Rp 10.000)", key: "filling_Special", def: 6000, type: "filling" },
+                      // Kebab Sizes & Fillings
+                      { label: "Kebab Reg - Beef (+Rp 2.000)", key: "filling_Beef", def: 1200, type: "filling" },
+                      { label: "Kebab Large - Beef (+Rp 5.000)", key: "filling_Beef_large", def: 3000, type: "filling" },
+                      { label: "Kebab Large - Beef Slice (+Rp 5.000)", key: "filling_Beef Slice_large", def: 3000, type: "filling" },
+                      { label: "Kebab Large - Ch. Katsu (+Rp 5.000)", key: "filling_Chicken Katsu_large", def: 3000, type: "filling" },
+                      { label: "Kebab Large - Special (+Rp 10.000)", key: "filling_Special_large", def: 6000, type: "filling" },
+                      // Spaghetti Sizes
+                      { label: "Spaghetti Porsi Double (+Rp 4.000)", key: "spaghetti_double", def: 2400, type: "size" },
+                    ]).map((lvl) => {
+                      const isSpicy = lvl.type === "spicy";
+                      const hppState = isSpicy ? spicyHpp : toppingsHpp;
+                      const setHppState = isSpicy ? setSpicyHpp : setToppingsHpp;
+                      
+                      return (
+                        <div key={lvl.key} className="flex items-center justify-between gap-3">
+                          <div className="flex flex-col">
+                            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-snug">{lvl.label}</span>
+                            <span className="text-[9px] text-slate-500 font-mono">Bawaan: Rp {lvl.def.toLocaleString()}</span>
+                          </div>
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder={lvl.def.toString()}
+                            value={hppState[lvl.key] !== undefined ? hppState[lvl.key] : ""}
+                            onChange={(e) => {
+                              const val = e.target.value === "" ? undefined : (parseInt(e.target.value, 10) || 0);
+                              setHppState(prev => {
+                                const next = { ...prev };
+                                if (val === undefined) {
+                                  delete next[lvl.key];
+                                } else {
+                                  next[lvl.key] = val;
+                                }
+                                return next;
+                              });
+                            }}
+                            className="w-24 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl py-1.5 px-3 text-xs text-foreground dark:text-white font-mono text-right focus:outline-none focus:ring-1 focus:ring-red-500"
+                          />
                         </div>
-                        <input
-                          type="number"
-                          min="0"
-                          placeholder={lvl.def.toString()}
-                          value={spicyHpp[lvl.key] !== undefined ? spicyHpp[lvl.key] : ""}
-                          onChange={(e) => {
-                            const val = e.target.value === "" ? undefined : (parseInt(e.target.value, 10) || 0);
-                            setSpicyHpp(prev => {
-                              const next = { ...prev };
-                              if (val === undefined) {
-                                delete next[lvl.key];
-                              } else {
-                                next[lvl.key] = val;
-                              }
-                              return next;
-                            });
-                          }}
-                          className="w-24 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl py-1.5 px-3 text-xs text-foreground dark:text-white font-mono text-right focus:outline-none focus:ring-1 focus:ring-red-500"
-                        />
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>
-            </div>
+            </div>     </div>
 
           </div>
 

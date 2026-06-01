@@ -119,6 +119,8 @@ export interface Settings {
   userProfileImage?: string;
   productOrder?: string[];
   tableCount?: number;
+  toppingsHpp?: Record<string, number>;
+  spicyHpp?: Record<string, number>;
 }
 
 export interface AppState {

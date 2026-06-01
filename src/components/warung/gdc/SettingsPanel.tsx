@@ -90,6 +90,9 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
   const [receiptHeader, setReceiptHeader] = useState(settings.receiptHeader || '');
   const [receiptFooter, setReceiptFooter] = useState(settings.receiptFooter || '');
 
+  const [toppingsHpp, setToppingsHpp] = useState<Record<string, number>>(settings.toppingsHpp || {});
+  const [spicyHpp, setSpicyHpp] = useState<Record<string, number>>(settings.spicyHpp || {});
+
   // QR Table Ordering States
   const [tableCount, setTableCount] = useState(settings.tableCount ?? 10);
   const [origin, setOrigin] = useState('');
@@ -277,7 +280,9 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
         userProfileName,
         userProfileImage,
         qrisUploadUrl,
-        tableCount
+        tableCount,
+        toppingsHpp,
+        spicyHpp
       });
 
       // Notify with sound
@@ -906,6 +911,111 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                 </div>
               </div>  </div>
 
+            </div>
+
+            {/* PENGATURAN HPP KUSTOM (TOPPING & LEVEL PEDAS) */}
+            <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-5">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl">
+                  <Sliders className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-bold text-foreground dark:text-white uppercase tracking-wider">Konfigurasi HPP Kustom</h3>
+              </div>
+
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 -mt-2 leading-relaxed">
+                Atur harga modal (HPP) untuk setiap topping tambahan dan tingkat kepedasan secara spesifik. Jika kosong, sistem otomatis menaksir HPP sebesar 60% dari harga jual tambahan.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-black/5 dark:border-white/5 pt-4">
+                {/* Left Column: Toppings HPP */}
+                <div className="flex flex-col gap-4">
+                  <span className="text-[10px] text-slate-700 dark:text-slate-350 font-black uppercase tracking-wider block border-b border-black/5 dark:border-white/5 pb-2">
+                    Harga Pokok (HPP) Topping
+                  </span>
+
+                  <div className="flex flex-col gap-3.5 max-h-[300px] overflow-y-auto pr-1 no-scrollbar">
+                    {[
+                      { label: "Telur (+Rp 4.000)", key: "Telur", def: 2400 },
+                      { label: "Beef Slice (+Rp 2.500)", key: "Beef Slice", def: 1500 },
+                      { label: "Keju Slice (+Rp 3.000)", key: "Keju Slice", def: 1800 },
+                      { label: "Ceker (+Rp 2.500)", key: "Ceker", def: 1500 },
+                      { label: "Kulit Ayam (+Rp 2.500)", key: "Kulit Ayam", def: 1500 },
+                      { label: "Pangsit Goreng (+Rp 2.500)", key: "Pangsit Goreng", def: 1500 },
+                      { label: "Bakso (+Rp 2.000)", key: "Bakso", def: 1200 },
+                      { label: "Sosis (+Rp 2.000)", key: "Sosis", def: 1200 },
+                      { label: "Nugget (+Rp 2.000)", key: "Nugget", def: 1200 },
+                      { label: "Otak-Otak (+Rp 2.000)", key: "Otak-Otak", def: 1200 },
+                      { label: "Cireng (+Rp 2.000)", key: "Cireng", def: 1200 },
+                    ].map((top) => (
+                      <div key={top.key} className="flex items-center justify-between gap-3">
+                        <div className="flex flex-col">
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{top.label}</span>
+                          <span className="text-[9px] text-slate-500 font-mono">Bawaan: Rp {top.def.toLocaleString()}</span>
+                        </div>
+                        <input
+                          type="number"
+                          min="0"
+                          placeholder={top.def.toString()}
+                          value={toppingsHpp[top.key] !== undefined ? toppingsHpp[top.key] : ""}
+                          onChange={(e) => {
+                            const val = e.target.value === "" ? undefined : (parseInt(e.target.value, 10) || 0);
+                            setToppingsHpp(prev => {
+                              const next = { ...prev };
+                              if (val === undefined) {
+                                delete next[top.key];
+                              } else {
+                                next[top.key] = val;
+                              }
+                              return next;
+                            });
+                          }}
+                          className="w-24 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl py-1.5 px-3 text-xs text-foreground dark:text-white font-mono text-right focus:outline-none focus:ring-1 focus:ring-red-500"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right Column: Spicy Levels HPP */}
+                <div className="flex flex-col gap-4">
+                  <span className="text-[10px] text-slate-700 dark:text-slate-350 font-black uppercase tracking-wider block border-b border-black/5 dark:border-white/5 pb-2">
+                    Harga Pokok (HPP) Level Pedas
+                  </span>
+
+                  <div className="flex flex-col gap-3.5">
+                    {[
+                      { label: "Level 4 Pedas (+Rp 2.000)", key: "level_4", def: 1200 },
+                      { label: "Level 5 Pedas (+Rp 2.000)", key: "level_5", def: 1200 },
+                    ].map((lvl) => (
+                      <div key={lvl.key} className="flex items-center justify-between gap-3">
+                        <div className="flex flex-col">
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{lvl.label}</span>
+                          <span className="text-[9px] text-slate-500 font-mono">Bawaan: Rp {lvl.def.toLocaleString()}</span>
+                        </div>
+                        <input
+                          type="number"
+                          min="0"
+                          placeholder={lvl.def.toString()}
+                          value={spicyHpp[lvl.key] !== undefined ? spicyHpp[lvl.key] : ""}
+                          onChange={(e) => {
+                            const val = e.target.value === "" ? undefined : (parseInt(e.target.value, 10) || 0);
+                            setSpicyHpp(prev => {
+                              const next = { ...prev };
+                              if (val === undefined) {
+                                delete next[lvl.key];
+                              } else {
+                                next[lvl.key] = val;
+                              }
+                              return next;
+                            });
+                          }}
+                          className="w-24 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl py-1.5 px-3 text-xs text-foreground dark:text-white font-mono text-right focus:outline-none focus:ring-1 focus:ring-red-500"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
 
           </div>

@@ -253,6 +253,8 @@ function mapSettings(profile: typeof storeProfiles.$inferSelect): Settings {
     userProfileImage: extra.userProfileImage ?? "",
     productOrder: extra.productOrder ?? [],
     tableCount: extra.tableCount ?? 10,
+    toppingsHpp: extra.toppingsHpp ?? {},
+    spicyHpp: extra.spicyHpp ?? {},
   };
 }
 
@@ -282,6 +284,8 @@ function normalizeSettings(settings: Settings): Settings {
     userProfileImage: settings.userProfileImage ?? "",
     productOrder: settings.productOrder ?? [],
     tableCount: settings.tableCount ?? 10,
+    toppingsHpp: settings.toppingsHpp ?? {},
+    spicyHpp: settings.spicyHpp ?? {},
   };
 
   return {
@@ -559,6 +563,16 @@ export async function createTransaction(
     throw new Error("Keranjang masih kosong.");
   }
 
+  const [profile] = await db
+    .select()
+    .from(storeProfiles)
+    .where(eq(storeProfiles.userId, userId))
+    .limit(1);
+
+  const settings = profile ? mapSettings(profile) : null;
+  const configuredToppingsHpp = settings?.toppingsHpp || {};
+  const configuredSpicyHpp = settings?.spicyHpp || {};
+
   const productIds = payload.items.map((item) => item.productId).filter(id => id !== "promo_jasmine_tea");
   const productRows = productIds.length > 0 ? await db
     .select()
@@ -669,9 +683,55 @@ export async function createTransaction(
 
       unitPrice = product.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
       
-      // Dynamic HPP: base buyPrice + 60% of any visual options surcharges!
-      const totalSurcharges = spicySurcharge + toppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
-      costPrice = product.buyPrice + Math.round(totalSurcharges * 0.6);
+      // Calculate dynamic HPP additions using configured settings, falling back to 60% of surcharge
+      // 1. Toppings HPP
+      let totalToppingsHpp = 0;
+      if (item.toppings && item.toppings.length > 0) {
+        let hasCustomToppingHpp = false;
+        item.toppings.forEach(t => {
+          if (configuredToppingsHpp[t] !== undefined) {
+            totalToppingsHpp += configuredToppingsHpp[t];
+            hasCustomToppingHpp = true;
+          }
+        });
+        
+        // If no custom topping HPP is configured at all, fallback to 60% of the toppings surcharge!
+        if (!hasCustomToppingHpp) {
+          totalToppingsHpp = Math.round(toppingsSurcharge * 0.6);
+        }
+      }
+      
+      // 2. Spicy Level HPP
+      let spicyHppCost = 0;
+      const spicyKey = `level_${item.spicyLevel}`;
+      if (item.spicyLevel !== undefined && configuredSpicyHpp[spicyKey] !== undefined) {
+        spicyHppCost = configuredSpicyHpp[spicyKey];
+      } else {
+        spicyHppCost = Math.round(spicySurcharge * 0.6);
+      }
+      
+      // 3. Varian Isi HPP
+      let fillingHppCost = 0;
+      const fillingKey = item.filling ? `filling_${item.filling}` : "";
+      const isLargeKebab = product.category === 'Kebab' && item.size === 'LARGE';
+      const fillingHppKey = fillingKey ? (isLargeKebab ? `${fillingKey}_large` : fillingKey) : "";
+      if (fillingHppKey && configuredToppingsHpp[fillingHppKey] !== undefined) {
+        fillingHppCost = configuredToppingsHpp[fillingHppKey];
+      } else {
+        fillingHppCost = Math.round(fillingSurcharge * 0.6);
+      }
+      
+      // 4. Spaghetti Sizing HPP
+      let spaghettiHppCost = 0;
+      if (isSpaghetti && item.size === "Double") {
+        if (configuredToppingsHpp["spaghetti_double"] !== undefined) {
+          spaghettiHppCost = configuredToppingsHpp["spaghetti_double"];
+        } else {
+          spaghettiHppCost = Math.round(spaghettiSurcharge * 0.6);
+        }
+      }
+
+      costPrice = product.buyPrice + totalToppingsHpp + spicyHppCost + fillingHppCost + spaghettiHppCost;
     }
 
     // Construct a beautiful name incorporating spicy level and toppings

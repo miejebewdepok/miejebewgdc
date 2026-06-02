@@ -68,7 +68,7 @@ type ServerMessage = {
 const quickPrompts = [
   "Sisa stok semua produk?",
   "Untung minggu ini berapa?",
-  "Pelanggan yang belum lunas?",
+  "Pengeluaran hari ini berapa?",
   "Rekomendasi restok untuk untung",
 ];
 
@@ -803,19 +803,7 @@ export function AIAssistantPanel({
             ],
           };
         } else if (query.includes("hutang") || query.includes("kasbon") || query.includes("lunas")) {
-          replyText = "Berikut adalah daftar pelanggan Buku Hutang yang belum melunasi kasbon mereka.";
-          toolName = "getUnpaidDebts";
-          toolResult = {
-            ok: true,
-            kind: "data",
-            title: "Buku Hutang Aktif",
-            summary: "Pelanggan dengan kasbon belum lunas",
-            rows: [
-              { label: "Pak Budi (08123456789)", value: "Rp 45.000 (Belum Lunas)", tone: "warn" },
-              { label: "Bu Siti (08771234567)", value: "Rp 12.000 (Belum Lunas)", tone: "warn" },
-              { label: "Kak Reza (08998765432)", value: "Rp 25.000 (Belum Lunas)", tone: "warn" },
-            ],
-          };
+          replyText = "Toko kami berkomitmen untuk menjaga kesehatan arus kas dan tidak melayani transaksi kasbon/hutang. Seluruh transaksi wajib diselesaikan secara tunai, QRIS, atau transfer bank. Terima kasih atas pengertiannya! 🙏";
         } else if (query.includes("rekomendasi") || query.includes("restok") || query.includes("saran")) {
           replyText = "Berdasarkan analisis penjualan 30 hari terakhir, berikut adalah saran restok untuk memaksimalkan keuntungan Anda.";
           toolName = "getRestockRecommendations";
@@ -831,7 +819,7 @@ export function AIAssistantPanel({
             ],
           };
         } else {
-          replyText = "Maaf, sebagai asisten simulasi offline, saya hanya memahami beberapa pertanyaan seputar:\n- 'stok' (Cek sisa stok)\n- 'untung' / 'laba' (Laporan keuntungan)\n- 'hutang' / 'kasbon' (Pelanggan belum lunas)\n- 'rekomendasi' / 'restok' (Saran restok)\n\nSilakan coba salah satu kata kunci tersebut!";
+          replyText = "Maaf, sebagai asisten simulasi offline, saya hanya memahami beberapa pertanyaan seputar:\n- 'stok' (Cek sisa stok)\n- 'untung' / 'laba' (Laporan keuntungan)\n- 'rekomendasi' / 'restok' (Saran restok)\n\nSilakan coba salah satu kata kunci tersebut!";
         }
 
         const replyMsg: ServerMessage = {
@@ -1110,8 +1098,8 @@ export function AIAssistantPanel({
                       <AssistantTextBubble
                         text={
                           isOfflineSimMode
-                            ? "Halo Bos! 🔥 Saya MIE JEBEW GDC AI (Mode Simulasi Offline). Di mode ini, Anda bisa tes kelancaran respon saya untuk cek stok, hitung untung, kasbon, atau saran restok.\n\nCobain ketik kata kunci di bawah atau masukkan pertanyaan seperti:\n👉 'stok' (Cek sisa stok)\n👉 'untung' (Laba minggu ini)\n👉 'kasbon' (Buku hutang)\n👉 'rekomendasi' (Saran restok cuan)"
-                            : "Halo Bos! 🔥 Saya MIE JEBEW GDC AI, asisten pintar warung Anda yang paling 'jebew'! 😎\n\nSaya siap bantu kelola warung Anda jadi makin sat-set dan gampang. Ini beberapa hal seru yang bisa saya bantu:\n📦 Cek sisa stok bahan & produk\n💰 Pantau laba bersih & profit mingguan\n📝 Catat transaksi kasbon/hutang pelanggan biar gak lupa\n🚀 Beri saran restok paling cuan\n💸 Catat pengeluaran instan lewat chat!\n\nCobain tanya ke saya:\n👉 'Untung minggu ini berapa?'\n👉 'Siapa saja yang belum lunas kasbon?'\n👉 'Saran restok biar makin untung'\n\nYuk, ada yang mau dicek hari ini? 👇"
+                            ? "Halo Bos! 🔥 Saya MIE JEBEW GDC AI (Mode Simulasi Offline). Di mode ini, Anda bisa tes kelancaran respon saya untuk cek stok, hitung untung, atau saran restok.\n\nCobain ketik kata kunci di bawah atau masukkan pertanyaan seperti:\n👉 'stok' (Cek sisa stok)\n👉 'untung' (Laba minggu ini)\n👉 'rekomendasi' (Saran restok cuan)"
+                            : "Halo Bos! 🔥 Saya MIE JEBEW GDC AI, asisten pintar warung Anda yang paling 'jebew'! 😎\n\nSaya siap bantu kelola warung Anda jadi makin sat-set dan gampang. Ini beberapa hal seru yang bisa saya bantu:\n📦 Cek sisa stok produk\n💰 Pantau laba bersih & profit mingguan\n🚀 Beri saran restok paling cuan\n💸 Catat pengeluaran instan lewat chat!\n\nCobain tanya ke saya:\n👉 'Untung minggu ini berapa?'\n👉 'Saran restok biar makin untung'\n\nYuk, ada yang mau dicek hari ini? 👇"
                         }
                       />
                     </MessageBubble>

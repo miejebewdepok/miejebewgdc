@@ -22,15 +22,15 @@ function createPool() {
 
   return new Pool({
     connectionString: connStr,
-    max: 2, // Limit pool size to prevent exceeding Supabase connection limits (max 15)
-    idleTimeoutMillis: 10000, // Close idle connections quickly to free up slots
+    max: 1, // Share 1 connection per serverless function to prevent database exhaustion
+    idleTimeoutMillis: 1000, // Close idle connections after 1s of inactivity to free up slots
   });
 }
 
 export const pool = globalForDatabase.__warungosPool ?? createPool();
 
-if (process.env.NODE_ENV !== "production") {
-  globalForDatabase.__warungosPool = pool;
-}
+// Always cache the pool in globalThis to reuse connections across serverless warm starts
+globalForDatabase.__warungosPool = pool;
+
 
 export const db = drizzle({ client: pool, schema });

@@ -1,10 +1,6 @@
 import { betterAuth } from "better-auth";
-import { Pool } from "pg";
 import { createAuthMiddleware, APIError } from "better-auth/api";
-
-const globalForAuth = globalThis as typeof globalThis & {
-  __warungosAuthPool?: Pool;
-};
+import { pool } from "@/db/client";
 
 function toOrigin(value: string) {
   if (value.startsWith("http://") || value.startsWith("https://")) {
@@ -59,31 +55,8 @@ function resolveAuthBaseUrl() {
   return "http://localhost:3000";
 }
 
-function getAuthPool() {
-  if (!globalForAuth.__warungosAuthPool) {
-    let connStr =
-      process.env.DATABASE_URL ??
-      process.env.POSTGRES_URL ??
-      "postgresql://postgres:postgres@127.0.0.1:5432/warungos";
-
-    // Self-healing: redirect Supabase session mode (port 5432) to transaction mode (port 6543)
-    // to avoid EMAXCONNSESSION errors on serverless platforms like Vercel.
-    if (connStr.includes("pooler.supabase.com:5432")) {
-      connStr = connStr.replace("pooler.supabase.com:5432", "pooler.supabase.com:6543");
-    }
-
-    globalForAuth.__warungosAuthPool = new Pool({
-      connectionString: connStr,
-      max: 2,
-      idleTimeoutMillis: 10000,
-    });
-  }
-
-  return globalForAuth.__warungosAuthPool;
-}
-
 export const auth = betterAuth({
-  database: getAuthPool(),
+  database: pool,
   secret:
     process.env.BETTER_AUTH_SECRET ??
     "warungos-dev-secret-please-change-this-in-production",
@@ -108,7 +81,6 @@ export const auth = betterAuth({
       if (ctx.path === "/sign-in/email") {
         const email = ctx.body?.email;
         if (email) {
-          const pool = getAuthPool();
           try {
             const res = await pool.query(
               'SELECT "isApproved" FROM "user" WHERE email = $1 LIMIT 1',

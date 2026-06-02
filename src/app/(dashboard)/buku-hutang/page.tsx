@@ -1,5 +1,5 @@
-import { BukuHutangView } from "@/components/warung/buku-hutang-view";
+import { LaporanKeuanganView } from "@/components/warung/laporan-keuangan-view";
 
-export default function BukuHutangPage() {
-  return <BukuHutangView />;
+export default function LaporanKeuanganPage() {
+  return <LaporanKeuanganView />;
 }

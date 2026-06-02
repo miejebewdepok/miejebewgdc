@@ -19,7 +19,7 @@ fs.readdirSync(gdcDir).forEach(file => {
 });
 
 // Add to problematic wrappers
-prependTsNocheck(path.join(warungDir, 'buku-hutang-view.tsx'));
+prependTsNocheck(path.join(warungDir, 'laporan-keuangan-view.tsx'));
 prependTsNocheck(path.join(warungDir, 'inventaris-view.tsx'));
 
 console.log('done');

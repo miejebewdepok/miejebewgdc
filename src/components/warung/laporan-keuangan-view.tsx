@@ -16,7 +16,7 @@ const FinancialReport = dynamic(() => import("./gdc/FinancialReport"), {
   ),
 });
 
-export function BukuHutangView() {
+export function LaporanKeuanganView() {
   const { transactions } = useAppState();
 
   return (

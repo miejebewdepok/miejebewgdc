@@ -1166,7 +1166,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
           <div className="lg:col-span-7 bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200/50 dark:border-white/5 rounded-[32px] p-5 sm:p-6 shadow-sm flex flex-col">
             <div className="mb-4">
               <h3 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <BookOpen className="text-red-500 w-4 h-4" /> Buku Buku Kas Harian ({filteredExpenses.length})
+                <BookOpen className="text-red-500 w-4 h-4" /> Buku Kas Harian ({filteredExpenses.length})
               </h3>
               <p className="text-slate-550 dark:text-slate-400 text-xs mt-1">Daftar kas keluar dalam rentang waktu yang terfilter di atas</p>
             </div>

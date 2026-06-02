@@ -479,7 +479,7 @@ export default function ManageProductsModal({
                   onUpdateCategories([...categories, trimName]);
                   setNewCategoryName('');
                 }}
-                className="flex gap-2"
+                className="flex flex-col sm:flex-row gap-2"
               >
                 <input
                   type="text"
@@ -487,11 +487,11 @@ export default function ManageProductsModal({
                   placeholder="e.g. Ricebowl, Dessert"
                   value={newCategoryName}
                   onChange={(e) => setNewCategoryName(e.target.value)}
-                  className="flex-1 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl py-2 px-3 text-xs text-foreground dark:text-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                  className="flex-1 min-w-0 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl py-2.5 px-3 text-xs text-foreground dark:text-white focus:outline-none focus:ring-1 focus:ring-red-500"
                 />
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-red-650 hover:bg-red-750 text-white font-bold rounded-xl text-[10px] uppercase tracking-wider transition shadow-md cursor-pointer shrink-0"
+                  className="px-4 py-2.5 bg-red-650 hover:bg-red-750 text-white font-bold rounded-xl text-[10px] uppercase tracking-wider transition shadow-md cursor-pointer shrink-0 text-center"
                 >
                   Tambah Kategori
                 </button>

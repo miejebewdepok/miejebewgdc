@@ -1758,7 +1758,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                     
                     {/* Table Badge */}
                     <div className="my-3 py-1.5 px-4 bg-red-50 text-red-650 border border-red-100 rounded-xl text-sm font-black uppercase tracking-wider">
-                      MEJA {selectedQrTable.replace(/^(meja|order|self-order)[\s\-_]*/i, "")}
+                      SELF ORDER {selectedQrTable.replace(/^(meja|order|self-order)[\s\-_]*/i, "")}
                     </div>
 
                     <div className="text-[10px] text-slate-600 font-medium mb-3 px-1 leading-relaxed">
@@ -1946,7 +1946,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                           <h1 class="brand">${merchantName}</h1>
                           <p class="address">${merchantAddress}</p>
                           
-                          <div class="table-badge">MEJA ${tableNum}</div>
+                          <div class="table-badge">SELF ORDER ${tableNum}</div>
                           
                           <p class="instructions">
                             Pindai kode QR di bawah untuk melihat menu<br>

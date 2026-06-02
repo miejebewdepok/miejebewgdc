@@ -21,7 +21,8 @@ import {
   Sparkles,
   UserCheck,
   UserX,
-  ShieldCheck
+  ShieldCheck,
+  Download
 } from 'lucide-react';
 
 const compressImage = (base64Str: string, maxWidth = 400, maxHeight = 400, quality = 0.7): Promise<string> => {
@@ -1743,23 +1744,29 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                 <div className="bg-zinc-900/60 w-[90%] h-1 pb-1.5"></div>
 
                 {/* scrolling paper container */}
-                <div className="w-[80%] bg-white text-slate-900 p-4 pt-5 rounded-b-sm shadow-md transition-all duration-300 max-h-96 overflow-y-auto shrink-0 select-text outline-none relative mt-[-2px] border-b-4 border-dashed border-slate-300">
-                  
-                  {/* paper scanlines / shadow */}
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-200/50 to-transparent h-12 pointer-events-none"></div>
-
-                  <div className="text-[10px] text-center flex flex-col items-center" style={{ fontFamily: 'monospace', lineHeight: 1.3 }}>
-                    <div className="font-extrabold text-sm uppercase mb-1">{settings.storeName || "MIE JEBEW GDC"}</div>
-                    <div className="text-[9px] mb-2">{settings.storeAddress || "Alamat Outlet"}</div>
-                    <div className="border-t border-b border-dashed border-slate-400 py-1 w-full my-2 font-bold uppercase tracking-wider">
-                      ORDER {selectedQrTable.replace(/^(meja|order|self-order)[\s\-_]*/i, "")}
+                <div className="w-[85%] bg-white text-slate-900 p-5 rounded-2xl shadow-xl transition-all duration-300 max-h-[380px] overflow-y-auto shrink-0 select-text outline-none relative mt-[-2px] border border-slate-200">
+                  <div className="text-center flex flex-col items-center font-sans">
+                    {/* Brand header */}
+                    {settings.userProfileImage ? (
+                      <img src={settings.userProfileImage} alt="Logo" className="w-10 h-10 rounded-xl object-cover mb-2 shadow-sm border border-slate-100" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center font-black text-xs mb-2">MJ</div>
+                    )}
+                    
+                    <div className="font-extrabold text-sm uppercase text-slate-800 tracking-tight">{settings.merchantName || settings.storeName || "MIE JEBEW GDC"}</div>
+                    <div className="text-[9px] text-slate-500 mt-0.5 leading-snug">{settings.merchantAddress || "Alamat Outlet"}</div>
+                    
+                    {/* Table Badge */}
+                    <div className="my-3 py-1.5 px-4 bg-red-50 text-red-650 border border-red-100 rounded-xl text-sm font-black uppercase tracking-wider">
+                      MEJA {selectedQrTable.replace(/^(meja|order|self-order)[\s\-_]*/i, "")}
                     </div>
-                    <div className="text-[8px] text-slate-600 mb-3 px-2 leading-relaxed">
-                      Scan QR Code di bawah untuk melihat menu & memesan langsung secara mandiri dari handphone Anda.
+
+                    <div className="text-[10px] text-slate-600 font-medium mb-3 px-1 leading-relaxed">
+                      Pindai kode QR di bawah untuk melihat menu & memesan langsung secara mandiri dari handphone Anda.
                     </div>
                     
-                    {/* QR Image */}
-                    <div className="w-36 h-36 bg-white border border-slate-200 p-2 flex items-center justify-center my-2 shadow-inner">
+                    {/* QR Code Frame */}
+                    <div className="w-36 h-36 bg-slate-50 border border-slate-150 p-3 rounded-2xl flex items-center justify-center my-1.5 shadow-inner">
                       <img 
                         src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
                           `${origin}/o/${isCabang2 ? `c2-${selectedQrTable}` : selectedQrTable}`
@@ -1769,10 +1776,10 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                       />
                     </div>
 
-                    <div className="text-[9px] font-bold text-slate-800 uppercase tracking-widest mt-2">
+                    <div className="text-[9px] font-extrabold text-slate-800 uppercase tracking-widest mt-3.5">
                       ~ SELF-ORDERING PLATFORM ~
                     </div>
-                    <div className="text-[8px] text-slate-500 mt-1">
+                    <div className="text-[8px] text-slate-400 font-medium mt-1">
                       Powered by WarungOS
                     </div>
                   </div>
@@ -1787,7 +1794,191 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
               </div>
             </div>
 
-            <p className="text-[10px] text-slate-400 text-center mt-6">
+            {/* Action buttons inside modal */}
+            <div className="flex flex-col gap-2 mt-5">
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const tableUrl = isCabang2 ? `${origin}/o/c2-${selectedQrTable}` : `${origin}/o/${selectedQrTable}`;
+                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(tableUrl)}`;
+                    const res = await fetch(qrUrl);
+                    const blob = await res.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+                    
+                    const link = document.createElement("a");
+                    link.href = blobUrl;
+                    link.download = `QR_Self_Order_Meja_${selectedQrTable.replace(/^(meja|order|self-order)[\s\-_]*/i, "")}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(blobUrl);
+                  } catch (e) {
+                    const tableUrl = isCabang2 ? `${origin}/o/c2-${selectedQrTable}` : `${origin}/o/${selectedQrTable}`;
+                    window.open(`https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(tableUrl)}`, "_blank");
+                  }
+                }}
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-extrabold text-center flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md shadow-emerald-500/10 border-none active:scale-95"
+              >
+                <Download className="w-4 h-4" /> Download Gambar QR (PNG)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const tableNum = selectedQrTable.replace(/^(meja|order|self-order)[\s\-_]*/i, "");
+                  const tableUrl = isCabang2 ? `${origin}/o/c2-${selectedQrTable}` : `${origin}/o/${selectedQrTable}`;
+                  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(tableUrl)}`;
+                  
+                  const printWindow = window.open("", "_blank");
+                  if (!printWindow) {
+                    alert("Popup diblokir oleh browser! Harap aktifkan izin popup.");
+                    return;
+                  }
+                  
+                  printWindow.document.write(`
+                    <html>
+                      <head>
+                        <title>QR Self Order - Meja ${tableNum}</title>
+                        <style>
+                          body {
+                            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                            color: #1e293b;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            min-height: 100vh;
+                            margin: 0;
+                            background-color: #f8fafc;
+                          }
+                          .card {
+                            background: white;
+                            width: 320px;
+                            padding: 30px;
+                            border-radius: 24px;
+                            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+                            border: 1px solid #e2e8f0;
+                            text-align: center;
+                            box-sizing: border-box;
+                          }
+                          .logo {
+                            width: 60px;
+                            height: 60px;
+                            border-radius: 16px;
+                            object-fit: cover;
+                            margin-bottom: 12px;
+                            box-shadow: 0 4px 10px rgba(220, 38, 38, 0.15);
+                          }
+                          .brand {
+                            font-size: 18px;
+                            font-weight: 800;
+                            letter-spacing: -0.025em;
+                            color: #0f172a;
+                            margin: 0;
+                            text-transform: uppercase;
+                          }
+                          .address {
+                            font-size: 10px;
+                            color: #64748b;
+                            margin: 4px 0 16px 0;
+                          }
+                          .table-badge {
+                            background-color: #fef2f2;
+                            border: 1px solid #fee2e2;
+                            color: #dc2626;
+                            font-size: 18px;
+                            font-weight: 900;
+                            padding: 8px 16px;
+                            border-radius: 14px;
+                            display: inline-block;
+                            margin-bottom: 16px;
+                            letter-spacing: 0.05em;
+                          }
+                          .instructions {
+                            font-size: 11px;
+                            color: #475569;
+                            line-height: 1.5;
+                            margin-bottom: 20px;
+                            font-weight: 500;
+                          }
+                          .qr-container {
+                            background: #f8fafc;
+                            border: 1px solid #f1f5f9;
+                            padding: 16px;
+                            border-radius: 16px;
+                            display: inline-block;
+                            margin-bottom: 20px;
+                          }
+                          .qr-image {
+                            width: 180px;
+                            height: 180px;
+                            display: block;
+                          }
+                          .footer-text {
+                            font-size: 11px;
+                            font-weight: 700;
+                            color: #0f172a;
+                            letter-spacing: 0.1em;
+                          }
+                          .subfooter-text {
+                            font-size: 9px;
+                            color: #94a3b8;
+                            margin-top: 4px;
+                          }
+                          @media print {
+                            body { background-color: white; }
+                            .card {
+                              box-shadow: none;
+                              border: none;
+                              padding: 10px;
+                            }
+                            .no-print { display: none; }
+                          }
+                        </style>
+                      </head>
+                      <body>
+                        <div class="card">
+                          \${settings.userProfileImage ? \`<img src="\${settings.userProfileImage}" class="logo" />\` : ''}
+                          <h1 class="brand">\${settings.merchantName || settings.storeName || "MIE JEBEW GDC"}</h1>
+                          <p class="address">\${settings.merchantAddress || "Alamat Outlet"}</p>
+                          
+                          <div class="table-badge">MEJA \${tableNum}</div>
+                          
+                          <p class="instructions">
+                            Pindai kode QR di bawah untuk melihat menu<br>
+                            & memesan makanan langsung dari meja Anda.
+                          </p>
+                          
+                          <div class="qr-container">
+                            <img src="\${qrUrl}" class="qr-image" />
+                          </div>
+                          
+                          <div class="footer-text font-bold">~ SELF-ORDERING PLATFORM ~</div>
+                          <div class="subfooter-text">Powered by WarungOS</div>
+                          
+                          <div class="no-print" style="margin-top: 25px;">
+                            <button onclick="window.print();" style="padding: 10px 20px; background-color: #dc2626; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 12px; box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2);">Cetak / Simpan PDF</button>
+                          </div>
+                        </div>
+                        <script>
+                          window.onload = function() {
+                            setTimeout(function() {
+                              window.print();
+                            }, 400);
+                          }
+                        </script>
+                      </body>
+                    </html>
+                  `);
+                  printWindow.document.close();
+                }}
+                className="w-full py-2.5 bg-red-650 hover:bg-red-700 text-white rounded-2xl text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md shadow-red-500/10 border-none active:scale-95"
+              >
+                <Printer className="w-4 h-4" /> Cetak Slip / Simpan PDF
+              </button>
+            </div>
+
+            <p className="text-[10px] text-slate-400 text-center mt-4">
               Potong slip QR Self Order ini dan tempelkan di <span className="font-bold text-white uppercase">{selectedQrTable}</span>.
             </p>
           </div>

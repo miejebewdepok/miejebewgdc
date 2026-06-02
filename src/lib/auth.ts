@@ -27,17 +27,31 @@ function getTrustedAuthOrigins(request?: Request) {
   }
 
   if (request) {
-    origins.add(new URL(request.url).origin);
+    try {
+      origins.add(new URL(request.url).origin);
+    } catch (e) {}
   }
 
   if (origins.size === 0) {
     origins.add("http://localhost:3000");
   }
 
+  // Always trust production custom domain and Capacitor webview origins
+  origins.add("https://kasir-miejebew.vercel.app");
+  origins.add("http://localhost");
+  origins.add("capacitor://localhost");
+  origins.add("http://localhost:3000");
+
   return Array.from(origins);
 }
 
 function resolveAuthBaseUrl() {
+  // If running in production (e.g. on Vercel), force base URL to use the custom domain
+  // to prevent it from resolving to the localhost value defined in the repo's .env file.
+  if (process.env.NODE_ENV === "production") {
+    return "https://kasir-miejebew.vercel.app";
+  }
+
   if (process.env.BETTER_AUTH_URL) {
     return process.env.BETTER_AUTH_URL;
   }

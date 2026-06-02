@@ -825,9 +825,9 @@ export default function CustomerOrderPage(props: {
 
         {/* Sub Category Selector */}
         {activeCategory !== "Semua" && (
-          <div className={activeCategory === "Makanan" ? (isCabang2 ? "grid grid-cols-3 gap-1.5" : "grid grid-cols-4 gap-1.5") : (isCabang2 ? "grid grid-cols-2 gap-2" : "grid grid-cols-3 gap-2")}>
+          <div className={activeCategory === "Makanan" ? "grid grid-cols-4 gap-1.5" : (isCabang2 ? "grid grid-cols-2 gap-2" : "grid grid-cols-3 gap-2")}>
             {(activeCategory === "Makanan"
-              ? (isCabang2 ? ["Mie Pedas", "Mie Tek Tek", "Pangsit"] : ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack"])
+              ? (isCabang2 ? ["Mie Pedas", "Mie Tek Tek", "Pangsit", "Snack"] : ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack"])
               : (isCabang2 ? ["Tea Series", "Delight Series"] : ["Qalla Tea", "Qalla Coffee", "Qalla Juice"])
             ).map((subCat) => {
               const isSelected = activeSubCategory === subCat;

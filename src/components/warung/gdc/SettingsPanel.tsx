@@ -760,9 +760,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
           </div>
 
           {!isCrew && (
-            <>
-              {/* INTEGRASI PEMBAYARAN QRIS */}
-              <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden">
+            <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden">
             <div className="flex items-center gap-2.5 mb-5">
               <div className="p-2 bg-yellow-500/10 text-yellow-500 rounded-xl">
                 <QrCode className="w-4 h-4" />
@@ -920,7 +918,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
 
      </div>
 
-          </div>
+          </div>)}
 
           {/* QR MEJA SETUP (SELF-ORDERING) CARD */}
           <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-5">
@@ -1001,7 +999,8 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
               </div>
             </div>
                     {/* DATABASE WHATSAPP & EMAIL PELANGGAN (PROMO QR) CARD */}
-          <div className="glass-morphism rounded-3xl p-4 sm:p-6 relative overflow-hidden flex flex-col gap-4 mt-6">
+          {!isCrew && (
+            <div className="glass-morphism rounded-3xl p-4 sm:p-6 relative overflow-hidden flex flex-col gap-4 mt-6">
             {/* Header Row */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
               <div className="flex items-center gap-3">
@@ -1176,7 +1175,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                 </div>
               )}
             </div>
-          </div>  </div></>)}
+          </div>)}  </div>
 
         </div>
 
@@ -1327,8 +1326,6 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
             </div>
           )}
 
-          {!isCrew && (
-            <>
               {/* PRINTER BLUETOOTH THERMAL CONNECT MODULE */}
               <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-5">
             <div className="flex items-center justify-between">
@@ -1528,6 +1525,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
           </div>
 
           {/* PENGATURAN HPP KUSTOM (TOPPING & LEVEL PEDAS) */}
+          {!isCrew && (
             <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-5">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl">
@@ -1661,7 +1659,8 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                   </div>
                 </div>
               </div>
-          </div></>)}
+          </div>
+          )}
 
         </div>
 

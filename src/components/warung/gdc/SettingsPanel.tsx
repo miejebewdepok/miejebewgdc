@@ -642,26 +642,26 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
     <div className="flex-1 flex flex-col gap-6 overflow-y-auto pr-1 select-none">
       
       {/* Settings Panel Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-black/5 dark:border-white/5">
         <div>
-          <h2 className="text-xl font-extrabold text-foreground dark:text-white flex items-center gap-2">
-            <SettingsIcon className="text-red-500 w-5 h-5" /> Pengaturan Sistem
+          <h2 className="text-xl sm:text-2xl font-extrabold text-foreground dark:text-white flex items-center gap-2">
+            <SettingsIcon className="text-red-500 w-5 h-5 sm:w-6 sm:h-6" /> Pengaturan Sistem
           </h2>
-          <p className="text-slate-550 dark:text-slate-400 text-xs">Konfigurasi Parameter Restoran & POS</p>
+          <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-0.5">Konfigurasi Parameter Restoran & POS</p>
         </div>
 
         <button
           onClick={handleSaveSettings}
           disabled={isSaving}
-          className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-extrabold text-xs px-5 py-3 rounded-2xl flex items-center gap-1.5 cursor-pointer transition-transform duration-200 active:scale-95 shadow-lg shadow-red-600/25 animate-none"
+          className="w-full sm:w-auto bg-red-650 hover:bg-red-700 disabled:opacity-50 text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl flex items-center justify-center gap-1.5 cursor-pointer transition-transform duration-200 active:scale-95 shadow-lg shadow-red-600/25 animate-none"
         >
           {isSaving ? (
             <>
-              <RefreshCw className="w-4 h-4 animate-spin" /> SAVING...
+              <RefreshCw className="w-4 h-4 animate-spin" /> MENYIMPAN...
             </>
           ) : (
             <>
-              <Check className="w-4 h-4" /> SAVE ALL CHANGES
+              <Check className="w-4 h-4" /> SIMPAN PERUBAHAN
             </>
           )}
         </button>

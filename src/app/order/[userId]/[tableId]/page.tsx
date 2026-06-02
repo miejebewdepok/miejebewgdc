@@ -492,9 +492,10 @@ export default function CustomerOrderPage(props: {
 
   // Add to cart trigger
   const handleAddClick = (product: Product) => {
+    const isRisoles = product.name.toLowerCase().includes("risoles");
     const isBypassed = isCabang2 
       ? (product.category === "Tea Series" || product.category === "Delight Series" || product.category.toLowerCase() === "chocolatte")
-      : ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(product.category);
+      : (["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(product.category) && !isRisoles);
     if (isBypassed) {
       // Direct add to cart bypass customization
       const cartItemId = `${product.id}-lvl0-`;
@@ -525,13 +526,15 @@ export default function CustomerOrderPage(props: {
       setCustomizingProduct(product);
       setSpicyLevel(0);
       setSelectedToppings([]);
-      // Default filling and size for Kebab / Lumpia Beef / Spaghetti Goreng
+      // Default filling and size for Kebab / Lumpia Beef / Spaghetti Goreng / Risoles
       const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
       setSelectedSize(isSpaghetti ? "Single" : "REGULER");
       if (product.category === "Kebab") {
         setSelectedFilling("Beef Slice");
       } else if (product.category === "Lumpia Beef") {
         setSelectedFilling("Beef Slice");
+      } else if (isRisoles) {
+        setSelectedFilling("Mayo");
       } else {
         setSelectedFilling("");
       }
@@ -543,7 +546,8 @@ export default function CustomerOrderPage(props: {
     if (!customizingProduct) return;
     const product = customizingProduct;
     
-    const fillingToPass = product.category === "Kebab" || product.category === "Lumpia Beef" ? selectedFilling : undefined;
+    const isRisoles = product.name.toLowerCase().includes("risoles");
+    const fillingToPass = product.category === "Kebab" || product.category === "Lumpia Beef" || isRisoles ? selectedFilling : undefined;
     const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
     const sizeToPass = (product.category === "Kebab" || isSpaghetti) ? selectedSize : undefined;
 
@@ -1048,60 +1052,62 @@ export default function CustomerOrderPage(props: {
               </div>
 
               {/* Spicy level selector */}
-              <div className="my-5">
-                <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-2.5">
-                  Tingkat Kepedasan
-                </label>
-                {customizingProduct.category === "Kebab" || customizingProduct.category === "Lumpia Beef" ? (
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { label: "Tidak Pedas", lvl: 0 },
-                      { label: "Sedang", lvl: 1 },
-                      { label: "Pedas", lvl: 2 },
-                    ].map((opt) => {
-                      const isSelected = spicyLevel === opt.lvl;
-                      return (
-                        <button
-                          key={opt.lvl}
-                          type="button"
-                          onClick={() => setSpicyLevel(opt.lvl)}
-                          className={`py-3 border rounded-xl text-[11px] font-bold transition-all cursor-pointer text-center ${
-                            isSelected
-                              ? "bg-red-600 border-red-500 text-white shadow-md shadow-red-600/25 font-black"
-                              : "bg-white/5 border-white/5 text-slate-400 hover:text-white"
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <>
-                    <div className="grid grid-cols-6 gap-2">
-                      {[0, 1, 2, 3, 4, 5].map((lvl) => (
-                        <button
-                          key={lvl}
-                          type="button"
-                          onClick={() => setSpicyLevel(lvl)}
-                          className={`py-2.5 border rounded-xl text-xs font-bold font-mono transition-all cursor-pointer ${
-                            spicyLevel === lvl
-                              ? "bg-red-600 border-red-500 text-white shadow-md shadow-red-600/25"
-                              : "bg-white/5 border-white/5 text-slate-400 hover:text-white"
-                          }`}
-                        >
-                          {lvl}
-                        </button>
-                      ))}
+              {!(["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(customizingProduct.category)) && (
+                <div className="my-5">
+                  <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-2.5">
+                    Tingkat Kepedasan
+                  </label>
+                  {customizingProduct.category === "Kebab" || customizingProduct.category === "Lumpia Beef" ? (
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { label: "Tidak Pedas", lvl: 0 },
+                        { label: "Sedang", lvl: 1 },
+                        { label: "Pedas", lvl: 2 },
+                      ].map((opt) => {
+                        const isSelected = spicyLevel === opt.lvl;
+                        return (
+                          <button
+                            key={opt.lvl}
+                            type="button"
+                            onClick={() => setSpicyLevel(opt.lvl)}
+                            className={`py-3 border rounded-xl text-[11px] font-bold transition-all cursor-pointer text-center ${
+                              isSelected
+                                ? "bg-red-600 border-red-500 text-white shadow-md shadow-red-600/25 font-black"
+                                : "bg-white/5 border-white/5 text-slate-400 hover:text-white"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        );
+                      })}
                     </div>
-                    {(spicyLevel === 4 || spicyLevel === 5) && (
-                      <span className="text-[9px] text-yellow-500 font-bold block mt-1.5">
-                        * Level 4 & 5 ada biaya tambahan +Rp 2.000
-                      </span>
-                    )}
-                  </>
-                )}
-              </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-6 gap-2">
+                        {[0, 1, 2, 3, 4, 5].map((lvl) => (
+                          <button
+                            key={lvl}
+                            type="button"
+                            onClick={() => setSpicyLevel(lvl)}
+                            className={`py-2.5 border rounded-xl text-xs font-bold font-mono transition-all cursor-pointer ${
+                              spicyLevel === lvl
+                                ? "bg-red-600 border-red-500 text-white shadow-md shadow-red-600/25"
+                                : "bg-white/5 border-white/5 text-slate-400 hover:text-white"
+                            }`}
+                          >
+                            {lvl}
+                          </button>
+                        ))}
+                      </div>
+                      {(spicyLevel === 4 || spicyLevel === 5) && (
+                        <span className="text-[9px] text-yellow-500 font-bold block mt-1.5">
+                          * Level 4 & 5 ada biaya tambahan +Rp 2.000
+                        </span>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Size Selection (Only for Kebab and Spaghetti Goreng) */}
               {(customizingProduct.category === "Kebab" || customizingProduct.name.toLowerCase().includes("spaghetti")) && (
@@ -1233,8 +1239,40 @@ export default function CustomerOrderPage(props: {
                 </div>
               )}
 
-              {/* Toppings selector (Only for non-Kebab, non-Lumpia Beef) */}
-              {customizingProduct.category !== "Kebab" && customizingProduct.category !== "Lumpia Beef" && (
+              {/* Rasa Selection (Only for Risoles) */}
+              {customizingProduct.name.toLowerCase().includes("risoles") && (
+                <div className="my-5 border-t border-white/5 pt-4">
+                  <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-2.5">
+                    Pilihan Rasa Risoles
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { label: "Mayo" },
+                      { label: "Mentai" },
+                      { label: "Ragout" },
+                    ].map((flavor) => {
+                      const isSelected = selectedFilling === flavor.label;
+                      return (
+                        <button
+                          key={flavor.label}
+                          type="button"
+                          onClick={() => setSelectedFilling(flavor.label)}
+                          className={`py-2.5 border rounded-xl text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
+                            isSelected
+                              ? "bg-red-600 border-red-500 text-white shadow-md shadow-red-600/25 font-black"
+                              : "bg-white/5 border-white/5 text-slate-450 hover:text-white"
+                          }`}
+                        >
+                          <span>{flavor.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Toppings selector (Only for non-Kebab, non-Lumpia Beef, non-Snack, non-Drinks) */}
+              {!["Kebab", "Lumpia Beef", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(customizingProduct.category) && (
                 <div className="my-5 border-t border-white/5 pt-4">
                   <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-2">
                     Toppings Tambahan

@@ -623,37 +623,48 @@ export default function ManageProductsModal({
                     </table>
                   </div>
 
-                  {/* Mobile View Cards for Categories */}
-                  <div className="md:hidden flex-1 overflow-y-auto space-y-3 pr-1 pb-4">
+                  {/* Mobile View: Clean, compact category rows */}
+                  <div className="md:hidden flex-1 overflow-y-auto space-y-2 pr-1 pb-4">
                     {categories.map((cat, index) => {
                       const productCount = products.filter(p => p.category === cat).length;
                       const isRowEditing = editingCategoryIndex === index;
 
                       return (
-                        <div key={index} className="bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/5 rounded-2xl p-3.5 flex flex-col gap-3 transition hover:bg-black/5 dark:hover:bg-white/5">
-                          <div className="flex justify-between items-center">
-                            <div className="flex-1 min-w-0 mr-2">
+                        <div 
+                          key={index} 
+                          className="flex items-center justify-between p-3 bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/5 rounded-2xl transition hover:bg-black/5 dark:hover:bg-white/5"
+                        >
+                          {/* Left: Tag Icon + Name/Input */}
+                          <div className="flex-1 flex items-center gap-2.5 min-w-0 mr-2">
+                            <div className="w-8 h-8 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center shrink-0">
+                              <Tag className="w-4 h-4" />
+                            </div>
+                            
+                            <div className="flex-1 min-w-0">
                               {isRowEditing ? (
                                 <input
                                   type="text"
                                   value={editingCategoryValue}
                                   onChange={(e) => setEditingCategoryValue(e.target.value)}
-                                  className="bg-white dark:bg-slate-900 border border-black/20 dark:border-white/20 rounded-xl py-2 px-3 text-xs text-foreground dark:text-white focus:outline-none focus:ring-1 focus:ring-red-500 w-full"
+                                  className="bg-white dark:bg-slate-900 border border-black/20 dark:border-white/20 rounded-xl py-1.5 px-3 text-xs text-foreground dark:text-white focus:outline-none focus:ring-1 focus:ring-red-500 w-full"
                                   required
+                                  autoFocus
                                 />
                               ) : (
-                                <span className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 truncate">
-                                  <Tag className="w-4 h-4 text-red-550 shrink-0" />
-                                  {cat}
-                                </span>
+                                <div className="flex flex-col">
+                                  <span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                                    {cat}
+                                  </span>
+                                  <span className="text-[9px] text-slate-400 font-medium leading-none mt-1">
+                                    {productCount} produk terkait
+                                  </span>
+                                </div>
                               )}
                             </div>
-                            <span className="text-[10px] font-mono font-bold text-yellow-600 dark:text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded-lg border border-yellow-500/20 shrink-0">
-                              {productCount} Menu
-                            </span>
                           </div>
 
-                          <div className="flex justify-end gap-2 border-t border-black/5 dark:border-white/5 pt-2">
+                          {/* Right: Actions */}
+                          <div className="flex items-center gap-1.5 shrink-0">
                             {isRowEditing ? (
                               <>
                                 <button
@@ -678,13 +689,13 @@ export default function ManageProductsModal({
 
                                     setEditingCategoryIndex(null);
                                   }}
-                                  className="py-1.5 px-3 bg-emerald-650/15 hover:bg-emerald-600/30 text-emerald-700 dark:text-emerald-400 font-bold rounded-lg text-[10px] uppercase cursor-pointer"
+                                  className="py-1.5 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-[10px] uppercase tracking-wider cursor-pointer transition shadow-sm"
                                 >
                                   Simpan
                                 </button>
                                 <button
                                   onClick={() => setEditingCategoryIndex(null)}
-                                  className="py-1.5 px-3 bg-black/10 hover:bg-black/15 dark:bg-white/10 dark:hover:bg-white/15 text-slate-700 dark:text-slate-300 font-bold rounded-lg text-[10px] uppercase cursor-pointer"
+                                  className="py-1.5 px-2.5 bg-black/10 hover:bg-black/15 dark:bg-white/10 dark:hover:bg-white/15 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-[10px] uppercase tracking-wider cursor-pointer transition"
                                 >
                                   Batal
                                 </button>
@@ -696,10 +707,10 @@ export default function ManageProductsModal({
                                     setEditingCategoryIndex(index);
                                     setEditingCategoryValue(cat);
                                   }}
-                                  className="py-1.5 px-3 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-600 dark:text-yellow-550 rounded-xl cursor-pointer transition-colors flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider"
+                                  className="p-2 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 rounded-xl cursor-pointer transition-colors"
                                   title="Edit Kategori"
                                 >
-                                  <Edit2 className="w-3.5 h-3.5" /> Edit
+                                  <Edit2 className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                   onClick={() => {
@@ -716,10 +727,10 @@ export default function ManageProductsModal({
                                       });
                                     }
                                   }}
-                                  className="py-1.5 px-3 bg-red-600/10 hover:bg-red-600/20 text-red-550 rounded-xl cursor-pointer transition-colors flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider"
+                                  className="p-2 bg-red-650/10 hover:bg-red-600/20 text-red-550 rounded-xl cursor-pointer transition-colors"
                                   title="Hapus Kategori"
                                 >
-                                  <Trash2 className="w-3.5 h-3.5" /> Hapus
+                                  <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                               </>
                             )}

@@ -11,6 +11,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
+import { useSession } from "@/lib/auth-client";
 
 export function AppShell({
   children,
@@ -24,10 +25,20 @@ export function AppShell({
   const [aiOpen, setAiOpen] = useState(false);
   const { theme: nextTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const { data: session } = useSession();
+  const isCrew = session?.user?.email === "miejebew.crew@gmail.com";
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (mounted && isCrew) {
+      if (pathname === '/laporan-keuangan' || pathname === '/inventaris') {
+        router.replace('/dashboard');
+      }
+    }
+  }, [mounted, isCrew, pathname, router]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {

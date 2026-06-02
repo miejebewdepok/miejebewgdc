@@ -14,7 +14,7 @@ import {
   Moon,
   LogOut
 } from 'lucide-react';
-import { signOut } from '@/lib/auth-client';
+import { signOut, useSession } from '@/lib/auth-client';
 
 interface SidebarProps {
   activeTab: 'dashboard' | 'pos' | 'history' | 'manage' | 'report' | 'settings';
@@ -90,6 +90,16 @@ export default function Sidebar({
     }
   ];
 
+  const { data: session } = useSession();
+  const isCrew = session?.user?.email === 'miejebew.crew@gmail.com';
+
+  const filteredMenuItems = menuItems.filter(item => {
+    if (isCrew && (item.id === 'report' || item.id === 'manage')) {
+      return false;
+    }
+    return true;
+  });
+
   return (
     <aside className="w-full lg:w-64 h-full bg-sidebar/80 dark:bg-slate-950/45 backdrop-blur-xl border-r border-sidebar-border/40 dark:border-white/10 flex flex-col justify-between p-6 z-20 shrink-0 select-none text-sidebar-foreground transition-colors duration-300">
       {/* Brand & Cashier Title */}
@@ -109,7 +119,7 @@ export default function Sidebar({
 
         {/* Navigation Items */}
         <div className="flex flex-col gap-2">
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const IconComponent = item.icon;
             const isActive = activeTab === item.id;
             return (

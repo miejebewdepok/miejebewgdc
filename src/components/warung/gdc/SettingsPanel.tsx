@@ -126,6 +126,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
 
   const { data: session } = useSession();
   const userEmail = session?.user?.email;
+  const isCrew = userEmail === 'miejebew.crew@gmail.com';
 
   // Manage User Access States
   const [usersList, setUsersList] = useState<{ id: string; name: string; email: string; isApproved: boolean; createdAt: string }[]>([]);
@@ -758,8 +759,10 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
             </div>
           </div>
 
-          {/* INTEGRASI PEMBAYARAN QRIS */}
-          <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden">
+          {!isCrew && (
+            <>
+              {/* INTEGRASI PEMBAYARAN QRIS */}
+              <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden">
             <div className="flex items-center gap-2.5 mb-5">
               <div className="p-2 bg-yellow-500/10 text-yellow-500 rounded-xl">
                 <QrCode className="w-4 h-4" />
@@ -1173,7 +1176,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                 </div>
               )}
             </div>
-          </div>  </div>
+          </div>  </div></>)}
 
         </div>
 
@@ -1324,8 +1327,10 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
             </div>
           )}
 
-          {/* PRINTER BLUETOOTH THERMAL CONNECT MODULE */}
-          <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-5">
+          {!isCrew && (
+            <>
+              {/* PRINTER BLUETOOTH THERMAL CONNECT MODULE */}
+              <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl">
@@ -1656,7 +1661,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                   </div>
                 </div>
               </div>
-          </div>
+          </div></>)}
 
         </div>
 

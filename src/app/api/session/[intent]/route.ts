@@ -21,6 +21,10 @@ const AUTH_INTENTS = {
 type Intent = keyof typeof AUTH_INTENTS;
 
 function getBaseUrl(request: NextRequest) {
+  if (process.env.NODE_ENV === "production") {
+    return "https://kasir-miejebew.vercel.app";
+  }
+
   if (process.env.BETTER_AUTH_URL) {
     return process.env.BETTER_AUTH_URL;
   }

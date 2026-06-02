@@ -57,7 +57,7 @@ export function AppShell({
   if (pathname === '/inventaris') activeTab = 'manage';
   if (pathname === '/pengaturan') activeTab = 'settings';
   if (pathname === '/laporan') activeTab = 'history';
-  if (pathname === '/buku-hutang') activeTab = 'report';
+  if (pathname === '/laporan-keuangan') activeTab = 'report';
 
   return (
     <div className="w-full h-screen bg-background text-foreground dark:bg-slate-950 dark:text-slate-100 flex overflow-hidden font-sans relative transition-colors duration-300">
@@ -76,7 +76,7 @@ export function AppShell({
             if (tab === "manage") router.push("/inventaris");
             if (tab === "settings") router.push("/pengaturan");
             if (tab === "history") router.push("/laporan");
-            if (tab === "report") router.push("/buku-hutang");
+            if (tab === "report") router.push("/laporan-keuangan");
           }}
           totalSalesToday={totalSalesToday}
           historyCount={historyCount}
@@ -118,7 +118,7 @@ export function AppShell({
                     if (tab === "manage") router.push("/inventaris");
                     if (tab === "settings") router.push("/pengaturan");
                     if (tab === "history") router.push("/laporan");
-                    if (tab === "report") router.push("/buku-hutang");
+                    if (tab === "report") router.push("/laporan-keuangan");
                   }}
                   totalSalesToday={totalSalesToday}
                   historyCount={historyCount}

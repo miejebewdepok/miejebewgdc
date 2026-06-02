@@ -1830,6 +1830,10 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                   const tableUrl = isCabang2 ? `${origin}/o/c2-${selectedQrTable}` : `${origin}/o/${selectedQrTable}`;
                   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(tableUrl)}`;
                   
+                  const logoHtml = settings.userProfileImage ? `<img src="${settings.userProfileImage}" class="logo" />` : '';
+                  const merchantName = settings.merchantName || settings.storeName || "MIE JEBEW GDC";
+                  const merchantAddress = settings.merchantAddress || "Alamat Outlet";
+
                   const printWindow = window.open("", "_blank");
                   if (!printWindow) {
                     alert("Popup diblokir oleh browser! Harap aktifkan izin popup.");
@@ -1938,11 +1942,11 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                       </head>
                       <body>
                         <div class="card">
-                          \${settings.userProfileImage ? \`<img src="\${settings.userProfileImage}" class="logo" />\` : ''}
-                          <h1 class="brand">\${settings.merchantName || settings.storeName || "MIE JEBEW GDC"}</h1>
-                          <p class="address">\${settings.merchantAddress || "Alamat Outlet"}</p>
+                          ${logoHtml}
+                          <h1 class="brand">${merchantName}</h1>
+                          <p class="address">${merchantAddress}</p>
                           
-                          <div class="table-badge">MEJA \${tableNum}</div>
+                          <div class="table-badge">MEJA ${tableNum}</div>
                           
                           <p class="instructions">
                             Pindai kode QR di bawah untuk melihat menu<br>
@@ -1950,7 +1954,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                           </p>
                           
                           <div class="qr-container">
-                            <img src="\${qrUrl}" class="qr-image" />
+                            <img src="${qrUrl}" class="qr-image" />
                           </div>
                           
                           <div class="footer-text font-bold">~ SELF-ORDERING PLATFORM ~</div>

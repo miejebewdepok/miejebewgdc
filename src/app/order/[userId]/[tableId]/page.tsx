@@ -52,7 +52,13 @@ export default function CustomerOrderPage(props: {
   const tableId = decodeURIComponent(rawTableId);
   const tableNumOnly = tableId.replace(/^(meja|order)[\s\-_]*/i, "");
   
-  const isCabang2 = userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5";
+  const [isCabang2, setIsCabang2] = useState(false);
+
+  useEffect(() => {
+    if (userId) {
+      setIsCabang2(userId.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5");
+    }
+  }, [userId]);
 
   // States
   const [loading, setLoading] = useState(true);
@@ -119,6 +125,21 @@ export default function CustomerOrderPage(props: {
       .then((data) => {
         if (data.products) {
           setProducts(data.products);
+          
+          // Self-healing check: detect Cabang 2 from product categories or storeName
+          const hasCabang2Cats = data.products.some((p: any) => 
+            p.category === "Mie Tek Tek" || 
+            p.category === "Pangsit" || 
+            p.category === "Tea Series" || 
+            p.category === "Delight Series"
+          );
+          const hasDepokInName = data.storeName && data.storeName.toLowerCase().includes("depok");
+          
+          if (hasCabang2Cats || hasDepokInName) {
+            setIsCabang2(true);
+          } else if (userId.toLowerCase() !== "rwtvcmmleowlwyhdjnnnnlewrlys26fc5") {
+            setIsCabang2(false);
+          }
         }
         if (data.productOrder) {
           setProductOrder(data.productOrder);

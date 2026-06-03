@@ -23,8 +23,21 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://miejebew.my.id"),
   title: "MIE JEBEW GDC",
   description: "Aplikasi kasir tablet-first untuk operasional modern.",
+  openGraph: {
+    title: "MIE JEBEW GDC",
+    description: "Aplikasi kasir tablet-first untuk operasional modern.",
+    images: [
+      {
+        url: "/logo.png",
+        width: 512,
+        height: 512,
+        alt: "Mie Jebew GDC Logo",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({

@@ -8,10 +8,34 @@ interface TransactionHistoryProps {
   transactions: Transaction[];
 }
 
+const safeParseDate = (dateStr: string) => {
+  if (!dateStr) return null;
+  let formatted = dateStr.trim();
+  if (formatted.includes(' ') && !formatted.includes('T')) {
+    formatted = formatted.replace(' ', 'T');
+  }
+  
+  const match = formatted.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/);
+  if (match) {
+    const [_, year, month, day, hours, minutes, seconds] = match;
+    const d = new Date(
+      parseInt(year),
+      parseInt(month) - 1,
+      parseInt(day),
+      parseInt(hours),
+      parseInt(minutes),
+      seconds ? parseInt(seconds) : 0
+    );
+    if (!isNaN(d.getTime())) return d;
+  }
+
+  const d = new Date(formatted);
+  return isNaN(d.getTime()) ? null : d;
+};
+
 const formatForDateTimeInput = (dateStr: string) => {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return '';
+  const d = safeParseDate(dateStr);
+  if (!d) return '';
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
@@ -68,7 +92,12 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
     if (!selectedTx) return;
     try {
       setIsSaving(true);
-      const isoDate = editCreatedAt ? new Date(editCreatedAt).toISOString() : selectedTx.createdAt;
+      const d = safeParseDate(editCreatedAt);
+      if (!d) {
+        alert("Format tanggal tidak valid.");
+        return;
+      }
+      const isoDate = d.toISOString();
       await updateTransaction(selectedTx.id, { 
         paymentMethod: editPaymentMethod as any,
         createdAt: isoDate,

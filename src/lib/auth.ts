@@ -38,7 +38,6 @@ function getTrustedAuthOrigins(request?: Request) {
 
   // Always trust production custom domain and Capacitor webview origins
   origins.add("https://miejebew.my.id");
-  origins.add("https://kasir-miejebew.vercel.app");
   origins.add("http://localhost");
   origins.add("capacitor://localhost");
   origins.add("http://localhost:3000");

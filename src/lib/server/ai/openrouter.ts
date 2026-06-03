@@ -42,9 +42,11 @@ export type OpenRouterResponse = {
   usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
 };
 
-const DEFAULT_MODEL = process.env.OPENROUTER_MODEL ?? "meta-llama/llama-3.3-70b-instruct:free";
+const DEFAULT_MODEL = process.env.OPENROUTER_MODEL ?? "google/gemini-2.5-flash:free";
 
 const FALLBACK_MODELS = [
+  "google/gemini-2.5-flash:free",
+  "nousresearch/hermes-3",
   "meta-llama/llama-3.3-70b-instruct:free",
   "meta-llama/llama-3.2-3b-instruct:free",
   "qwen/qwen-2.5-72b-instruct:free",

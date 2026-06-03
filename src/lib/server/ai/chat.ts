@@ -55,14 +55,13 @@ export async function runUserTurn(input: {
   await renameChatIfDefault(userId, chatId, userText);
 
   const systemContent = await buildSystemContext(userId);
+  const history = await listMessages(chatId);
+  const orMessages: OpenRouterMessage[] = [
+    { role: "system", content: systemContent },
+    ...storedToOpenRouter(history),
+  ];
 
   for (let iter = 0; iter < MAX_TOOL_ITERATIONS; iter += 1) {
-    const history = await listMessages(chatId);
-    const orMessages: OpenRouterMessage[] = [
-      { role: "system", content: systemContent },
-      ...storedToOpenRouter(history),
-    ];
-
     const response = await callOpenRouter({
       messages: orMessages,
       tools: toolDefinitions,
@@ -79,6 +78,12 @@ export async function runUserTurn(input: {
       role: "assistant",
       content: msg.content ?? "",
       toolCalls: toolCalls && toolCalls.length > 0 ? toolCalls : null,
+    });
+
+    orMessages.push({
+      role: "assistant",
+      content: msg.content || null,
+      ...(toolCalls && toolCalls.length > 0 ? { tool_calls: toolCalls } : {}),
     });
 
     if (!toolCalls || toolCalls.length === 0) {
@@ -103,12 +108,15 @@ export async function runUserTurn(input: {
         toolArgs: parsedArgs,
         toolResult: result,
       });
+
+      orMessages.push({
+        role: "tool",
+        tool_call_id: call.id,
+        name: call.function.name,
+        content: JSON.stringify(result),
+      });
     }
   }
-
-  // include the user message itself in the diff returned
-  beforeIds.add(userStored.id);
-  beforeIds.delete(userStored.id);
 
   const after = await listMessages(chatId);
   return { newMessages: after.filter((m) => !beforeIds.has(m.id)) };

@@ -3,7 +3,7 @@
   "appName": "Mie Jebew GDC",
   "webDir": "public",
   "server": {
-    "url": "https://kasir-miejebew.vercel.app",
+    "url": "https://miejebew.my.id",
     "cleartext": true
   }
 }

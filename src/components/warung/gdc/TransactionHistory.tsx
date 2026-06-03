@@ -8,6 +8,14 @@ interface TransactionHistoryProps {
   transactions: Transaction[];
 }
 
+const formatForDateTimeInput = (dateStr: string) => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
 export default function TransactionHistory({ transactions }: TransactionHistoryProps) {
   const { settings, deleteTransaction, deleteTransactionsBulk, updateTransaction } = useAppState();
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,6 +23,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
 
   const [isEditing, setIsEditing] = useState(false);
   const [editPaymentMethod, setEditPaymentMethod] = useState<string>('');
+  const [editCreatedAt, setEditCreatedAt] = useState<string>('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -59,9 +68,13 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
     if (!selectedTx) return;
     try {
       setIsSaving(true);
-      await updateTransaction(selectedTx.id, { paymentMethod: editPaymentMethod as any });
+      const isoDate = editCreatedAt ? new Date(editCreatedAt).toISOString() : selectedTx.createdAt;
+      await updateTransaction(selectedTx.id, { 
+        paymentMethod: editPaymentMethod as any,
+        createdAt: isoDate,
+      });
       setIsEditing(false);
-      setSelectedTx((prev) => prev ? { ...prev, paymentMethod: editPaymentMethod as any } : null);
+      setSelectedTx((prev) => prev ? { ...prev, paymentMethod: editPaymentMethod as any, createdAt: isoDate } : null);
     } catch (e) {
       alert("Gagal menyimpan perubahan.");
     } finally {
@@ -73,6 +86,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
     setSelectedTx(tx);
     setIsEditing(false);
     setEditPaymentMethod(tx.paymentMethod);
+    setEditCreatedAt(formatForDateTimeInput(tx.createdAt));
   };
 
   // Helper variables for selected transaction to avoid undefined crashes and NaN values
@@ -460,9 +474,18 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                       <span>Nota ID:</span>
                       <span className="font-semibold text-foreground dark:text-white">{selectedTx.id}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center my-1">
                       <span>Tanggal:</span>
-                      <span>{new Date(selectedTx.createdAt).toLocaleDateString()} {new Date(selectedTx.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                      {isEditing ? (
+                        <input 
+                          type="datetime-local"
+                          value={editCreatedAt}
+                          onChange={(e) => setEditCreatedAt(e.target.value)}
+                          className="bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded px-1.5 py-0.5 text-[10px] text-foreground dark:text-white outline-none focus:ring-1 focus:ring-red-500 w-44"
+                        />
+                      ) : (
+                        <span>{new Date(selectedTx.createdAt).toLocaleDateString()} {new Date(selectedTx.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                      )}
                     </div>
                     <div className="flex justify-between">
                       <span>Kasir:</span>

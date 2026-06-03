@@ -31,12 +31,18 @@ export const metadata: Metadata = {
     description: "Aplikasi kasir tablet-first untuk operasional modern.",
     images: [
       {
-        url: "/logo.png",
-        width: 512,
-        height: 512,
+        url: "https://miejebew.my.id/logo.png",
+        width: 256,
+        height: 256,
         alt: "Mie Jebew GDC Logo",
       },
     ],
+  },
+  twitter: {
+    card: "summary",
+    title: "MIE JEBEW GDC",
+    description: "Aplikasi kasir tablet-first untuk operasional modern.",
+    images: ["https://miejebew.my.id/logo.png"],
   },
 };
 

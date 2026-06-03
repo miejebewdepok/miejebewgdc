@@ -525,7 +525,7 @@ export function AppStateProvider({
             }
           }
           const isSpaghetti = p.name.toLowerCase().includes("spaghetti");
-          const spaghettiSurcharge = (isSpaghetti && size === "Double") ? 4000 : 0;
+          const spaghettiSurcharge = (isSpaghetti && size === "Double") ? 5000 : 0;
           const linePrice = p.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
           return sum + linePrice * line.quantity;
         }, 0);
@@ -603,7 +603,7 @@ export function AppStateProvider({
     }
 
     const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
-    const spaghettiSurcharge = (isSpaghetti && size === "Double") ? 4000 : 0;
+    const spaghettiSurcharge = (isSpaghetti && size === "Double") ? 5000 : 0;
 
     const sellPrice = product.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
 

@@ -506,7 +506,7 @@ export default function CustomerOrderPage(props: {
     }
 
     const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
-    const spaghettiSurcharge = (isSpaghetti && size === "Double") ? 4000 : 0;
+    const spaghettiSurcharge = (isSpaghetti && size === "Double") ? 5000 : 0;
 
     return product.sellPrice + spicySurcharge + totalToppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
   };
@@ -1142,7 +1142,7 @@ export default function CustomerOrderPage(props: {
                       : ["REGULER", "LARGE"]
                     ).map((sz) => {
                       const isSelected = selectedSize === sz;
-                      const surcharge = (customizingProduct.name.toLowerCase().includes("spaghetti") && sz === "Double") ? 4000 : (sz === "LARGE" ? 5000 : 0);
+                      const surcharge = (customizingProduct.name.toLowerCase().includes("spaghetti") && sz === "Double") ? 5000 : (sz === "LARGE" ? 5000 : 0);
                       return (
                         <button
                           key={sz}

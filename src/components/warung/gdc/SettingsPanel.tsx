@@ -1622,7 +1622,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                       { label: "Kebab Large - Ch. Katsu (+Rp 5.000)", key: "filling_Chicken Katsu_large", def: 3000, type: "filling" },
                       { label: "Kebab Large - Special (+Rp 10.000)", key: "filling_Special_large", def: 6000, type: "filling" },
                       // Spaghetti Sizes
-                      { label: "Spaghetti Porsi Double (+Rp 4.000)", key: "spaghetti_double", def: 2400, type: "size" },
+                      { label: "Spaghetti Porsi Double (+Rp 5.000)", key: "spaghetti_double", def: 2400, type: "size" },
                     ]).map((lvl) => {
                       const isSpicy = lvl.type === "spicy";
                       const hppState = isSpicy ? spicyHpp : toppingsHpp;

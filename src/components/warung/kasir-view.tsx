@@ -789,7 +789,7 @@ export function KasirView() {
                   {(customizingProduct.name.toLowerCase().includes('spaghetti')
                     ? [
                         { label: "Single", surcharge: 0 },
-                        { label: "Double", surcharge: 4000 },
+                        { label: "Double", surcharge: 5000 },
                       ]
                     : [
                         { label: "REGULER", surcharge: 0 },
@@ -1139,7 +1139,7 @@ export function KasirView() {
               {customizingProduct.name.toLowerCase().includes("spaghetti") && selectedSize === 'Double' && (
                 <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
                   <span>Porsi Double</span>
-                  <span className="font-mono">+ Rp 4.000</span>
+                  <span className="font-mono">+ Rp 5.000</span>
                 </div>
               )}
               {/* Filling Pricing (Kebab) */}
@@ -1191,7 +1191,7 @@ export function KasirView() {
                 <span>Harga Unit</span>
                 <span className="text-red-650 dark:text-red-400 font-mono font-extrabold">
                   Rp {((customizingProduct.sellPrice + 
-                        ((customizingProduct.name.toLowerCase().includes("spaghetti") && selectedSize === 'Double') ? 4000 : 0) +
+                        ((customizingProduct.name.toLowerCase().includes("spaghetti") && selectedSize === 'Double') ? 5000 : 0) +
                         ((!(userEmail === "miejebew.depok@gmail.com"
                           ? (customizingProduct.category === "Tea Series" || customizingProduct.category === "Delight Series" || customizingProduct.category?.toLowerCase() === "chocolatte")
                           : ['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(customizingProduct.category)

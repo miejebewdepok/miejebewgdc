@@ -61,7 +61,10 @@ export function AppShell({
       .reduce((sum, tx) => sum + tx.total, 0);
   }, [transactions]);
 
-  const historyCount = transactions.length;
+  const historyCount = useMemo(() => {
+    const today = new Date().toDateString();
+    return transactions.filter((tx) => new Date(tx.createdAt).toDateString() === today).length;
+  }, [transactions]);
 
   let activeTab: any = 'dashboard';
   if (pathname === '/kasir') activeTab = 'pos';

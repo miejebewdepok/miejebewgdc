@@ -10,8 +10,8 @@
     "minimum_stock": 5,
     "description": "Slush coklat dingin",
     "created_at": "2026-06-01T22:20:58.107Z",
-    "updated_at": "2026-06-02T02:08:00.906Z",
-    "image_url": "https://i.ibb.co.com/LD801GcJ/Iced-Chocolatte.webp"
+    "updated_at": "2026-06-02T09:25:13.664Z",
+    "image_url": "https://i.ibb.co.com/S4vpNY9V/NEW-CHOCOLATE.jpg"
   },
   {
     "id": "prd_441c9a10",
@@ -146,11 +146,11 @@
     "category": "Lumpia Beef",
     "buy_price": 5000,
     "sell_price": 10000,
-    "stock": 50,
+    "stock": 48,
     "minimum_stock": 5,
     "description": "Lumpia isi daging sapi pilihan",
     "created_at": "2026-06-01T22:20:58.107Z",
-    "updated_at": "2026-06-01T23:52:31.641Z",
+    "updated_at": "2026-06-03T06:47:37.656Z",
     "image_url": "https://i.ibb.co.com/p6Z6y4cJ/LUMPIA-BEEF.webp"
   },
   {
@@ -160,11 +160,11 @@
     "category": "Mie Pedas",
     "buy_price": 5000,
     "sell_price": 10000,
-    "stock": 40,
+    "stock": 33,
     "minimum_stock": 5,
     "description": "Mie pedas khas Jebew dengan level 0-5",
     "created_at": "2026-06-01T22:20:58.107Z",
-    "updated_at": "2026-06-01T23:51:43.754Z",
+    "updated_at": "2026-06-03T08:29:49.791Z",
     "image_url": "https://i.ibb.co.com/VRd5DmT/MIE-JEBEW.webp"
   },
   {
@@ -174,11 +174,11 @@
     "category": "Mie Pedas",
     "buy_price": 5000,
     "sell_price": 10000,
-    "stock": 40,
+    "stock": 39,
     "minimum_stock": 5,
     "description": "Spaghetti goreng porsi Single/Double",
     "created_at": "2026-06-01T22:20:58.107Z",
-    "updated_at": "2026-06-01T23:52:08.489Z",
+    "updated_at": "2026-06-03T09:12:10.168Z",
     "image_url": "https://i.ibb.co.com/pr2ZrV8H/SPAGHETTI-GORENGS.webp"
   },
   {
@@ -236,20 +236,6 @@
     "created_at": "2026-06-01T22:20:58.107Z",
     "updated_at": "2026-06-02T00:39:23.380Z",
     "image_url": "https://i.ibb.co.com/LD801GcJ/Iced-Chocolatte.webp"
-  },
-  {
-    "id": "prd_2a11042f",
-    "user_id": "yY2uZ9lhPK8Xt8RmHixiKTn1PNwbKjMn",
-    "name": "Chocolatte Slush",
-    "category": "Qalla Coffee",
-    "buy_price": 4000,
-    "sell_price": 8000,
-    "stock": 30,
-    "minimum_stock": 5,
-    "description": "Espresso + susu segar",
-    "created_at": "2026-06-01T22:20:58.107Z",
-    "updated_at": "2026-06-02T00:41:40.946Z",
-    "image_url": "https://i.ibb.co.com/jkhcyW0g/Chocolatte-Slush.webp"
   },
   {
     "id": "prd_c7d5b997",
@@ -341,12 +327,12 @@
     "name": "Jasmine Tea",
     "category": "Qalla Tea",
     "buy_price": 2000,
-    "sell_price": 4000,
-    "stock": 25,
+    "sell_price": 5000,
+    "stock": 23,
     "minimum_stock": 5,
     "description": "Menu asli Mie Jebew GDC",
     "created_at": "2026-06-02T00:47:44.150Z",
-    "updated_at": "2026-06-02T00:47:44.150Z",
+    "updated_at": "2026-06-03T06:45:40.784Z",
     "image_url": "https://i.ibb.co.com/hx5yL3SG/JASMINE-TEA.webp"
   },
   {
@@ -370,11 +356,11 @@
     "category": "Qalla Tea",
     "buy_price": 2500,
     "sell_price": 5000,
-    "stock": 20,
+    "stock": 19,
     "minimum_stock": 5,
     "description": "Menu asli Mie Jebew GDC",
     "created_at": "2026-06-02T00:48:33.968Z",
-    "updated_at": "2026-06-02T00:48:33.968Z",
+    "updated_at": "2026-06-03T06:45:40.784Z",
     "image_url": "https://i.ibb.co.com/1fW5TJP8/LYCHEE-TEA.webp"
   },
   {
@@ -412,11 +398,11 @@
     "category": "Qalla Tea",
     "buy_price": 25000,
     "sell_price": 5000,
-    "stock": 20,
+    "stock": 19,
     "minimum_stock": 5,
     "description": "Menu asli Mie Jebew GDC",
     "created_at": "2026-06-02T00:52:50.492Z",
-    "updated_at": "2026-06-02T00:52:50.492Z",
+    "updated_at": "2026-06-03T06:36:06.019Z",
     "image_url": "https://i.ibb.co.com/pvPgDFPT/SAKURA-TEA.webp"
   },
   {
@@ -439,12 +425,12 @@
     "name": "Vanilla Tea",
     "category": "Qalla Tea",
     "buy_price": 2000,
-    "sell_price": 4000,
+    "sell_price": 5000,
     "stock": 30,
     "minimum_stock": 5,
     "description": "Menu asli Mie Jebew GDC",
     "created_at": "2026-06-02T00:48:05.328Z",
-    "updated_at": "2026-06-02T00:48:05.328Z",
+    "updated_at": "2026-06-03T06:45:10.312Z",
     "image_url": "https://i.ibb.co.com/QjD5Rkmq/VANILLA-TEA.webp"
   },
   {
@@ -454,11 +440,11 @@
     "category": "Snack",
     "buy_price": 3500,
     "sell_price": 7000,
-    "stock": 50,
+    "stock": 0,
     "minimum_stock": 5,
     "description": "Chicken katsu renyah",
     "created_at": "2026-06-01T22:20:58.107Z",
-    "updated_at": "2026-06-01T23:53:11.790Z",
+    "updated_at": "2026-06-03T08:25:49.743Z",
     "image_url": "https://i.ibb.co.com/vM6j5d4/CHICKEN-KATSU.webp"
   },
   {
@@ -468,11 +454,11 @@
     "category": "Snack",
     "buy_price": 1500,
     "sell_price": 3000,
-    "stock": 30,
+    "stock": 0,
     "minimum_stock": 5,
     "description": "Lumpia udang renyah",
     "created_at": "2026-06-01T22:20:58.107Z",
-    "updated_at": "2026-06-02T00:08:30.385Z",
+    "updated_at": "2026-06-03T08:25:54.928Z",
     "image_url": "https://i.ibb.co.com/CK7m7ZpQ/LUMPIA-UDANG.webp"
   },
   {
@@ -482,11 +468,11 @@
     "category": "Snack",
     "buy_price": 2000,
     "sell_price": 4000,
-    "stock": 30,
+    "stock": 0,
     "minimum_stock": 5,
     "description": "{\"text\":\"Menu asli Mie Jebew GDC\",\"mentaiImageUrl\":\"https://i.ibb.co.com/4gSF05jb/RISOLES-KAKEK-MENTAI.webp\",\"ragoutImageUrl\":\"https://i.ibb.co.com/bMPPhRv0/RISOLES-KAKEK-RAGOUT.webp\"}",
     "created_at": "2026-06-01T22:20:58.107Z",
-    "updated_at": "2026-06-02T00:09:06.054Z",
+    "updated_at": "2026-06-03T08:25:34.816Z",
     "image_url": "https://i.ibb.co.com/bnd8T4c/RISOLES-KAKEK-MAYO.webp"
   },
   {
@@ -496,11 +482,11 @@
     "category": "Snack",
     "buy_price": 2000,
     "sell_price": 4000,
-    "stock": 40,
+    "stock": 0,
     "minimum_stock": 5,
     "description": "Udang keju goreng krispi",
     "created_at": "2026-06-01T22:20:58.107Z",
-    "updated_at": "2026-06-02T00:08:05.734Z",
+    "updated_at": "2026-06-03T08:25:43.279Z",
     "image_url": "https://i.ibb.co.com/Dfsq9Dx0/UDANG-KEJU.webp"
   }
 ]

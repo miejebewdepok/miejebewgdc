@@ -483,10 +483,10 @@ export default function CustomerOrderPage(props: {
     // Calculate Special Toppings (Rp 2.500 each)
     const specialSurcharge = specialToppings.length * 2500;
     
-    // Calculate Premium Toppings (Telur +4k, Keju Slice +3k)
+    // Calculate Premium Toppings (Telur +5k, Keju Slice +3k)
     let premiumSurcharge = 0;
     premiumToppings.forEach((t) => {
-      if (t === "Telur") premiumSurcharge += 4000;
+      if (t === "Telur") premiumSurcharge += 5000;
       else if (t === "Keju Slice") premiumSurcharge += 3000;
     });
 
@@ -1304,8 +1304,8 @@ export default function CustomerOrderPage(props: {
                         ? ["Telur"].includes(t)
                         : ["Beef Slice", "Keju Slice", "Telur"].includes(t);
                       const premiumPrice = isCabang2 
-                        ? (t === "Telur" ? 4000 : 0)
-                        : (t === "Beef Slice" ? 2500 : t === "Telur" ? 4000 : 3000);
+                        ? (t === "Telur" ? 5000 : 0)
+                        : (t === "Beef Slice" ? 2500 : t === "Telur" ? 5000 : 3000);
                       return (
                         <button
                           key={t}

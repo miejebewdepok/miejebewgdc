@@ -506,7 +506,7 @@ export function AppStateProvider({
             else if (t === "Ceker") specialSurcharge += 2500;
             else if (t === "Kulit Ayam") specialSurcharge += 2500;
             else if (t === "Pangsit Goreng") specialSurcharge += 2500;
-            else if (t === "Telur") specialSurcharge += 4000;
+            else if (t === "Telur") specialSurcharge += 5000;
             else if (t === "Keju Slice") specialSurcharge += 3000;
           });
           const toppingsSurcharge = isBypassed ? 0 : stdSurcharge + specialSurcharge;
@@ -581,7 +581,7 @@ export function AppStateProvider({
       else if (t === "Ceker") specialSurcharge += 2500;
       else if (t === "Kulit Ayam") specialSurcharge += 2500;
       else if (t === "Pangsit Goreng") specialSurcharge += 2500;
-      else if (t === "Telur") specialSurcharge += 4000;
+      else if (t === "Telur") specialSurcharge += 5000;
       else if (t === "Keju Slice") specialSurcharge += 3000;
     });
 

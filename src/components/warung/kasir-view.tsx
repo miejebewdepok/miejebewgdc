@@ -127,7 +127,7 @@ export function KasirView() {
     const isCabang2 = userEmail === "miejebew.depok@gmail.com";
     
     // Group toppings:
-    // 1. Premium Toppings (Telur is +4k for all, Keju Slice is +3k for Cabang 1)
+    // 1. Premium Toppings (Telur is +5k for all, Keju Slice is +3k for Cabang 1)
     // 2. Special Toppings (Ceker, Kulit Ayam, Pangsit Goreng are +2.5k for Cabang 2; Beef Slice is +2.5k for Cabang 1)
     // 3. Promo Toppings (Everything else normally +2k, eligible for 3 for 5k and 7 for 10k)
     
@@ -157,10 +157,10 @@ export function KasirView() {
     // Calculate Special Toppings (Rp 2.500 each)
     const specialSurcharge = specialToppings.length * 2500;
     
-    // Calculate Premium Toppings (Telur +4k, Keju Slice +3k)
+    // Calculate Premium Toppings (Telur +5k, Keju Slice +3k)
     let premiumSurcharge = 0;
     premiumToppings.forEach((t) => {
-      if (t === "Telur") premiumSurcharge += 4000;
+      if (t === "Telur") premiumSurcharge += 5000;
       else if (t === "Keju Slice") premiumSurcharge += 3000;
     });
     
@@ -1034,7 +1034,7 @@ export function KasirView() {
                             if (topping === "Telur") {
                               return (
                                 <span className="text-[8px] font-black text-yellow-500 leading-none mt-0.5 animate-pulse">
-                                  +Rp 4k (Premium)
+                                  +Rp 5k (Premium)
                                 </span>
                               );
                             }

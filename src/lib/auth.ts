@@ -37,6 +37,7 @@ function getTrustedAuthOrigins(request?: Request) {
   }
 
   // Always trust production custom domain and Capacitor webview origins
+  origins.add("https://miejebew.my.id");
   origins.add("https://kasir-miejebew.vercel.app");
   origins.add("http://localhost");
   origins.add("capacitor://localhost");
@@ -46,14 +47,14 @@ function getTrustedAuthOrigins(request?: Request) {
 }
 
 function resolveAuthBaseUrl() {
+  if (process.env.BETTER_AUTH_URL) {
+    return process.env.BETTER_AUTH_URL;
+  }
+
   // If running in production (e.g. on Vercel), force base URL to use the custom domain
   // to prevent it from resolving to the localhost value defined in the repo's .env file.
   if (process.env.NODE_ENV === "production") {
-    return "https://kasir-miejebew.vercel.app";
-  }
-
-  if (process.env.BETTER_AUTH_URL) {
-    return process.env.BETTER_AUTH_URL;
+    return "https://miejebew.my.id";
   }
 
   const vercelHost =

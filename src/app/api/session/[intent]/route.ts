@@ -21,12 +21,12 @@ const AUTH_INTENTS = {
 type Intent = keyof typeof AUTH_INTENTS;
 
 function getBaseUrl(request: NextRequest) {
-  if (process.env.NODE_ENV === "production") {
-    return "https://kasir-miejebew.vercel.app";
-  }
-
   if (process.env.BETTER_AUTH_URL) {
     return process.env.BETTER_AUTH_URL;
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    return "https://miejebew.my.id";
   }
   const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
   const protocol = request.headers.get("x-forwarded-proto") ?? "https";

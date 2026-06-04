@@ -32,13 +32,11 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
   const { expenses, addExpense, deleteExpense, settings } = useAppState();
   const { data: session } = useSession();
   const userEmail = session?.user?.email;
-  const isCabang2 = userEmail === "miejebew.depok@gmail.com" || 
-                    settings.storeName?.toLowerCase().includes("depok") || 
-                    settings.merchantName?.toLowerCase().includes("depok");
+  const isCabang2 = settings?.branchCode === 'CABANG_2';
 
   const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month'>('today');
-  const [activeTab, setActiveTab] = useState<'sales' | 'expenses' | 'shift'>('sales');
   const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<'sales' | 'expenses' | 'shift'>('sales');
 
   // Petty Cash Flow states
   const [expenseTitle, setExpenseTitle] = useState('');

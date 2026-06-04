@@ -6,6 +6,7 @@ import { useSession } from "@/lib/auth-client";
 import { emptyAppState } from "@/lib/empty-state";
 import { AppState, Debt, DebtDraft, PaymentMethod, Product, ProductDraft, SavedBill, Settings, Transaction } from "@/lib/types";
 import { calculateItemUnitPrice } from "@/lib/pricing";
+import { showLocalNotification } from "@/lib/capacitor/notifications";
 
 type CartLine = {
   id: string;
@@ -159,9 +160,18 @@ export function AppStateProvider({
       try {
         const response = await requestJson<{ savedBills: SavedBill[] }>("/api/saved-bills");
         
+        if (response.savedBills.length > state.savedBills.length) {
+          await showLocalNotification({
+            title: 'Pesanan Baru',
+            body: `Ada pesanan masuk dari meja. Total bill saat ini: ${response.savedBills.length}`,
+            id: 101,
+          });
+        }
+        
         setState((current) => {
           // Compare length of incoming bills with current bills to play audio alert
           if (response.savedBills.length > current.savedBills.length) {
+
             // Play Gojek/Shopee style cheerful marimba arpeggio tune (rich bell tone + loud gain + autoplay bypass)
             // Play Upgraded Exciting Beat and Indonesian Female Voice Overlay (repeats exactly 5 times)
             // Play Upgraded Exciting K-Pop Style Beat and Indonesian Female Voice Overlay (repeats exactly 5 times)

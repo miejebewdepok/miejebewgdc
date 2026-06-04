@@ -12,6 +12,7 @@ import CheckoutModal from "./gdc/CheckoutModal";
 import SavedBillsModal from "./gdc/SavedBillsModal";
 import { Search, ChevronDown, ChevronUp, ShoppingCart, LayoutGrid, Flame, Utensils, Beef, Coffee, Leaf, Cookie, Clock, X, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { showLocalNotification } from "@/lib/capacitor/notifications";
 import React from "react";
 
 // Custom SVG Strawberry icon in Lucide style (monochrome)
@@ -147,7 +148,7 @@ export function KasirView() {
       let saved = localStorage.getItem(storageKey);
       
       // Auto-migrate old categories for the main owner if they don't have user-isolated categories yet
-      if (!saved && (settings.branchCode === "CABANG_1" || userEmail === "taufiqrusdhi.ez@gmail.com")) {
+      if (!saved && settings.branchCode === "CABANG_1") {
         const oldSaved = localStorage.getItem("miejebew_categories_v4");
         if (oldSaved) {
           saved = oldSaved;
@@ -431,6 +432,15 @@ export function KasirView() {
         return null;
       }
       toast.success("Transaksi berhasil disimpan.");
+      try {
+        await showLocalNotification({
+          title: 'Pembayaran Berhasil',
+          body: `Transaksi sebesar Rp${total.toLocaleString('id-ID')} sudah disimpan.`,
+          id: 201,
+        });
+      } catch (e) {
+        console.warn('Failed to show checkout success notification', e);
+      }
       return transaction;
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Gagal menyimpan transaksi.");

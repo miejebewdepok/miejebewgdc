@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { CartItem } from '@/lib/types';
 import { Trash2, Plus, Minus, Receipt, Save, RefreshCw, Flame, X } from 'lucide-react';
+import { useAppState } from '@/components/providers/app-state-provider';
 import { useSession } from '@/lib/auth-client';
 
 interface CartSectionProps {
@@ -25,9 +26,10 @@ export default function CartSection({
   onSaveBill,
   onCloseMobile
 }: CartSectionProps) {
+  const { settings } = useAppState();
   const { data: session } = useSession();
   const userEmail = session?.user?.email;
-  const isCabang2 = userEmail === "miejebew.depok@gmail.com";
+  const isCabang2 = settings?.branchCode === 'CABANG_2';
 
   const [billNamePrompt, setBillNamePrompt] = useState(false);
   const [billName, setBillName] = useState('');

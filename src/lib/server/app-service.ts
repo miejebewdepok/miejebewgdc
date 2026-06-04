@@ -205,13 +205,8 @@ export async function getRequestUser() {
     throw new Error("UNAUTHORIZED");
   }
 
-  let userId = session.user.id;
+  const userId = session.user.id;
   const userEmail = session.user.email;
-
-  // Share Taufiq's premium database with Cabang 1 crew accounts only
-  if (userEmail === "miejebew.crew@gmail.com") {
-    userId = "yY2uZ9lhPK8Xt8RmHixiKTn1PNwbKjMn";
-  }
 
   await ensureWorkspace(userId, session);
   return { userId, session };

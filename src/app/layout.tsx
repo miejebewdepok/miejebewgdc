@@ -86,6 +86,27 @@ export default function RootLayout({
             `
           }}
         />
+        <Script
+          id="register-notifications"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (async function() {
+                try {
+                  var m = await import('/lib/capacitor/notifications.js');
+                  if (typeof m.ensureNotificationPermission === 'function') {
+                    await m.ensureNotificationPermission();
+                  }
+                  if (typeof m.dismissAllPending === 'function') {
+                    await m.dismissAllPending();
+                  }
+                } catch (e) {
+                  console.warn('Notification bootstrap skipped:', e);
+                }
+              })();
+            `
+          }}
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

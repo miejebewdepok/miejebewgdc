@@ -91,7 +91,8 @@ export default function Sidebar({
   ];
 
   const { data: session } = useSession();
-  const isCrew = session?.user?.email === 'miejebew.crew@gmail.com';
+  const userEmail = session?.user?.email;
+  const isCrew = userEmail === 'miejebew.crew@gmail.com';
 
   const filteredMenuItems = menuItems.filter(item => {
     if (isCrew && (item.id === 'report' || item.id === 'manage')) {

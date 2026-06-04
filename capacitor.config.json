@@ -4,6 +4,11 @@
   "webDir": "public",
   "server": {
     "url": "https://miejebew.my.id",
+    "allowNavigation": [
+      "miejebew.my.id",
+      "*.miejebew.my.id",
+      "kasir-miejebew.vercel.app"
+    ],
     "cleartext": true
   }
 }

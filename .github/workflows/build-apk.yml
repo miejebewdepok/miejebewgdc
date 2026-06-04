@@ -31,7 +31,7 @@ jobs:
           # Mock environment variables to satisfy build checks
           DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
           BETTER_AUTH_SECRET: "mock_better_auth_secret_for_github_actions_build"
-          NEXT_PUBLIC_APP_URL: "https://kasir-miejebew.vercel.app"
+          NEXT_PUBLIC_APP_URL: "https://miejebew.my.id"
 
       - name: Sync Capacitor Android
         run: npx cap sync android

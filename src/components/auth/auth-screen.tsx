@@ -164,6 +164,33 @@ export function AuthScreen() {
     setSuccessState(null);
   };
 
+  if (isSessionPending) {
+    return (
+      <div className="relative min-h-screen bg-[#fef2f2] dark:bg-[#090b11] flex flex-col items-center justify-center text-[#450a0a] dark:text-slate-100 font-sans transition-colors duration-300 dark overflow-hidden select-none">
+        {/* Background blobs */}
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-200/50 dark:bg-red-600/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-amber-100/50 dark:bg-amber-500/10 rounded-full blur-[150px] pointer-events-none" />
+        
+        <div className="flex flex-col items-center text-center gap-4 relative z-10 animate-pulse">
+          <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-red-600 to-amber-500 shadow-[0_0_25px_rgba(239,68,68,0.45)] border border-white/10 overflow-hidden bg-white">
+            {cachedStoreLogo ? (
+              <img src={cachedStoreLogo} alt="Logo" className="w-full h-full object-cover" />
+            ) : (
+              <Flame className="size-8 text-white" />
+            )}
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-sm font-black uppercase tracking-[0.25em] bg-gradient-to-r from-red-500 to-amber-400 bg-clip-text text-transparent">
+              {cachedStoreName}
+            </span>
+            <span className="text-[10px] text-red-900/60 dark:text-slate-400 font-medium">Memuat Sistem Kasir...</span>
+          </div>
+          <div className="size-5 rounded-full border-2 border-red-600 border-t-transparent animate-spin mt-2" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative min-h-screen bg-[#fef2f2] dark:bg-[#090b11] text-[#450a0a] dark:text-slate-100 overflow-hidden flex items-center justify-center px-4 py-8 lg:p-12 font-sans select-none transition-colors duration-300 dark">
       

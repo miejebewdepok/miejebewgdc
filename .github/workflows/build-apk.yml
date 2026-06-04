@@ -28,8 +28,7 @@ jobs:
         run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: 1
-          # Mock environment variables to satisfy build checks
-          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+          DATABASE_URL: "postgresql://postgres:***@localhost:5432/postgres"
           BETTER_AUTH_SECRET: "mock_better_auth_secret_for_github_actions_build"
           NEXT_PUBLIC_APP_URL: "https://miejebew.my.id"
 
@@ -59,3 +58,53 @@ jobs:
           name: warungos-kasir
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 7
+
+      - name: Publish APK to Latest Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APK_PATH: android/app/build/outputs/apk/debug/app-debug.apk
+        run: |
+          set -e
+
+          API="https://api.github.com"
+          OWNER_REPO="${{ github.repository }}"
+
+          get_release() {
+            curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+              "${API}/repos/${OWNER_REPO}/releases/tags/latest" || true
+          }
+
+          RELEASE_INFO=$(get_release)
+
+          if echo "${RELEASE_INFO}" | grep -q '"id"'; then
+            RELEASE_ID=$(echo "${RELEASE_INFO}" | jq -r '.id')
+          else
+            PAYLOAD=$(jq -n \
+              --arg tag_name "latest" \
+              --arg name "Latest Build" \
+              --arg body "Automatically updated APK from main branch." \
+              '{tag_name:$tag_name, name:$name, body:$body, draft:false, prerelease:true}')
+            CREATE_RESPONSE=$(curl -s -X POST \
+              -H "Authorization: token ${GITHUB_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "${PAYLOAD}" \
+              "${API}/repos/${OWNER_REPO}/releases")
+            RELEASE_ID=$(echo "${CREATE_RESPONSE}" | jq -r '.id')
+          fi
+
+          ASSET_URL=$(echo "${RELEASE_INFO}" | jq -r '.assets[] | select(.name=="app-debug.apk") | .url // empty')
+          if [ -n "${ASSET_URL}" ]; then
+            ASSET_ID=$(echo "${RELEASE_INFO}" | jq -r '.assets[] | select(.name=="app-debug.apk") | .id')
+            curl -s -X DELETE \
+              -H "Authorization: token ${GITHUB_TOKEN}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "${API}/repos/${OWNER_REPO}/releases/${RELEASE_ID}/assets/${ASSET_ID}" >/dev/null || true
+          fi
+
+          UPLOAD_URL="https://uploads.github.com/repos/${OWNER_REPO}/releases/${RELEASE_ID}/assets?name=app-debug.apk"
+          curl -s -X POST \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -H "Content-Type: application/vnd.android.package-archive" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            --data-binary @"${APK_PATH}" \
+            "${UPLOAD_URL}" >/dev/null

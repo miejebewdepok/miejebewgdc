@@ -119,7 +119,7 @@ interface CheckoutModalProps {
   total: number;
   serviceCharge: number;
   settings: Settings;
-  onSuccessCheckout: (transaction: Transaction) => Promise<boolean>;
+  onSuccessCheckout: (transaction: Transaction) => Promise<Transaction | null>;
 }
 
 export default function CheckoutModal({
@@ -218,7 +218,7 @@ export default function CheckoutModal({
   const activeCartItems = isCompleted && createdTransaction ? createdTransaction.items : cartItems;
   const activeCustomerName = isCompleted && createdTransaction ? createdTransaction.customerName : customerName;
   const activePaymentMethod = isCompleted && createdTransaction ? createdTransaction.paymentMethod : paymentMethod;
-  const activeInvoiceNo = isCompleted && createdTransaction ? createdTransaction.invoiceNo : invoiceNo;
+  const activeInvoiceNo = isCompleted && createdTransaction ? (createdTransaction.invoiceNo || createdTransaction.id) : invoiceNo;
 
   const isInsufficient = paymentMethod === 'Tunai' && amountPaid < total;
 
@@ -359,9 +359,9 @@ export default function CheckoutModal({
       paymentMethod
     };
     try {
-      const success = await onSuccessCheckout(newTx);
-      if (success) {
-        setCreatedTransaction(newTx);
+      const serverTx = await onSuccessCheckout(newTx);
+      if (serverTx) {
+        setCreatedTransaction(serverTx);
         setIsCompleted(true);
         if (paymentMethod === 'QRIS') {
           speakQrisNotification(total);

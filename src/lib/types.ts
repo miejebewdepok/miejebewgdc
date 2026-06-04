@@ -100,6 +100,7 @@ export interface Settings {
   businessNotes: string;
   stockAlertThreshold: number;
   enabledPayments: PaymentMethod[];
+  branchCode?: string;
   qrisType?: 'static' | 'dynamic' | 'upload';
   qrisName?: string;
   qrisStaticCodeUrl?: string;

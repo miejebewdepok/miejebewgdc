@@ -12,6 +12,13 @@ import {
 } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { AppState, DebtDraft, PaymentMethod, ProductDraft, Settings, Transaction } from "@/lib/types";
+import { 
+  calculateItemUnitPrice,
+  calculateSpicySurcharge,
+  calculateToppingsSurcharge,
+  calculateFillingSurcharge,
+  calculateSpaghettiSurcharge 
+} from "../pricing";
 import { sendDebtReminderAlert, sendStockAlert } from "@/lib/server/whatsapp";
 
 let initializationPromise: Promise<void> | null = null;
@@ -230,6 +237,7 @@ function mapSettings(profile: typeof storeProfiles.$inferSelect): Settings {
     businessNotes: profile.businessNotes,
     stockAlertThreshold: profile.stockAlertThreshold,
     enabledPayments: profile.enabledPayments,
+    branchCode: extra.branchCode ?? (profile.userId === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" ? "CABANG_2" : "CABANG_1"),
     
     // GDC-specific mappings
     merchantName: profile.storeName,
@@ -598,38 +606,24 @@ export async function createTransaction(
   const lineItems = payload.items.map((item) => {
     let product: any;
     if (item.productId === "promo_jasmine_tea") {
+      const branchCode = settings?.branchCode || (isCabang2 ? "CABANG_2" : "CABANG_1");
       const nonPromoSubtotal = payload.items
         .filter(it => it.productId !== "promo_jasmine_tea")
         .reduce((sum, it) => {
           const p = productMap.get(it.productId);
           if (!p) return sum;
-          const spicySurcharge = (it.spicyLevel === 4 || it.spicyLevel === 5) ? 2000 : 0;
-          const toppingsCount = it.toppings ? it.toppings.length : 0;
-          const toppingsSurcharge = isCabang2 
-            ? (it.toppings || []).filter(t => ["Ceker", "Kulit Ayam", "Pangsit Goreng", "Telur"].includes(t)).reduce((sum, t) => {
-                if (t === "Telur") return sum + 4000;
-                return sum + 2500;
-              }, 0)
-            : (toppingsCount === 3 
-              ? 5000 
-              : toppingsCount === 7 
-              ? 10000 
-              : toppingsCount * 2000);
-          let fillingSurcharge = 0;
-          if (p.category === 'Kebab') {
-            if (it.size === 'REGULER') {
-              if (it.filling === 'Beef') fillingSurcharge = 2000;
-            } else if (it.size === 'LARGE') {
-              if (it.filling === 'Beef Slice' || it.filling === 'Beef' || it.filling === 'Chicken Katsu') fillingSurcharge = 5000;
-              else if (it.filling === 'Special') fillingSurcharge = 10000;
-            }
-          } else {
-            if (it.filling === 'Beef Patty' || it.filling === 'Chicken Katsu') fillingSurcharge = 5000;
-            else if (it.filling === 'Special') fillingSurcharge = 10000;
-          }
-          const isSpaghetti = p.name.toLowerCase().includes("spaghetti");
-          const spaghettiSurcharge = (isSpaghetti && it.size === "Double") ? 4000 : 0;
-          const unitPrice = p.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
+          const unitPrice = calculateItemUnitPrice(
+            p.sellPrice,
+            p.category,
+            p.name,
+            { 
+              spicyLevel: it.spicyLevel, 
+              toppings: it.toppings, 
+              filling: it.filling, 
+              size: it.size 
+            },
+            branchCode
+          );
           return sum + unitPrice * it.quantity;
         }, 0);
       const isVip = nonPromoSubtotal >= 50000;
@@ -675,35 +669,14 @@ export async function createTransaction(
       unitPrice = 0;
       costPrice = 0;
     } else {
-      // Calculate price with surcharge for levels 4-5 and toppings (+2000 each, promo: 3 toppings = 5000, 7 toppings = 10000)
-      const spicySurcharge = (item.spicyLevel === 4 || item.spicyLevel === 5) ? 2000 : 0;
-      const toppingsCount = item.toppings ? item.toppings.length : 0;
-      const toppingsSurcharge = isCabang2 
-        ? (item.toppings || []).filter(t => ["Ceker", "Kulit Ayam", "Pangsit Goreng", "Telur"].includes(t)).reduce((sum, t) => {
-            if (t === "Telur") return sum + 4000;
-            return sum + 2500;
-          }, 0)
-        : (toppingsCount === 3 
-          ? 5000 
-          : toppingsCount === 7 
-          ? 10000 
-          : toppingsCount * 2000);
-        
-      let fillingSurcharge = 0;
-      if (product.category === 'Kebab') {
-        if (item.size === 'REGULER') {
-          if (item.filling === 'Beef') fillingSurcharge = 2000;
-        } else if (item.size === 'LARGE') {
-          if (item.filling === 'Beef Slice' || item.filling === 'Beef' || item.filling === 'Chicken Katsu') fillingSurcharge = 5000;
-          else if (item.filling === 'Special') fillingSurcharge = 10000;
-        }
-      } else {
-        if (item.filling === 'Beef Patty' || item.filling === 'Chicken Katsu') fillingSurcharge = 5000;
-        else if (item.filling === 'Special') fillingSurcharge = 10000;
-      }
-
+      // Calculate price with surcharge using shared pricing library
+      const branchCode = settings?.branchCode || (isCabang2 ? "CABANG_2" : "CABANG_1");
+      const isRisoles = product.name.toLowerCase().includes("risoles");
       const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
-      const spaghettiSurcharge = (isSpaghetti && item.size === "Double") ? 4000 : 0;
+      const spicySurcharge = calculateSpicySurcharge(item.spicyLevel ?? 0, product.category, branchCode, isRisoles);
+      const toppingsSurcharge = calculateToppingsSurcharge(item.toppings ?? [], branchCode);
+      const fillingSurcharge = calculateFillingSurcharge(product.category, item.size, item.filling);
+      const spaghettiSurcharge = calculateSpaghettiSurcharge(product.name, item.size);
 
       unitPrice = product.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
       

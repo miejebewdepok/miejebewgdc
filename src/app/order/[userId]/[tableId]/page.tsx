@@ -19,6 +19,7 @@ import {
   Lock
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
+import { calculateItemUnitPrice } from "@/lib/pricing";
 
 interface Product {
   id: string;
@@ -126,19 +127,23 @@ export default function CustomerOrderPage(props: {
         if (data.products) {
           setProducts(data.products);
           
-          // Self-healing check: detect Cabang 2 from product categories or storeName
-          const hasCabang2Cats = data.products.some((p: any) => 
-            p.category === "Mie Tek Tek" || 
-            p.category === "Pangsit" || 
-            p.category === "Tea Series" || 
-            p.category === "Delight Series"
-          );
-          const hasDepokInName = data.storeName && data.storeName.toLowerCase().includes("depok");
-          
-          if (hasCabang2Cats || hasDepokInName) {
-            setIsCabang2(true);
-          } else if (userId.toLowerCase() !== "rwtvcmmleowlwyhdjnnnnlewrlys26fc5") {
-            setIsCabang2(false);
+          if (data.branchCode) {
+            setIsCabang2(data.branchCode === "CABANG_2");
+          } else {
+            // Self-healing check fallback: detect Cabang 2 from product categories or storeName
+            const hasCabang2Cats = data.products.some((p: any) => 
+              p.category === "Mie Tek Tek" || 
+              p.category === "Pangsit" || 
+              p.category === "Tea Series" || 
+              p.category === "Delight Series"
+            );
+            const hasDepokInName = data.storeName && data.storeName.toLowerCase().includes("depok");
+            
+            if (hasCabang2Cats || hasDepokInName) {
+              setIsCabang2(true);
+            } else if (userId.toLowerCase() !== "rwtvcmmleowlwyhdjnnnnlewrlys26fc5") {
+              setIsCabang2(false);
+            }
           }
         }
         if (data.productOrder) {
@@ -447,68 +452,14 @@ export default function CustomerOrderPage(props: {
 
   // Surcharge calculator matching cashier logic
   const calculateConfiguredPrice = (product: Product, level: number, toppings: string[], filling?: string, size?: string) => {
-    const isBypassed = isCabang2 
-      ? (product.category === "Tea Series" || product.category === "Delight Series" || product.category.toLowerCase() === "chocolatte")
-      : ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(product.category);
-    if (isBypassed) return product.sellPrice;
-
-    // Spicy surcharge ONLY for non-Kebab, non-Lumpia Beef, non-bypassed
-    const isSpicySurcharged = !isBypassed && product.category !== "Kebab" && product.category !== "Lumpia Beef";
-    const spicySurcharge = (isSpicySurcharged && (level === 4 || level === 5)) ? 2000 : 0;
-
-    // Toppings surcharge logic
-    const premiumKeys = isCabang2 ? ["Telur"] : ["Telur", "Keju Slice"];
-    const specialKeys = isCabang2 
-      ? ["Ceker", "Kulit Ayam", "Pangsit Goreng"] 
-      : ["Beef Slice"];
-      
-    const premiumToppings = toppings.filter((t) => premiumKeys.includes(t));
-    const specialToppings = toppings.filter((t) => specialKeys.includes(t));
-    const promoToppings = toppings.filter((t) => !premiumKeys.includes(t) && !specialKeys.includes(t));
-    
-    // Calculate Promo Toppings with greedy standard logic (groups of 7 for 10k, groups of 3 for 5k, rest 2k each)
-    let promoSurcharge = 0;
-    let remCount = promoToppings.length;
-    
-    const sevens = Math.floor(remCount / 7);
-    promoSurcharge += sevens * 10000;
-    remCount %= 7;
-    
-    const threes = Math.floor(remCount / 3);
-    promoSurcharge += threes * 5000;
-    remCount %= 3;
-    
-    promoSurcharge += remCount * 2000;
-    
-    // Calculate Special Toppings (Rp 2.500 each)
-    const specialSurcharge = specialToppings.length * 2500;
-    
-    // Calculate Premium Toppings (Telur +5k, Keju Slice +3k)
-    let premiumSurcharge = 0;
-    premiumToppings.forEach((t) => {
-      if (t === "Telur") premiumSurcharge += 5000;
-      else if (t === "Keju Slice") premiumSurcharge += 3000;
-    });
-
-    const totalToppingsSurcharge = promoSurcharge + specialSurcharge + premiumSurcharge;
-
-    let fillingSurcharge = 0;
-    if (product.category === 'Kebab') {
-      if (size === 'REGULER') {
-        if (filling === 'Beef') fillingSurcharge = 2000;
-      } else if (size === 'LARGE') {
-        if (filling === 'Special') fillingSurcharge = 10000;
-        else fillingSurcharge = 5000;
-      }
-    } else if (product.category === 'Lumpia Beef') {
-      if (filling === 'Beef Patty' || filling === 'Chicken Katsu') fillingSurcharge = 5000;
-      else if (filling === 'Special') fillingSurcharge = 10000;
-    }
-
-    const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
-    const spaghettiSurcharge = (isSpaghetti && size === "Double") ? 5000 : 0;
-
-    return product.sellPrice + spicySurcharge + totalToppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
+    const branchCode = isCabang2 ? "CABANG_2" : "CABANG_1";
+    return calculateItemUnitPrice(
+      product.sellPrice,
+      product.category,
+      product.name,
+      { spicyLevel: level, toppings, filling, size },
+      branchCode
+    );
   };
 
   // Add to cart trigger

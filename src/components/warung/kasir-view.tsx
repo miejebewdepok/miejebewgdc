@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
 import { useSession } from "@/lib/auth-client";
 import { Product, ProductCategory, Transaction } from "@/lib/types";
+import { calculateItemUnitPrice, calculateToppingsSurcharge as sharedCalculateToppingsSurcharge } from "@/lib/pricing";
 import ProductCard from "./gdc/ProductCard";
 import CartSection from "./gdc/CartSection";
 import CheckoutModal from "./gdc/CheckoutModal";
@@ -124,47 +125,9 @@ export function KasirView() {
   const userEmail = session?.user?.email;
 
   const calculateToppingsSurcharge = (toppings: string[]) => {
-    const isCabang2 = userEmail === "miejebew.depok@gmail.com";
-    
-    // Group toppings:
-    // 1. Premium Toppings (Telur is +5k for all, Keju Slice is +3k for Cabang 1)
-    // 2. Special Toppings (Ceker, Kulit Ayam, Pangsit Goreng are +2.5k for Cabang 2; Beef Slice is +2.5k for Cabang 1)
-    // 3. Promo Toppings (Everything else normally +2k, eligible for 3 for 5k and 7 for 10k)
-    
-    const premiumKeys = isCabang2 ? ["Telur"] : ["Telur", "Keju Slice"];
-    const specialKeys = isCabang2 
-      ? ["Ceker", "Kulit Ayam", "Pangsit Goreng"] 
-      : ["Beef Slice"];
-      
-    const premiumToppings = toppings.filter((t) => premiumKeys.includes(t));
-    const specialToppings = toppings.filter((t) => specialKeys.includes(t));
-    const promoToppings = toppings.filter((t) => !premiumKeys.includes(t) && !specialKeys.includes(t));
-    
-    // Calculate Promo Toppings with greedy standard logic (groups of 7 for 10k, groups of 3 for 5k, rest 2k each)
-    let promoSurcharge = 0;
-    let remCount = promoToppings.length;
-    
-    const sevens = Math.floor(remCount / 7);
-    promoSurcharge += sevens * 10000;
-    remCount %= 7;
-    
-    const threes = Math.floor(remCount / 3);
-    promoSurcharge += threes * 5000;
-    remCount %= 3;
-    
-    promoSurcharge += remCount * 2000;
-    
-    // Calculate Special Toppings (Rp 2.500 each)
-    const specialSurcharge = specialToppings.length * 2500;
-    
-    // Calculate Premium Toppings (Telur +5k, Keju Slice +3k)
-    let premiumSurcharge = 0;
-    premiumToppings.forEach((t) => {
-      if (t === "Telur") premiumSurcharge += 5000;
-      else if (t === "Keju Slice") premiumSurcharge += 3000;
-    });
-    
-    return promoSurcharge + specialSurcharge + premiumSurcharge;
+    const isCabang2 = settings.branchCode === "CABANG_2" || userEmail === "miejebew.depok@gmail.com";
+    const branchCode = isCabang2 ? "CABANG_2" : "CABANG_1";
+    return sharedCalculateToppingsSurcharge(toppings, branchCode);
   };
 
   const defaultCategories = useMemo(() => {
@@ -460,7 +423,7 @@ export function KasirView() {
     setIsCheckoutModalOpen(true);
   }
 
-  async function handleSuccessCheckout(tx: any): Promise<boolean> {
+  async function handleSuccessCheckout(tx: any): Promise<any> {
     try {
       const transaction = await checkout({
         customerName: tx.customerName,
@@ -470,13 +433,13 @@ export function KasirView() {
       });
       if (!transaction) {
         toast.error("Keranjang masih kosong.");
-        return false;
+        return null;
       }
       toast.success("Transaksi berhasil disimpan.");
-      return true;
+      return transaction;
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Gagal menyimpan transaksi.");
-      return false;
+      return null;
     }
   }
 
@@ -1190,21 +1153,18 @@ export function KasirView() {
               <div className="flex justify-between text-sm font-bold border-t border-sidebar-border/30 dark:border-white/5 pt-2 mt-1">
                 <span>Harga Unit</span>
                 <span className="text-red-650 dark:text-red-400 font-mono font-extrabold">
-                  Rp {((customizingProduct.sellPrice + 
-                        ((customizingProduct.name.toLowerCase().includes("spaghetti") && selectedSize === 'Double') ? 5000 : 0) +
-                        ((!(userEmail === "miejebew.depok@gmail.com"
-                          ? (customizingProduct.category === "Tea Series" || customizingProduct.category === "Delight Series" || customizingProduct.category?.toLowerCase() === "chocolatte")
-                          : ['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(customizingProduct.category)
-                        ) && (selectedSpicyLevel === 4 || selectedSpicyLevel === 5)) ? 2000 : 0) + 
-                        (customizingProduct.category === 'Kebab' && selectedSize === 'REGULER' && selectedFilling === 'Beef' ? 2000 : 0) +
-                        (customizingProduct.category === 'Kebab' && selectedSize === 'LARGE' && selectedFilling !== 'Special' ? 5000 : 0) +
-                        (customizingProduct.category === 'Kebab' && selectedSize === 'LARGE' && selectedFilling === 'Special' ? 10000 : 0) +
-                        (customizingProduct.category === 'Lumpia Beef' && ['Beef Patty', 'Chicken Katsu'].includes(selectedFilling) ? 5000 : 0) +
-                        (customizingProduct.category === 'Lumpia Beef' && selectedFilling === 'Special' ? 10000 : 0) +
-                        (!(userEmail === "miejebew.depok@gmail.com"
-                          ? (customizingProduct.category === "Tea Series" || customizingProduct.category === "Delight Series" || customizingProduct.category?.toLowerCase() === "chocolatte")
-                          : ['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(customizingProduct.category)
-                        ) ? calculateToppingsSurcharge(selectedToppings) : 0))).toLocaleString('id-ID')}                </span>
+                  Rp {calculateItemUnitPrice(
+                    customizingProduct.sellPrice,
+                    customizingProduct.category,
+                    customizingProduct.name,
+                    { 
+                      spicyLevel: selectedSpicyLevel, 
+                      toppings: selectedToppings, 
+                      filling: selectedFilling, 
+                      size: selectedSize 
+                    },
+                    settings.branchCode === "CABANG_2" || userEmail === "miejebew.depok@gmail.com" ? "CABANG_2" : "CABANG_1"
+                  ).toLocaleString('id-ID')}                </span>
               </div>
             </div>
 

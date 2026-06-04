@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { emptyAppState } from "@/lib/empty-state";
 import { AppState, Debt, DebtDraft, PaymentMethod, Product, ProductDraft, SavedBill, Settings, Transaction } from "@/lib/types";
+import { calculateItemUnitPrice } from "@/lib/pricing";
 
 type CartLine = {
   id: string;
@@ -479,7 +480,8 @@ export function AppStateProvider({
     
     // In-memory fallback mock for dynamic promo Jasmine Tea product
     if (!product && line.productId === "promo_jasmine_tea") {
-      const isCabang2 = sessionUserId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" || pathname?.toLowerCase().includes("rwtvcmmleowlwyhdjnnnnlewrlys26fc5");
+      const isCabang2 = state.settings.branchCode === "CABANG_2" || sessionUserId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" || pathname?.toLowerCase().includes("rwtvcmmleowlwyhdjnnnnlewrlys26fc5");
+      const branchCode = isCabang2 ? "CABANG_2" : "CABANG_1";
       const nonPromoTotal = state.cart
         .filter(it => it.productId !== "promo_jasmine_tea")
         .reduce((sum, line) => {
@@ -489,44 +491,14 @@ export function AppStateProvider({
           const toppings = line.toppings ?? [];
           const filling = line.filling;
           const size = line.size;
-          const isBypassed = isCabang2 
-            ? (p.category === 'Tea Series' || p.category === 'Delight Series' || p.category.toLowerCase() === 'chocolatte')
-            : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(p.category);
-          const spicySurcharge = isBypassed ? 0 : ((level === 4 || level === 5) ? 2000 : 0);
-          const specialKeys = isCabang2 
-            ? ["Ceker", "Kulit Ayam", "Pangsit Goreng", "Telur"] 
-            : ["Beef Slice", "Keju Slice", "Telur"];
-          const specialToppings = toppings.filter((t) => specialKeys.includes(t));
-          const standardToppings = toppings.filter((t) => !specialKeys.includes(t));
-          const stdCount = standardToppings.length;
-          const stdSurcharge = isCabang2 ? 0 : (stdCount === 3 ? 5000 : (stdCount === 7 ? 10000 : stdCount * 2000));
-          let specialSurcharge = 0;
-          specialToppings.forEach((t) => {
-            if (t === "Beef Slice") specialSurcharge += 2500;
-            else if (t === "Ceker") specialSurcharge += 2500;
-            else if (t === "Kulit Ayam") specialSurcharge += 2500;
-            else if (t === "Pangsit Goreng") specialSurcharge += 2500;
-            else if (t === "Telur") specialSurcharge += 5000;
-            else if (t === "Keju Slice") specialSurcharge += 3000;
-          });
-          const toppingsSurcharge = isBypassed ? 0 : stdSurcharge + specialSurcharge;
-          let fillingSurcharge = 0;
-          if (!isBypassed) {
-            if (p.category === 'Kebab') {
-              if (size === 'REGULER') {
-                if (filling === 'Beef') fillingSurcharge = 2000;
-              } else if (size === 'LARGE') {
-                if (filling === 'Beef Slice' || filling === 'Beef' || filling === 'Chicken Katsu') fillingSurcharge = 5000;
-                else if (filling === 'Special') fillingSurcharge = 10000;
-              }
-            } else {
-              if (filling === 'Beef Patty' || filling === 'Chicken Katsu') fillingSurcharge = 5000;
-              else if (filling === 'Special') fillingSurcharge = 10000;
-            }
-          }
-          const isSpaghetti = p.name.toLowerCase().includes("spaghetti");
-          const spaghettiSurcharge = (isSpaghetti && size === "Double") ? 5000 : 0;
-          const linePrice = p.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
+          
+          const linePrice = calculateItemUnitPrice(
+            p.sellPrice,
+            p.category,
+            p.name,
+            { spicyLevel: level, toppings, filling, size },
+            branchCode
+          );
           return sum + linePrice * line.quantity;
         }, 0);
 
@@ -552,60 +524,15 @@ export function AppStateProvider({
     const toppings = line.toppings ?? [];
     const filling = line.filling;
     const size = line.size;
-    const isCabang2 = sessionUserId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" || pathname?.toLowerCase().includes("rwtvcmmleowlwyhdjnnnnlewrlys26fc5");
-    const isBypassed = isCabang2 
-      ? (product.category === 'Tea Series' || product.category === 'Delight Series' || product.category.toLowerCase() === 'chocolatte')
-      : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(product.category);
-    
-    const spicySurcharge = isBypassed ? 0 : ((level === 4 || level === 5) ? 2000 : 0);
-    
-    const specialKeys = isCabang2 
-      ? ["Ceker", "Kulit Ayam", "Pangsit Goreng", "Telur"] 
-      : ["Beef Slice", "Keju Slice", "Telur"];
-
-    const specialToppings = toppings.filter((t) => specialKeys.includes(t));
-    const standardToppings = toppings.filter((t) => !specialKeys.includes(t));
-
-    const stdCount = standardToppings.length;
-    const stdSurcharge = isCabang2 
-      ? 0 
-      : (stdCount === 3 
-        ? 5000 
-        : (stdCount === 7 
-          ? 10000 
-          : stdCount * 2000));
-
-    let specialSurcharge = 0;
-    specialToppings.forEach((t) => {
-      if (t === "Beef Slice") specialSurcharge += 2500;
-      else if (t === "Ceker") specialSurcharge += 2500;
-      else if (t === "Kulit Ayam") specialSurcharge += 2500;
-      else if (t === "Pangsit Goreng") specialSurcharge += 2500;
-      else if (t === "Telur") specialSurcharge += 5000;
-      else if (t === "Keju Slice") specialSurcharge += 3000;
-    });
-
-    const toppingsSurcharge = isBypassed ? 0 : stdSurcharge + specialSurcharge;
-
-    let fillingSurcharge = 0;
-    if (!isBypassed) {
-      if (product.category === 'Kebab') {
-        if (size === 'REGULER') {
-          if (filling === 'Beef') fillingSurcharge = 2000;
-        } else if (size === 'LARGE') {
-          if (filling === 'Beef Slice' || filling === 'Beef' || filling === 'Chicken Katsu') fillingSurcharge = 5000;
-          else if (filling === 'Special') fillingSurcharge = 10000;
-        }
-      } else {
-        if (filling === 'Beef Patty' || filling === 'Chicken Katsu') fillingSurcharge = 5000;
-        else if (filling === 'Special') fillingSurcharge = 10000;
-      }
-    }
-
-    const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
-    const spaghettiSurcharge = (isSpaghetti && size === "Double") ? 5000 : 0;
-
-    const sellPrice = product.sellPrice + spicySurcharge + toppingsSurcharge + fillingSurcharge + spaghettiSurcharge;
+    const isCabang2 = state.settings.branchCode === "CABANG_2" || sessionUserId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" || pathname?.toLowerCase().includes("rwtvcmmleowlwyhdjnnnnlewrlys26fc5");
+    const branchCode = isCabang2 ? "CABANG_2" : "CABANG_1";
+    const sellPrice = calculateItemUnitPrice(
+      product.sellPrice,
+      product.category,
+      product.name,
+      { spicyLevel: level, toppings, filling, size },
+      branchCode
+    );
 
     return [
       {

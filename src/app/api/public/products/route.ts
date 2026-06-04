@@ -30,10 +30,14 @@ export async function GET(request: NextRequest) {
       .limit(1);
 
     let productOrder: string[] = [];
+    let branchCode = "CABANG_1";
     try {
       if (profile && profile.businessNotes && profile.businessNotes.startsWith("{")) {
         const extra = JSON.parse(profile.businessNotes);
         productOrder = extra.productOrder ?? [];
+        branchCode = extra.branchCode ?? (profile.userId === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" ? "CABANG_2" : "CABANG_1");
+      } else if (profile) {
+        branchCode = profile.userId === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" ? "CABANG_2" : "CABANG_1";
       }
     } catch (e) {
       console.error("Failed to parse productOrder from businessNotes", e);
@@ -42,6 +46,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       storeName: profile?.storeName || "Mie Jebew GDC",
       productOrder,
+      branchCode,
       products: productRows.map((p) => ({
         id: p.id,
         name: p.name,

@@ -1,7 +1,28 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import { useEffect } from "react";
 
 export default function UnduhPage() {
-  redirect(
-    "https://github.com/miejebewdepok/miejebewgdc/releases/download/latest/app-debug.apk"
+  useEffect(() => {
+    window.location.replace(
+      "https://github.com/miejebewdepok/miejebewgdc/releases/download/latest/app-debug.apk"
+    );
+  }, []);
+
+  return (
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="text-center">
+        <p className="text-sm text-gray-600">Sedang mengalihkan ke APK terbaru...</p>
+        <p className="mt-2 text-xs text-gray-500">
+          Jika tidak otomatis, klik{" "}
+          <a
+            href="https://github.com/miejebewdepok/miejebewgdc/releases/download/latest/app-debug.apk"
+            className="underline"
+          >
+            tautan ini
+          </a>
+        </p>
+      </div>
+    </div>
   );
 }

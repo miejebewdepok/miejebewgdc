@@ -128,12 +128,12 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
   const currentUserId = session?.user?.id ?? null;
   const currentUserEmail = session?.user?.email;
   const isOwner = Boolean(currentUserId && currentUserId === userId);
-  const isMainOwner = isOwner && settings.branchCode !== "CABANG_2";
+  const isMainOwner = currentUserEmail === "taufiqrusdhi.ez@gmail.com";
 
   // Manage User Access States
   const [usersList, setUsersList] = useState<{ id: string; name: string; email: string; isApproved: boolean; createdAt: string }[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-  const isCrew = !isOwner;
+  const isCrew = currentUserEmail === "miejebew.crew@gmail.com";
   const fetchUsersList = async () => {
     if (!isMainOwner) return;
     setIsLoadingUsers(true);
@@ -1001,7 +1001,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
               </div>
             </div>
                     {/* DATABASE WHATSAPP & EMAIL PELANGGAN (PROMO QR) CARD */}
-          {!isCrew && (
+          {isMainOwner && (
             <div className="glass-morphism rounded-3xl p-4 sm:p-6 relative overflow-hidden flex flex-col gap-4 mt-6">
             {/* Header Row */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">

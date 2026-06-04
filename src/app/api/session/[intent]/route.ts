@@ -36,11 +36,8 @@ function getBaseUrl(request: NextRequest) {
   return request.nextUrl.origin;
 }
 
-function redirectToAuth(request: NextRequest, mode: string, error: string) {
-  const url = new URL("/auth", getBaseUrl(request));
-  url.searchParams.set("mode", mode);
-  url.searchParams.set("error", error);
-  return NextResponse.redirect(url, { status: 303 });
+function returnError(mode: string, error: string) {
+  return NextResponse.json({ success: false, mode, error }, { status: 400 });
 }
 
 function appendSetCookieHeaders(source: Response, target: NextResponse) {
@@ -68,7 +65,7 @@ export async function POST(
   const config = AUTH_INTENTS[intent as Intent];
 
   if (!config) {
-    return NextResponse.json({ error: "Intent auth tidak dikenal." }, { status: 404 });
+    return NextResponse.json({ success: false, error: "Intent auth tidak dikenal." }, { status: 404 });
   }
 
   const formData = await request.formData();
@@ -88,7 +85,7 @@ export async function POST(
     (field) => String(formData.get(field) ?? "").trim().length === 0
   );
   if (hasMissingField) {
-    return redirectToAuth(request, config.mode, "Lengkapi dulu data akun yang wajib diisi.");
+    return returnError(config.mode, "Lengkapi dulu data akun yang wajib diisi.");
   }
 
   const authURL = new URL(config.authPath, getBaseUrl(request));
@@ -110,28 +107,23 @@ export async function POST(
       | null;
 
     if (!authResponse.ok) {
-      return redirectToAuth(
-        request,
+      return returnError(
         config.mode,
         authResult?.message ?? config.defaultError
       );
     }
 
     if (intent === "sign-up") {
-      const successURL = new URL("/auth", getBaseUrl(request));
-      successURL.searchParams.set("mode", "signin");
-      successURL.searchParams.set(
-        "success",
-        "Registration successful! Your account is pending approval by RP Group. Please contact RP Group to activate your access."
-      );
-      return NextResponse.redirect(successURL, { status: 303 });
+      const successMsg = "Registration successful! Your account is pending approval by RP Group. Please contact RP Group to activate your access.";
+      return NextResponse.json({ success: true, message: successMsg, mode: "signin" });
     }
 
-    const redirectTarget = new URL(authResult?.url ?? callbackURL, getBaseUrl(request));
-    const response = NextResponse.redirect(redirectTarget, { status: 303 });
+    const redirectTarget = authResult?.url ?? callbackURL;
+    const response = NextResponse.json({ success: true, redirect: redirectTarget });
     appendSetCookieHeaders(authResponse, response);
     return response;
   } catch {
-    return redirectToAuth(request, config.mode, config.defaultError);
+    return returnError(config.mode, config.defaultError);
   }
 }
+

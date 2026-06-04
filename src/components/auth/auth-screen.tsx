@@ -34,9 +34,25 @@ export function AuthScreen() {
   const searchParams = useSearchParams();
   const { data: session, isPending: isSessionPending } = useSession();
   const queryMode = searchParams.get("mode") === "signup" ? "signup" : "signin";
-  const authError = searchParams.get("error");
-  const authSuccess = searchParams.get("success");
-  const [mode, setMode] = useState<AuthMode>(authSuccess ? "signin" : queryMode);
+  const [mode, setMode] = useState<AuthMode>(searchParams.get("success") ? "signin" : queryMode);
+  
+  const [errorState, setErrorState] = useState<string | null>(null);
+  const [successState, setSuccessState] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error) {
+      setErrorState(error);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const success = searchParams.get("success");
+    if (success) {
+      setSuccessState(success);
+    }
+  }, [searchParams]);
   
   const [cachedStoreName, setCachedStoreName] = useState("MIE JEBEW GDC");
   const [cachedStoreLogo, setCachedStoreLogo] = useState("");
@@ -72,12 +88,81 @@ export function AuthScreen() {
   }, [isSessionPending, router, session]);
 
   useEffect(() => {
-    if (authSuccess) {
+    if (searchParams.get("success")) {
       setMode("signin");
     } else {
       setMode(queryMode);
     }
-  }, [queryMode, authSuccess]);
+  }, [queryMode, searchParams]);
+
+  const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrorState(null);
+    setSuccessState(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("email", signInForm.email);
+      formData.append("password", signInForm.password);
+      formData.append("callbackURL", "/dashboard");
+
+      const res = await fetch("/api/session/sign-in", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setErrorState(data.error || "Gagal masuk ke dashboard.");
+      } else {
+        router.replace(data.redirect || "/dashboard");
+      }
+    } catch (err) {
+      setErrorState("Terjadi kesalahan koneksi. Silakan coba lagi.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrorState(null);
+    setSuccessState(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("name", signUpForm.name);
+      formData.append("email", signUpForm.email);
+      formData.append("password", signUpForm.password);
+      formData.append("callbackURL", "/dashboard");
+
+      const res = await fetch("/api/session/sign-up", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setErrorState(data.error || "Gagal membuat akun baru.");
+      } else {
+        setSuccessState(data.message || "Pendaftaran berhasil! Akun Anda sedang menunggu persetujuan.");
+        setMode("signin");
+        setSignUpForm({ name: "", email: "", password: "" });
+      }
+    } catch (err) {
+      setErrorState("Terjadi kesalahan koneksi. Silakan coba lagi.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleModeChange = (newMode: AuthMode) => {
+    setMode(newMode);
+    setErrorState(null);
+    setSuccessState(null);
+  };
 
   return (
     <div className="relative min-h-screen bg-[#fef2f2] dark:bg-[#090b11] text-[#450a0a] dark:text-slate-100 overflow-hidden flex items-center justify-center px-4 py-8 lg:p-12 font-sans select-none transition-colors duration-300 dark">
@@ -131,7 +216,7 @@ export function AuthScreen() {
                     ? "bg-gradient-to-r from-red-600 to-amber-500 text-white shadow-md font-black"
                     : "text-red-900/60 dark:text-slate-400 hover:text-[#450a0a] dark:hover:text-white"
                 )}
-                onClick={() => setMode("signin")}
+                onClick={() => handleModeChange("signin")}
               >
                 Masuk
               </button>
@@ -143,25 +228,25 @@ export function AuthScreen() {
                     ? "bg-gradient-to-r from-red-600 to-amber-500 text-white shadow-md font-black"
                     : "text-red-900/60 dark:text-slate-400 hover:text-[#450a0a] dark:hover:text-white"
                 )}
-                onClick={() => setMode("signup")}
+                onClick={() => handleModeChange("signup")}
               >
                 Daftar
               </button>
             </div>
 
             {/* Success Display */}
-            {authSuccess ? (
-              <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3.5 text-xs text-emerald-650 dark:text-emerald-400 font-semibold mb-6 flex items-start gap-2 leading-relaxed">
-                <CheckCircle2 className="w-4 h-4 text-emerald-550 shrink-0 mt-0.5" />
-                <span>{authSuccess}</span>
+            {successState ? (
+              <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold mb-6 flex items-start gap-2 leading-relaxed">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                <span>{successState}</span>
               </div>
             ) : null}
 
             {/* Error Display */}
-            {authError ? (
-              <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-550 dark:text-red-400 font-semibold mb-6 flex items-start gap-2 leading-relaxed">
+            {errorState ? (
+              <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-600 dark:text-red-400 font-semibold mb-6 flex items-start gap-2 leading-relaxed">
                 <Flame className="w-4 h-4 text-red-550 shrink-0 mt-0.5" />
-                <span>{authError}</span>
+                <span>{errorState}</span>
               </div>
             ) : null}
 
@@ -223,13 +308,23 @@ export function AuthScreen() {
                   type="submit"
                   form="signin-form"
                   size="lg"
+                  disabled={isLoading}
                   className="h-12 w-full rounded-2xl bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-extrabold shadow-[0_4px_25px_rgba(239,68,68,0.25)] hover:shadow-[0_4px_35px_rgba(239,68,68,0.45)] transition-all duration-300 transform hover:-translate-y-0.5 text-xs uppercase tracking-wider cursor-pointer mt-4 flex items-center justify-center gap-2"
                 >
-                  <span>Masuk POS</span>
-                  <ArrowRight className="w-4 h-4" />
+                  {isLoading ? (
+                    <span className="flex items-center gap-2">
+                      <span className="size-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                      Memproses...
+                    </span>
+                  ) : (
+                    <>
+                      <span>Masuk POS</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
                 </Button>
 
-                <form id="signin-form" action="/api/session/sign-in" method="post">
+                <form id="signin-form" onSubmit={handleSignIn}>
                   <input type="hidden" name="callbackURL" value="/dashboard" />
                 </form>
               </div>
@@ -310,13 +405,23 @@ export function AuthScreen() {
                   type="submit"
                   form="signup-form"
                   size="lg"
+                  disabled={isLoading}
                   className="h-12 w-full rounded-2xl bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-extrabold shadow-[0_4px_25px_rgba(239,68,68,0.25)] hover:shadow-[0_4px_35px_rgba(239,68,68,0.45)] transition-all duration-300 transform hover:-translate-y-0.5 text-xs uppercase tracking-wider cursor-pointer mt-4 flex items-center justify-center gap-2"
                 >
-                  <span>Daftar Akun</span>
-                  <ArrowRight className="w-4 h-4" />
+                  {isLoading ? (
+                    <span className="flex items-center gap-2">
+                      <span className="size-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                      Mendaftar...
+                    </span>
+                  ) : (
+                    <>
+                      <span>Daftar Akun</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
                 </Button>
 
-                <form id="signup-form" action="/api/session/sign-up" method="post">
+                <form id="signup-form" onSubmit={handleSignUp}>
                   <input type="hidden" name="callbackURL" value="/dashboard" />
                 </form>
               </div>

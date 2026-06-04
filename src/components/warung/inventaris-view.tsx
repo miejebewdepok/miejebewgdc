@@ -31,17 +31,11 @@ export function InventarisView() {
   }
 
   const defaultCategories = useMemo(() => {
-    if (userEmail === "miejebew.depok@gmail.com") {
+    if (settings.branchCode === "CABANG_2" || userEmail === "miejebew.depok@gmail.com") {
       return ["Mie Pedas", "Mie Tek Tek", "Pangsit", "Tea Series", "Delight Series"];
     }
-    if (
-      userEmail === "taufiqrusdhi.ez@gmail.com" ||
-      userEmail === "miejebew.crew@gmail.com"
-    ) {
-      return ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"];
-    }
-    return [];
-  }, [userEmail]);
+    return ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"];
+  }, [settings.branchCode, userEmail]);
 
   // Local storage for categories — synced with kasir using user-isolated keys
   const [localCategories, setLocalCategories] = useState<string[] | null>(null);
@@ -52,7 +46,7 @@ export function InventarisView() {
       let saved = localStorage.getItem(storageKey);
       
       // Auto-migrate old categories for the main owner if they don't have user-isolated categories yet
-      if (!saved && userEmail === "taufiqrusdhi.ez@gmail.com") {
+      if (!saved && (settings.branchCode === "CABANG_1" || userEmail === "taufiqrusdhi.ez@gmail.com")) {
         const oldSaved = localStorage.getItem("miejebew_categories_v4");
         if (oldSaved) {
           saved = oldSaved;

@@ -4,17 +4,26 @@ import { pool } from "@/db/client";
 
 export const dynamic = "force-dynamic";
 
-
 export async function GET(request: NextRequest) {
   try {
     const { session } = await getRequestUser();
-    const userEmail = session?.user?.email;
+    const currentUserId = session?.user?.id;
 
-    // Only allow taufiqrusdhi.ez@gmail.com to manage access
-    if (userEmail !== "taufiqrusdhi.ez@gmail.com") {
+    if (!currentUserId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check if the current user is a store owner (registered in store_profiles)
+    const profileRes = await pool.query(
+      `SELECT user_id FROM store_profiles WHERE user_id = $1`,
+      [currentUserId]
+    );
+
+    if ((profileRes.rowCount ?? 0) === 0) {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 
+    // Query all users to manage access
     const res = await pool.query(
       `SELECT id, name, email, "isApproved", "createdAt" FROM "user" ORDER BY "createdAt" DESC`
     );
@@ -29,10 +38,19 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const { session } = await getRequestUser();
-    const userEmail = session?.user?.email;
+    const currentUserId = session?.user?.id;
 
-    // Only allow taufiqrusdhi.ez@gmail.com to manage access
-    if (userEmail !== "taufiqrusdhi.ez@gmail.com") {
+    if (!currentUserId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check if the current user is a store owner
+    const profileRes = await pool.query(
+      `SELECT user_id FROM store_profiles WHERE user_id = $1`,
+      [currentUserId]
+    );
+
+    if ((profileRes.rowCount ?? 0) === 0) {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 
@@ -43,13 +61,23 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "userId is required" }, { status: 400 });
     }
 
+    // Prevent modifying themselves or any other store owner
+    const ownerCheck = await pool.query(
+      `SELECT user_id FROM store_profiles WHERE user_id = $1`,
+      [userId]
+    );
+
+    if ((ownerCheck.rowCount ?? 0) > 0) {
+      return NextResponse.json({ error: "Cannot modify status of a store owner" }, { status: 400 });
+    }
+
     const res = await pool.query(
-      `UPDATE "user" SET "isApproved" = $1 WHERE id = $2 AND email != 'taufiqrusdhi.ez@gmail.com' RETURNING id`,
+      `UPDATE "user" SET "isApproved" = $1 WHERE id = $2 RETURNING id`,
       [isApproved, userId]
     );
 
-    if (res.rowCount === 0) {
-      return NextResponse.json({ error: "User not found or cannot be modified" }, { status: 404 });
+    if ((res.rowCount ?? 0) === 0) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     return NextResponse.json({ success: true });

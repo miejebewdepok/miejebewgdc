@@ -71,7 +71,6 @@ interface SettingsPanelProps {
 export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPanelProps) {
   const { userId } = useAppState();
   const isCabang2 = settings.branchCode === "CABANG_2" ||
-                    userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" || 
                     settings.storeName?.toLowerCase().includes("depok") || 
                     settings.merchantName?.toLowerCase().includes("depok");
   // Local state for forms
@@ -126,15 +125,20 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
   };
 
   const { data: session } = useSession();
-  const userEmail = session?.user?.email;
-  const isCrew = userEmail === 'miejebew.crew@gmail.com';
+  const currentUserId = session?.user?.id ?? null;
+  const currentUserEmail = session?.user?.email;
+  const isOwner = Boolean(currentUserId && currentUserId === userId);
 
   // Manage User Access States
   const [usersList, setUsersList] = useState<{ id: string; name: string; email: string; isApproved: boolean; createdAt: string }[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
+  const isCrew = Boolean(
+    currentUserId && usersList.some((u) => u.id === currentUserId && u.isApproved)
+  );
+
   const fetchUsersList = async () => {
-    if (userEmail !== "taufiqrusdhi.ez@gmail.com") return;
+    if (!isOwner) return;
     setIsLoadingUsers(true);
     try {
       const res = await fetch("/api/settings/users");
@@ -176,10 +180,10 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
   }, []);
 
   useEffect(() => {
-    if (userEmail === "taufiqrusdhi.ez@gmail.com") {
+    if (isOwner) {
       fetchUsersList();
     }
-  }, [userEmail]);
+  }, [isOwner]);
 
   const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1254,7 +1258,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
           </div>
 
           {/* USER APPROVAL PANEL (ONLY FOR OWNER) */}
-          {userEmail === "taufiqrusdhi.ez@gmail.com" && (
+          {isOwner && (
             <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-4">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-red-500/10 text-red-500 rounded-xl">
@@ -1279,7 +1283,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
               ) : (
                 <div className="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1 no-scrollbar animate-fade">
                   {usersList
-                    .filter((u) => u.email !== "taufiqrusdhi.ez@gmail.com")
+                    .filter((u) => u.id !== userId)
                     .map((user) => (
                       <div
                         key={user.id}

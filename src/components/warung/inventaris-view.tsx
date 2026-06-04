@@ -10,7 +10,7 @@ export function InventarisView() {
   const { data: session } = useSession();
   const userEmail = session?.user?.email;
 
-  if (userEmail === "miejebew.crew@gmail.com") {
+  if (settings.branchCode !== "CABANG_2" && useAppState().userId !== "yY2uZ9lhPK8Xt8RmHixiKTn1PNwbKjMn") {
     return (
       <div className="w-full h-full flex items-center justify-center p-8 bg-slate-900/10 dark:bg-slate-950/20">
         <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 p-8 rounded-[32px] shadow-xl text-center flex flex-col items-center gap-4">
@@ -31,11 +31,11 @@ export function InventarisView() {
   }
 
   const defaultCategories = useMemo(() => {
-    if (settings.branchCode === "CABANG_2" || userEmail === "miejebew.depok@gmail.com") {
+    if (settings.branchCode === "CABANG_2") {
       return ["Mie Pedas", "Mie Tek Tek", "Pangsit", "Tea Series", "Delight Series"];
     }
     return ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"];
-  }, [settings.branchCode, userEmail]);
+  }, [settings.branchCode]);
 
   // Local storage for categories — synced with kasir using user-isolated keys
   const [localCategories, setLocalCategories] = useState<string[] | null>(null);
@@ -46,7 +46,7 @@ export function InventarisView() {
       let saved = localStorage.getItem(storageKey);
       
       // Auto-migrate old categories for the main owner if they don't have user-isolated categories yet
-      if (!saved && (settings.branchCode === "CABANG_1" || userEmail === "taufiqrusdhi.ez@gmail.com")) {
+      if (!saved && settings.branchCode === "CABANG_1") {
         const oldSaved = localStorage.getItem("miejebew_categories_v4");
         if (oldSaved) {
           saved = oldSaved;
@@ -56,7 +56,7 @@ export function InventarisView() {
 
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (userEmail === "miejebew.depok@gmail.com" && !parsed.includes("Mie Pedas")) {
+        if (settings.branchCode === "CABANG_2" && !parsed.includes("Mie Pedas")) {
           setLocalCategories(defaultCategories);
           localStorage.setItem(storageKey, JSON.stringify(defaultCategories));
         } else {

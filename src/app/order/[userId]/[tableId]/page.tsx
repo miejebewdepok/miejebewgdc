@@ -55,12 +55,6 @@ export default function CustomerOrderPage(props: {
   
   const [isCabang2, setIsCabang2] = useState(false);
 
-  useEffect(() => {
-    if (userId) {
-      setIsCabang2(userId.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5");
-    }
-  }, [userId]);
-
   // States
   const [loading, setLoading] = useState(true);
   const [storeName, setStoreName] = useState("Mie Jebew GDC");
@@ -138,12 +132,7 @@ export default function CustomerOrderPage(props: {
               p.category === "Delight Series"
             );
             const hasDepokInName = data.storeName && data.storeName.toLowerCase().includes("depok");
-            
-            if (hasCabang2Cats || hasDepokInName) {
-              setIsCabang2(true);
-            } else if (userId.toLowerCase() !== "rwtvcmmleowlwyhdjnnnnlewrlys26fc5") {
-              setIsCabang2(false);
-            }
+            setIsCabang2(Boolean(hasCabang2Cats || hasDepokInName));
           }
         }
         if (data.productOrder) {

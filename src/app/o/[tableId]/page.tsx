@@ -15,39 +15,46 @@ export default async function ShortOrderRedirectPage(props: PageProps) {
   const resolvedParams = await props.params;
   const tableId = resolvedParams.tableId;
 
-  let resolvedUserId = "yY2uZ9lhPK8Xt8RmHixiKTn1PNwbKjMn"; // Default fallback (Mie Jebew GDC milik Taufiq)
+  let resolvedUserId: string | null = null;
   let cleanTableId = tableId;
+  const targetBranch = tableId.startsWith("c2-") ? "CABANG_2" : "CABANG_1";
 
   if (tableId.startsWith("c2-")) {
-    resolvedUserId = "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5"; // Cabang 2 (Depok)
     cleanTableId = tableId.substring(3);
-  } else {
-    try {
-      // 1. Cari user ID milik email Taufiq secara khusus di tabel user database untuk mencegah hijack oleh akun lain
-      const userResult = await pool.query<{ id: string }>(
-        `select id from "user" where email = $1 limit 1`,
-        ["taufiqrusdhi.ez@gmail.com"]
-      );
-
-      if (userResult.rowCount && userResult.rows[0]) {
-        resolvedUserId = userResult.rows[0].id;
-      } else {
-        // 2. Jika tidak ditemukan (misal saat seeding awal belum selesai), gunakan pencarian store profile fallback
-        const gdcProfile = await db
-          .select({ userId: storeProfiles.userId })
-          .from(storeProfiles)
-          .where(eq(storeProfiles.userId, "yY2uZ9lhPK8Xt8RmHixiKTn1PNwbKjMn"))
-          .limit(1);
-
-        if (gdcProfile.length > 0 && gdcProfile[0].userId) {
-          resolvedUserId = gdcProfile[0].userId;
-        }
-      }
-    } catch (err) {
-      console.error("Failed to resolve dynamic store userId, falling back to default", err);
-    }
   }
 
-  // Alihkan pelanggan ke halaman self-order spesifik milik toko Anda
+  try {
+    const profiles = await db.select().from(storeProfiles);
+    for (const profile of profiles) {
+      if (profile.businessNotes && profile.businessNotes.startsWith("{")) {
+        try {
+          const extra = JSON.parse(profile.businessNotes);
+          if (extra.branchCode === targetBranch) {
+            resolvedUserId = profile.userId;
+            break;
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+    }
+
+    // Safe fallbacks for backward compatibility
+    if (!resolvedUserId) {
+      if (targetBranch === "CABANG_2") {
+        resolvedUserId = "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5"; // Fallback Depok
+      } else {
+        resolvedUserId = "yY2uZ9lhPK8Xt8RmHixiKTn1PNwbKjMn"; // Fallback GDC
+      }
+    }
+  } catch (err) {
+    console.error("Failed to resolve store profile dynamically, using static fallback", err);
+    resolvedUserId = targetBranch === "CABANG_2" ? "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5" : "yY2uZ9lhPK8Xt8RmHixiKTn1PNwbKjMn";
+  }
+
+  if (!resolvedUserId) {
+    throw new Error("Profil warung untuk short order tidak ditemukan.");
+  }
+
   redirect(`/order/${resolvedUserId}/${cleanTableId}`);
 }

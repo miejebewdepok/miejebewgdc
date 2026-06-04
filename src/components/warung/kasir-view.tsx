@@ -123,15 +123,16 @@ export function KasirView() {
 
   const { data: session } = useSession();
   const userEmail = session?.user?.email;
+  const isCabang2 = settings.branchCode === "CABANG_2";
 
   const calculateToppingsSurcharge = (toppings: string[]) => {
-    const isCabang2 = settings.branchCode === "CABANG_2" || userEmail === "miejebew.depok@gmail.com";
+    const isCabang2 = settings.branchCode === "CABANG_2";
     const branchCode = isCabang2 ? "CABANG_2" : "CABANG_1";
     return sharedCalculateToppingsSurcharge(toppings, branchCode);
   };
 
   const defaultCategories = useMemo(() => {
-    if (settings.branchCode === "CABANG_2" || userEmail === "miejebew.depok@gmail.com") {
+    if (settings.branchCode === "CABANG_2") {
       return ["Mie Pedas", "Mie Tek Tek", "Pangsit", "Tea Series", "Delight Series"];
     }
     return ["Mie Pedas", "Lumpia Beef", "Kebab", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"];
@@ -358,7 +359,7 @@ export function KasirView() {
 
   const mappedCartItems = cartLines.map(line => {
     const isSpecialCategory = line.product.category === 'Kebab' || line.product.category === 'Lumpia Beef';
-    const isCabang2 = userEmail === "miejebew.depok@gmail.com";
+    "const isCabang2 = isCabang2;"
     const isBypassed = isCabang2 
       ? (line.product.category === 'Tea Series' || line.product.category === 'Delight Series' || line.product.category?.toLowerCase() === 'chocolatte')
       : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(line.product.category);
@@ -555,7 +556,7 @@ export function KasirView() {
                     isDragging={draggedId === product.id}
                     isDragOver={dragOverId === product.id}
                     onAddToCart={() => {
-                      const isCabang2 = userEmail === "miejebew.depok@gmail.com";
+                      "const isCabang2 = isCabang2;"
                       const isBypassedCategory = isCabang2 
                         ? (product.category === 'Tea Series' || product.category === 'Delight Series' || product.category?.toLowerCase() === 'chocolatte')
                         : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(product.category);
@@ -946,7 +947,7 @@ export function KasirView() {
                 )}
               >
                 <div className="grid grid-cols-3 gap-2 py-1">
-                  {(userEmail === "miejebew.depok@gmail.com"
+                  {(settings.branchCode === "CABANG_2"
                     ? [
                         "Bakso",
                         "Sosis",
@@ -987,7 +988,7 @@ export function KasirView() {
                         <div className="flex flex-col text-left leading-tight min-w-0">
                           <span className="truncate block font-extrabold text-[10px]">{topping}</span>
                           {(() => {
-                            const isCabang2 = userEmail === "miejebew.depok@gmail.com";
+                            "const isCabang2 = isCabang2;"
                             if (topping === "Telur") {
                               return (
                                 <span className="text-[8px] font-black text-yellow-500 leading-none mt-0.5 animate-pulse">
@@ -1077,7 +1078,7 @@ export function KasirView() {
                 <span>Harga Dasar Menu</span>
                 <span className="font-mono">Rp {customizingProduct.sellPrice.toLocaleString('id-ID')}</span>
               </div>
-              {(!(userEmail === "miejebew.depok@gmail.com"
+              {(!(settings.branchCode === "CABANG_2"
                 ? (customizingProduct.category === "Tea Series" || customizingProduct.category === "Delight Series" || customizingProduct.category?.toLowerCase() === "chocolatte")
                 : ['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(customizingProduct.category)
               ) && (selectedSpicyLevel === 4 || selectedSpicyLevel === 5)) && (
@@ -1124,7 +1125,7 @@ export function KasirView() {
               )}
               {selectedToppings.length > 0 && (() => {
                 const totalSurcharge = calculateToppingsSurcharge(selectedToppings);
-                const isCabang2 = userEmail === "miejebew.depok@gmail.com";
+                "const isCabang2 = isCabang2;"
                 const premiumKeys = isCabang2 
                   ? ["Telur"] 
                   : ["Beef Slice", "Keju Slice", "Telur"];

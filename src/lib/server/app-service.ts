@@ -237,7 +237,7 @@ function mapSettings(profile: typeof storeProfiles.$inferSelect): Settings {
     businessNotes: profile.businessNotes,
     stockAlertThreshold: profile.stockAlertThreshold,
     enabledPayments: profile.enabledPayments,
-    branchCode: extra.branchCode ?? (profile.userId === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" ? "CABANG_2" : "CABANG_1"),
+    branchCode: extra.branchCode ?? "CABANG_1",
     
     // GDC-specific mappings
     merchantName: profile.storeName,
@@ -601,7 +601,7 @@ export async function createTransaction(
     .from(products)
     .where(and(eq(products.userId, userId), inArray(products.id, productIds))) : [];
 
-  const isCabang2 = settings?.branchCode === "CABANG_2" || userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5";
+  const isCabang2 = settings?.branchCode === "CABANG_2";
   const productMap = new Map(productRows.map((product) => [product.id, product]));
   const lineItems = payload.items.map((item) => {
     let product: any;

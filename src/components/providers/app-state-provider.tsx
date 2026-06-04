@@ -480,7 +480,7 @@ export function AppStateProvider({
     
     // In-memory fallback mock for dynamic promo Jasmine Tea product
     if (!product && line.productId === "promo_jasmine_tea") {
-      const isCabang2 = state.settings.branchCode === "CABANG_2" || sessionUserId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" || pathname?.toLowerCase().includes("rwtvcmmleowlwyhdjnnnnlewrlys26fc5");
+      const isCabang2 = state.settings.branchCode === "CABANG_2";
       const branchCode = isCabang2 ? "CABANG_2" : "CABANG_1";
       const nonPromoTotal = state.cart
         .filter(it => it.productId !== "promo_jasmine_tea")
@@ -524,7 +524,7 @@ export function AppStateProvider({
     const toppings = line.toppings ?? [];
     const filling = line.filling;
     const size = line.size;
-    const isCabang2 = state.settings.branchCode === "CABANG_2" || sessionUserId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" || pathname?.toLowerCase().includes("rwtvcmmleowlwyhdjnnnnlewrlys26fc5");
+    const isCabang2 = state.settings.branchCode === "CABANG_2";
     const branchCode = isCabang2 ? "CABANG_2" : "CABANG_1";
     const sellPrice = calculateItemUnitPrice(
       product.sellPrice,

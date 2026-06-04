@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/client";
 import { products, storeProfiles } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { handleRouteError } from "@/lib/server/route-error";
 
 export const runtime = "nodejs";
@@ -35,9 +35,9 @@ export async function GET(request: NextRequest) {
       if (profile && profile.businessNotes && profile.businessNotes.startsWith("{")) {
         const extra = JSON.parse(profile.businessNotes);
         productOrder = extra.productOrder ?? [];
-        branchCode = extra.branchCode ?? (profile.userId === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" ? "CABANG_2" : "CABANG_1");
+        branchCode = extra.branchCode ?? "CABANG_1";
       } else if (profile) {
-        branchCode = profile.userId === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" ? "CABANG_2" : "CABANG_1";
+        branchCode = "CABANG_1";
       }
     } catch (e) {
       console.error("Failed to parse productOrder from businessNotes", e);

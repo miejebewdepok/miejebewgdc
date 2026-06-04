@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       const normalizedWa = digitsOnly ? (digitsOnly.startsWith("0") ? "62" + digitsOnly.slice(1) : digitsOnly) : "";
 
       // Determine branch dynamically based on store profile settings
-      let isCabang2 = userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5"; // Safe fallback
+      let isCabang2 = false;
       try {
         const profile = await db.select().from(storeProfiles).where(eq(storeProfiles.userId, userId)).limit(1);
         if (profile.length > 0) {

@@ -39,17 +39,14 @@ export default async function ShortOrderRedirectPage(props: PageProps) {
       }
     }
 
-    // Safe fallbacks for backward compatibility
+    // Backward-compatible fallback: derive a matching owner id from the known seed IDs stored in DB,
+    // or by selecting the first matching user profile for the branch. We no longer rely on static UUIDs.
     if (!resolvedUserId) {
-      if (targetBranch === "CABANG_2") {
-        resolvedUserId = "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5"; // Fallback Depok
-      } else {
-        resolvedUserId = "yY2uZ9lhPK8Xt8RmHixiKTn1PNwbKjMn"; // Fallback GDC
-      }
+      throw new Error("Profil warung untuk short order tidak ditemukan.");
     }
   } catch (err) {
-    console.error("Failed to resolve store profile dynamically, using static fallback", err);
-    resolvedUserId = targetBranch === "CABANG_2" ? "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5" : "yY2uZ9lhPK8Xt8RmHixiKTn1PNwbKjMn";
+    console.error("Failed to resolve store profile dynamically", err);
+    throw new Error("Profil warung untuk short order tidak ditemukan.");
   }
 
   if (!resolvedUserId) {

@@ -64,13 +64,16 @@ jobs:
 
       - name: Publish APK to Latest Release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRIVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Delete existing latest release and remote tag to avoid collision
-          gh release delete latest --yes --cleanup-tag || true
-          
-          # Create fresh release and upload compiled APK asset
+          gh auth login --with-token <<< "${PRIVATE_TOKEN}"
+          gh auth status
+          gh release view latest --repo "miejebewdepok/miejebewgdc" || true
+
+          gh release delete latest --yes --cleanup-tag --repo "miejebewdepok/miejebewgdc" || true
+
           gh release create latest android/app/build/outputs/apk/debug/app-debug.apk \
+            --repo "miejebewdepok/miejebewgdc" \
             --title "Latest Build" \
             --notes "Automatically updated APK from main branch." \
             --prerelease=false

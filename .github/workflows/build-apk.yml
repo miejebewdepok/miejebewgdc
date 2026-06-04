@@ -50,30 +50,36 @@ jobs:
       - name: Make Gradle Executable
         run: chmod +x android/gradlew
 
-      - name: Build Android Debug APK
+      - name: Decode Keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/release.keystore
+
+      - name: Build Android Release APK
+        env:
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
         run: |
           cd android
-          ./gradlew assembleDebug
+          ./gradlew assembleRelease
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: warungos-kasir
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
           retention-days: 7
 
       - name: Publish APK to Latest Release
         env:
-          PRIVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh auth login --with-token <<< "${PRIVATE_TOKEN}"
-          gh auth status
-          gh release view latest --repo "miejebewdepok/miejebewgdc" || true
-
-          gh release delete latest --yes --cleanup-tag --repo "miejebewdepok/miejebewgdc" || true
-
-          gh release create latest android/app/build/outputs/apk/debug/app-debug.apk \
-            --repo "miejebewdepok/miejebewgdc" \
+          # Delete existing latest release and remote tag to avoid collision
+          gh release delete latest --yes --cleanup-tag || true
+          
+          # Create fresh release and upload compiled APK asset
+          gh release create latest android/app/build/outputs/apk/release/app-release.apk \
             --title "Latest Build" \
             --notes "Automatically updated APK from main branch." \
             --prerelease=false

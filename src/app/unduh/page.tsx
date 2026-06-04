@@ -5,7 +5,7 @@ import { useEffect } from "react";
 export default function UnduhPage() {
   useEffect(() => {
     window.location.replace(
-      "https://github.com/miejebewdepok/miejebewgdc/releases/download/latest/app-debug.apk"
+      "https://github.com/miejebewdepok/miejebewgdc/releases/download/latest/app-release.apk"
     );
   }, []);
 
@@ -16,7 +16,7 @@ export default function UnduhPage() {
         <p className="mt-2 text-xs text-gray-500">
           Jika tidak otomatis, klik{" "}
           <a
-            href="https://github.com/miejebewdepok/miejebewgdc/releases/download/latest/app-debug.apk"
+            href="https://github.com/miejebewdepok/miejebewgdc/releases/download/latest/app-release.apk"
             className="underline"
           >
             tautan ini

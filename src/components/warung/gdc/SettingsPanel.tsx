@@ -128,6 +128,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
   const currentUserId = session?.user?.id ?? null;
   const currentUserEmail = session?.user?.email;
   const isOwner = Boolean(currentUserId && currentUserId === userId);
+  const isMainOwner = currentUserEmail === "taufiqrusdhi.ez@gmail.com";
 
   // Manage User Access States
   const [usersList, setUsersList] = useState<{ id: string; name: string; email: string; isApproved: boolean; createdAt: string }[]>([]);
@@ -138,7 +139,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
   );
 
   const fetchUsersList = async () => {
-    if (!isOwner) return;
+    if (!isMainOwner) return;
     setIsLoadingUsers(true);
     try {
       const res = await fetch("/api/settings/users");
@@ -180,10 +181,10 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
   }, []);
 
   useEffect(() => {
-    if (isOwner) {
+    if (isMainOwner) {
       fetchUsersList();
     }
-  }, [isOwner]);
+  }, [isMainOwner]);
 
   const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1258,7 +1259,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
           </div>
 
           {/* USER APPROVAL PANEL (ONLY FOR OWNER) */}
-          {isOwner && (
+          {isMainOwner && (
             <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-4">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-red-500/10 text-red-500 rounded-xl">

@@ -8,24 +8,18 @@ export async function GET(request: NextRequest) {
   try {
     const { session } = await getRequestUser();
     const currentUserId = session?.user?.id;
+    const currentUserEmail = session?.user?.email;
 
-    if (!currentUserId) {
+    if (!currentUserId || currentUserEmail !== "taufiqrusdhi.ez@gmail.com") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if the current user is a store owner (registered in store_profiles)
-    const profileRes = await pool.query(
-      `SELECT user_id FROM store_profiles WHERE user_id = $1`,
-      [currentUserId]
-    );
-
-    if ((profileRes.rowCount ?? 0) === 0) {
-      return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
-    }
-
-    // Query all users to manage access
+    // Query only users who are not store owners (actual crew/karyawan)
     const res = await pool.query(
-      `SELECT id, name, email, "isApproved", "createdAt" FROM "user" ORDER BY "createdAt" DESC`
+      `SELECT id, name, email, "isApproved", "createdAt" 
+       FROM "user" 
+       WHERE id NOT IN (SELECT user_id FROM store_profiles)
+       ORDER BY "createdAt" DESC`
     );
 
     return NextResponse.json({ users: res.rows });
@@ -39,19 +33,10 @@ export async function PUT(request: NextRequest) {
   try {
     const { session } = await getRequestUser();
     const currentUserId = session?.user?.id;
+    const currentUserEmail = session?.user?.email;
 
-    if (!currentUserId) {
+    if (!currentUserId || currentUserEmail !== "taufiqrusdhi.ez@gmail.com") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Check if the current user is a store owner
-    const profileRes = await pool.query(
-      `SELECT user_id FROM store_profiles WHERE user_id = $1`,
-      [currentUserId]
-    );
-
-    if ((profileRes.rowCount ?? 0) === 0) {
-      return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 
     const body = await request.json();

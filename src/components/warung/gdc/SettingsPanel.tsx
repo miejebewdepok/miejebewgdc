@@ -133,11 +133,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
   // Manage User Access States
   const [usersList, setUsersList] = useState<{ id: string; name: string; email: string; isApproved: boolean; createdAt: string }[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-
-  const isCrew = Boolean(
-    currentUserId && usersList.some((u) => u.id === currentUserId && u.isApproved)
-  );
-
+  const isCrew = !isOwner;
   const fetchUsersList = async () => {
     if (!isMainOwner) return;
     setIsLoadingUsers(true);

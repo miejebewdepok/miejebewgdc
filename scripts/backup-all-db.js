@@ -62,6 +62,31 @@ async function run() {
     fs.writeFileSync(latestBackupPath, JSON.stringify(dbBackup, null, 2), 'utf8');
     console.log(`💾 Snapshot terbaru diupdate di: src/db/backup/latest-db-backup.json`);
 
+    // Implement retention policy: keep only the last 5 time-stamped backups
+    try {
+      const files = fs.readdirSync(backupDir);
+      const backupFiles = files
+        .filter(file => (file.startsWith('full-db-backup-') || file.startsWith('full-database-backup-')) && file.endsWith('.json'))
+        .map(file => ({
+          name: file,
+          path: path.join(backupDir, file),
+          time: fs.statSync(path.join(backupDir, file)).mtime.getTime()
+        }))
+        .sort((a, b) => a.time - b.time); // sort oldest first
+
+      const maxBackups = 5;
+      if (backupFiles.length > maxBackups) {
+        const toDeleteCount = backupFiles.length - maxBackups;
+        console.log(`\n🧹 Retention policy: Menghapus ${toDeleteCount} backup lama...`);
+        for (let i = 0; i < toDeleteCount; i++) {
+          fs.unlinkSync(backupFiles[i].path);
+          console.log(`🗑️ Dihapus: src/db/backup/${backupFiles[i].name}`);
+        }
+      }
+    } catch (e) {
+      console.warn("⚠️ Gagal menjalankan retention policy backup:", e.message);
+    }
+
     console.log("\n🎉 SELURUH PROSES BACKUP DATABASE SELESAI DENGAN SUKSES!");
   } catch (err) {
     console.error("❌ Terjadi error sistem saat melakukan backup:", err);

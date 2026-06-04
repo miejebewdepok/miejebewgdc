@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSavedBill } from "@/lib/server/app-service";
 import { handleRouteError } from "@/lib/server/route-error";
 import { db } from "@/db/client";
-import { customerPromoClaims } from "@/db/schema";
+import { customerPromoClaims, storeProfiles } from "@/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
 import { validateWhatsappNumber } from "@/lib/server/whatsapp";
 import crypto from "crypto";
@@ -40,7 +40,23 @@ export async function POST(request: NextRequest) {
       const digitsOnly = waClean.replace(/\D/g, "");
       const normalizedWa = digitsOnly ? (digitsOnly.startsWith("0") ? "62" + digitsOnly.slice(1) : digitsOnly) : "";
 
-      const isCabang2 = userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5";
+      // Determine branch dynamically based on store profile settings
+      let isCabang2 = userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5"; // Safe fallback
+      try {
+        const profile = await db.select().from(storeProfiles).where(eq(storeProfiles.userId, userId)).limit(1);
+        if (profile.length > 0) {
+          const notes = profile[0].businessNotes;
+          if (notes && notes.startsWith("{")) {
+            const extra = JSON.parse(notes);
+            if (extra.branchCode) {
+              isCabang2 = extra.branchCode === "CABANG_2";
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Failed to detect branchCode for order promo check", e);
+      }
+
       const promoType = isCabang2
         ? (isVipBypass ? "Free Es Teh Manis (VIP)" : "Free Es Teh Tawar")
         : "Free Jasmine Tea";

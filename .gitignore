@@ -44,3 +44,9 @@ next-env.d.ts
 # scratch
 /scratch
 
+# db backups (sensitive production data)
+/src/db/backup/
+
+# junk files
+nul
+

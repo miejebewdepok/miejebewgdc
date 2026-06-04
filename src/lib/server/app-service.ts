@@ -601,7 +601,7 @@ export async function createTransaction(
     .from(products)
     .where(and(eq(products.userId, userId), inArray(products.id, productIds))) : [];
 
-  const isCabang2 = userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5";
+  const isCabang2 = settings?.branchCode === "CABANG_2" || userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5";
   const productMap = new Map(productRows.map((product) => [product.id, product]));
   const lineItems = payload.items.map((item) => {
     let product: any;

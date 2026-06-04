@@ -70,7 +70,8 @@ interface SettingsPanelProps {
 
 export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPanelProps) {
   const { userId } = useAppState();
-  const isCabang2 = userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" || 
+  const isCabang2 = settings.branchCode === "CABANG_2" ||
+                    userId?.toLowerCase() === "rwtvcmmleowlwyhdjnnnnlewrlys26fc5" || 
                     settings.storeName?.toLowerCase().includes("depok") || 
                     settings.merchantName?.toLowerCase().includes("depok");
   // Local state for forms

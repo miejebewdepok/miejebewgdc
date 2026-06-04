@@ -14,12 +14,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Query only users who are not store owners (actual crew/karyawan)
+    // Query all users to manage access
     const res = await pool.query(
-      `SELECT id, name, email, "isApproved", "createdAt" 
-       FROM "user" 
-       WHERE id NOT IN (SELECT user_id FROM store_profiles)
-       ORDER BY "createdAt" DESC`
+      `SELECT id, name, email, "isApproved", "createdAt" FROM "user" ORDER BY "createdAt" DESC`
     );
 
     return NextResponse.json({ users: res.rows });
@@ -46,14 +43,9 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "userId is required" }, { status: 400 });
     }
 
-    // Prevent modifying themselves or any other store owner
-    const ownerCheck = await pool.query(
-      `SELECT user_id FROM store_profiles WHERE user_id = $1`,
-      [userId]
-    );
-
-    if ((ownerCheck.rowCount ?? 0) > 0) {
-      return NextResponse.json({ error: "Cannot modify status of a store owner" }, { status: 400 });
+    // Prevent modifying themselves
+    if (userId === currentUserId) {
+      return NextResponse.json({ error: "Cannot modify your own status" }, { status: 400 });
     }
 
     const res = await pool.query(

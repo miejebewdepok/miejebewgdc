@@ -128,7 +128,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
   const currentUserId = session?.user?.id ?? null;
   const currentUserEmail = session?.user?.email;
   const isOwner = Boolean(currentUserId && currentUserId === userId);
-  const isMainOwner = currentUserEmail === "taufiqrusdhi.ez@gmail.com";
+  const isMainOwner = isOwner && settings.branchCode !== "CABANG_2";
 
   // Manage User Access States
   const [usersList, setUsersList] = useState<{ id: string; name: string; email: string; isApproved: boolean; createdAt: string }[]>([]);

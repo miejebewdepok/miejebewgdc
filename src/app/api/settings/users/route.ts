@@ -8,10 +8,34 @@ export async function GET(request: NextRequest) {
   try {
     const { session } = await getRequestUser();
     const currentUserId = session?.user?.id;
-    const currentUserEmail = session?.user?.email;
 
-    if (!currentUserId || currentUserEmail !== "taufiqrusdhi.ez@gmail.com") {
+    if (!currentUserId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check if the current user is a store owner of Cabang 1
+    const profileRes = await pool.query(
+      `SELECT business_notes FROM store_profiles WHERE user_id = $1`,
+      [currentUserId]
+    );
+
+    if ((profileRes.rowCount ?? 0) === 0) {
+      return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+    }
+
+    const notes = profileRes.rows[0].business_notes;
+    let isCabang2 = false;
+    try {
+      if (notes && notes.startsWith("{")) {
+        const extra = JSON.parse(notes);
+        if (extra.branchCode === "CABANG_2") {
+          isCabang2 = true;
+        }
+      }
+    } catch (e) {}
+
+    if (isCabang2) {
+      return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 
     // Query all users to manage access
@@ -30,10 +54,34 @@ export async function PUT(request: NextRequest) {
   try {
     const { session } = await getRequestUser();
     const currentUserId = session?.user?.id;
-    const currentUserEmail = session?.user?.email;
 
-    if (!currentUserId || currentUserEmail !== "taufiqrusdhi.ez@gmail.com") {
+    if (!currentUserId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check if the current user is a store owner of Cabang 1
+    const profileRes = await pool.query(
+      `SELECT business_notes FROM store_profiles WHERE user_id = $1`,
+      [currentUserId]
+    );
+
+    if ((profileRes.rowCount ?? 0) === 0) {
+      return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+    }
+
+    const notes = profileRes.rows[0].business_notes;
+    let isCabang2 = false;
+    try {
+      if (notes && notes.startsWith("{")) {
+        const extra = JSON.parse(notes);
+        if (extra.branchCode === "CABANG_2") {
+          isCabang2 = true;
+        }
+      }
+    } catch (e) {}
+
+    if (isCabang2) {
+      return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 
     const body = await request.json();

@@ -1098,7 +1098,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                   <Smartphone className="w-8 h-8 text-slate-450 dark:text-slate-600 mx-auto mb-2" />
                   <span className="text-xs font-bold text-slate-400 block">Belum Ada Klaim Promo</span>
                   <p className="text-[10px] text-slate-555 dark:text-slate-500 mt-1 max-w-[250px] mx-auto leading-relaxed">
-                    Kontak WhatsApp & Email pelanggan yang mengklaim {userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5" ? "Es Teh Tawar" : "Jasmine Tea"} gratis saat self-order akan otomatis muncul di sini.
+                    Kontak WhatsApp & Email pelanggan yang mengklaim {settings.branchCode === "CABANG_2" ? "Es Teh Tawar" : "Jasmine Tea"} gratis saat self-order akan otomatis muncul di sini.
                   </p>
                 </div>
               ) : (
@@ -1611,7 +1611,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                   </span>
 
                   <div className="flex flex-col gap-3.5 max-h-[300px] overflow-y-auto pr-1 no-scrollbar">
-                    {(userId === "rWTVcmMLeOWLWyHDJnNNLEwrlYs26fc5" ? [
+                    {(isCabang2 ? [
                       { label: "Level 4 Pedas (+Rp 2.000)", key: "level_4", def: 1200, type: "spicy" },
                       { label: "Level 5 Pedas (+Rp 2.000)", key: "level_5", def: 1200, type: "spicy" },
                     ] : [

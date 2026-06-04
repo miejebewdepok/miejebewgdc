@@ -10,7 +10,7 @@ export function InventarisView() {
   const { data: session } = useSession();
   const userEmail = session?.user?.email;
 
-  if (settings.branchCode !== "CABANG_2") {
+  if (settings.branchCode === "CABANG_2") {
     return (
       <div className="w-full h-full flex items-center justify-center p-8 bg-slate-900/10 dark:bg-slate-950/20">
         <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 p-8 rounded-[32px] shadow-xl text-center flex flex-col items-center gap-4">

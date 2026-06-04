@@ -289,6 +289,7 @@ function normalizeSettings(settings: Settings): Settings {
     tableCount: settings.tableCount ?? 10,
     toppingsHpp: settings.toppingsHpp ?? {},
     spicyHpp: settings.spicyHpp ?? {},
+    branchCode: settings.branchCode ?? "CABANG_1",
   };
 
   return {

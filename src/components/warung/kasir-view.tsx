@@ -158,7 +158,7 @@ export function KasirView() {
 
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (userEmail === "miejebew.depok@gmail.com" && !parsed.includes("Mie Pedas")) {
+        if (settings.branchCode === "CABANG_2" && !parsed.includes("Mie Pedas")) {
           setLocalCategories(defaultCategories);
           localStorage.setItem(storageKey, JSON.stringify(defaultCategories));
         } else {
@@ -700,7 +700,7 @@ export function KasirView() {
             )}
 
             {/* Spicy Levels */}
-            {!(userEmail === "miejebew.depok@gmail.com"
+            {!(settings.branchCode === "CABANG_2"
                ? (customizingProduct.category === "Tea Series" || customizingProduct.category === "Delight Series" || customizingProduct.category?.toLowerCase() === "chocolatte")
                : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(customizingProduct.category)
              ) && (
@@ -895,7 +895,7 @@ export function KasirView() {
             )}
 
             {/* Toppings Selection Accordion Header */}
-             {!(userEmail === "miejebew.depok@gmail.com"
+             {!(settings.branchCode === "CABANG_2"
                ? (customizingProduct.category === "Tea Series" || customizingProduct.category === "Delight Series" || customizingProduct.category?.toLowerCase() === "chocolatte")
                : ['Kebab', 'Lumpia Beef', 'Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(customizingProduct.category)
              ) && (
@@ -1168,7 +1168,7 @@ export function KasirView() {
                       filling: selectedFilling, 
                       size: selectedSize 
                     },
-                    settings.branchCode === "CABANG_2" || userEmail === "miejebew.depok@gmail.com" ? "CABANG_2" : "CABANG_1"
+                    settings.branchCode === "CABANG_2" ? "CABANG_2" : "CABANG_1"
                   ).toLocaleString('id-ID')}                </span>
               </div>
             </div>

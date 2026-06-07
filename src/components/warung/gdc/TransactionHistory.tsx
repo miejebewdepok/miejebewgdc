@@ -241,7 +241,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
       if (typeof window !== "undefined" && (window as any).Capacitor?.isNativePlatform?.()) {
         window.open(url, '_system');
       } else {
-        window.location.href = url;
+        window.open(url, '_blank');
       }
     } catch (err) {
       alert("Gagal memformat struk untuk RawBT: " + err);

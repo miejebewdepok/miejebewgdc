@@ -36,6 +36,7 @@ function createAuthPool() {
     connectionString: connStr,
     max: 1, // Separate pool for Better Auth queries to avoid Vercel serverless connection contention
     idleTimeoutMillis: 1000,
+    ssl: { rejectUnauthorized: false }, // Supabase sometimes presents a self-signed intermediate in the TLS chain
   });
 }
 

@@ -39,6 +39,7 @@ function createPool() {
     connectionString: connStr,
     max: 8, // Support up to 8 parallel queries for bootstrap optimization (Supabase Transaction Mode pooler on 6543 allows high limits)
     idleTimeoutMillis: 1000, // Close idle connections after 1s of inactivity to free up slots
+    ssl: { rejectUnauthorized: false }, // Supabase sometimes presents a self-signed intermediate in the TLS chain
   });
 }
 

@@ -224,10 +224,25 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
 
   const handlePrintRawBt = () => {
     try {
+      const isIos = typeof window !== "undefined" && (
+        /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+      );
+      
+      if (isIos) {
+        alert("Pencetakan RawBT hanya didukung di perangkat Android. Untuk iPad/iPhone, silakan gunakan tombol 'CETAK (PC)'.");
+        return;
+      }
+
       const text = generateRawBtReceiptText();
       const base64 = btoa(unescape(encodeURIComponent(text)));
       const url = `rawbt:base64,${base64}`;
-      window.location.href = url;
+      
+      if (typeof window !== "undefined" && (window as any).Capacitor?.isNativePlatform?.()) {
+        window.open(url, '_system');
+      } else {
+        window.location.href = url;
+      }
     } catch (err) {
       alert("Gagal memformat struk untuk RawBT: " + err);
     }

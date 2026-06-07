@@ -1,6 +1,31 @@
 import { betterAuth } from "better-auth";
 import { createAuthMiddleware, APIError } from "better-auth/api";
-import { pool } from "@/db/client";
+import { Pool } from "pg";
+
+const globalForAuth = globalThis as typeof globalThis & {
+  __betterAuthPool?: Pool;
+};
+
+function createAuthPool() {
+  let connStr =
+    process.env.BETTER_AUTH_DB_URL ??
+    process.env.DATABASE_URL ??
+    process.env.POSTGRES_URL ??
+    "postgresql://postgres:postgres@127.0.0.1:5432/warungos";
+
+  if (connStr.includes("pooler.supabase.com:5432")) {
+    connStr = connStr.replace("pooler.supabase.com:5432", "pooler.supabase.com:6543");
+  }
+
+  return new Pool({
+    connectionString: connStr,
+    max: 1, // Separate pool for Better Auth queries to avoid Vercel serverless connection contention
+    idleTimeoutMillis: 1000,
+  });
+}
+
+export const authPool = globalForAuth.__betterAuthPool ?? createAuthPool();
+globalForAuth.__betterAuthPool = authPool;
 
 function toOrigin(value: string) {
   if (value.startsWith("http://") || value.startsWith("https://")) {
@@ -72,7 +97,7 @@ function resolveAuthBaseUrl() {
 }
 
 export const auth = betterAuth({
-  database: pool,
+  database: authPool,
   secret:
     process.env.BETTER_AUTH_SECRET ??
     "warungos-dev-secret-please-change-this-in-production",
@@ -98,7 +123,7 @@ export const auth = betterAuth({
         const email = ctx.body?.email;
         if (email) {
           try {
-            const res = await pool.query(
+            const res = await authPool.query(
               'SELECT "isApproved" FROM "user" WHERE email = $1 LIMIT 1',
               [email.toLowerCase().trim()]
             );

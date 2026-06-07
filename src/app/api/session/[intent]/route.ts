@@ -114,6 +114,10 @@ export async function POST(
       | null;
 
     if (!authResponse.ok) {
+      console.error("Auth response not OK:", {
+        status: authResponse.status,
+        result: authResult,
+      });
       return returnError(
         config.mode,
         authResult?.message ?? config.defaultError
@@ -137,8 +141,9 @@ export async function POST(
     const response = NextResponse.json({ success: true, redirect: redirectTarget });
     appendSetCookieHeaders(authResponse, response);
     return response;
-  } catch {
-    return returnError(config.mode, config.defaultError);
+  } catch (error: any) {
+    console.error("Auth intent route catch error:", error);
+    return returnError(config.mode, error?.message ? `Error: ${error.message}` : config.defaultError);
   }
 }
 

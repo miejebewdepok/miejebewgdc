@@ -187,6 +187,12 @@ async function ensureWorkspace(userId: string, session?: SessionHint) {
 }
 
 export async function ensureAppReady() {
+  // Disable raw DDL schema bootstrap queries in production/Vercel serverless to eliminate cold start delays.
+  // The database schema is fully managed via Drizzle migrations (drizzle/ folder).
+  if (process.env.NODE_ENV === "production" || process.env.VERCEL === "1") {
+    return;
+  }
+
   if (!initializationPromise) {
     initializationPromise = ensureTables();
   }

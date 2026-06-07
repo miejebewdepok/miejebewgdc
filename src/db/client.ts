@@ -8,9 +8,24 @@ const globalForDatabase = globalThis as typeof globalThis & {
 
 function createPool() {
   let connStr =
-    process.env.DATABASE_URL ??
-    process.env.POSTGRES_URL ??
-    "postgresql://postgres:postgres@127.0.0.1:5432/warungos";
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    "";
+
+  // Validate the connection string format; if invalid or empty, fall back
+  if (!connStr.startsWith("postgres://") && !connStr.startsWith("postgresql://")) {
+    console.warn("DATABASE_URL is empty or invalid, falling back to POSTGRES_URL...");
+    connStr = process.env.POSTGRES_URL || "";
+  }
+
+  if (!connStr.startsWith("postgres://") && !connStr.startsWith("postgresql://")) {
+    console.warn("POSTGRES_URL is empty or invalid, falling back to local...");
+    connStr = "postgresql://postgres:postgres@127.0.0.1:5432/warungos";
+  }
+
+  // Mask sensitive credentials for logging
+  const maskedConn = connStr.replace(/:[^:@]+@/, ":***@");
+  console.log("Resolved main database connection string:", maskedConn);
 
   // Self-healing database connection adapter for Supabase pooler.
   // Session mode (port 5432) strictly limits total clients to 15, causing serverless Vercel

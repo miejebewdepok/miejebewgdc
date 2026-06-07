@@ -8,10 +8,25 @@ const globalForAuth = globalThis as typeof globalThis & {
 
 function createAuthPool() {
   let connStr =
-    process.env.BETTER_AUTH_DB_URL ??
-    process.env.DATABASE_URL ??
-    process.env.POSTGRES_URL ??
-    "postgresql://postgres:postgres@127.0.0.1:5432/warungos";
+    process.env.BETTER_AUTH_DB_URL ||
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    "";
+
+  // Validate the connection string format; if invalid or empty, fall back
+  if (!connStr.startsWith("postgres://") && !connStr.startsWith("postgresql://")) {
+    console.warn("BETTER_AUTH_DB_URL is empty or invalid, falling back to DATABASE_URL...");
+    connStr = process.env.DATABASE_URL || process.env.POSTGRES_URL || "";
+  }
+
+  if (!connStr.startsWith("postgres://") && !connStr.startsWith("postgresql://")) {
+    console.warn("DATABASE_URL is empty or invalid, falling back to local...");
+    connStr = "postgresql://postgres:postgres@127.0.0.1:5432/warungos";
+  }
+
+  // Mask sensitive credentials for logging
+  const maskedConn = connStr.replace(/:[^:@]+@/, ":***@");
+  console.log("Resolved authPool connection string:", maskedConn);
 
   if (connStr.includes("pooler.supabase.com:5432")) {
     connStr = connStr.replace("pooler.supabase.com:5432", "pooler.supabase.com:6543");

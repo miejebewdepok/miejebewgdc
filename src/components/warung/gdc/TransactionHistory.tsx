@@ -515,7 +515,14 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
               <div className="mt-4">
                 <button
                   type="button"
-                  onClick={() => { try { window.print(); } catch(e) {} }}
+                  onClick={() => {
+                    const isCapacitor = typeof window !== "undefined" && (window as any).Capacitor?.isNativePlatform?.();
+                    if (isCapacitor) {
+                      alert("Pencetakan langsung tidak didukung di aplikasi APK. Silakan buka aplikasi kasir melalui Google Chrome di HP/Tablet/Laptop untuk mencetak struk.");
+                    } else {
+                      try { window.print(); } catch(e) {}
+                    }
+                  }}
                   className="w-full bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-foreground dark:text-white rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Printer className="w-4 h-4 text-red-500" /> CETAK STRUK

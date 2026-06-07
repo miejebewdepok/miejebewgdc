@@ -558,7 +558,12 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
 
   // Print Summary PDF handler
   const printReport = () => {
-    window.print();
+    const isCapacitor = typeof window !== "undefined" && (window as any).Capacitor?.isNativePlatform?.();
+    if (isCapacitor) {
+      alert("Pencetakan laporan tidak didukung langsung di aplikasi APK. Silakan buka aplikasi kasir melalui Google Chrome di HP/Tablet/Laptop untuk mencetak laporan.");
+    } else {
+      try { window.print(); } catch(e) {}
+    }
   };
 
   return (

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Settings } from '@/lib/types';
 import { useAppState } from '@/components/providers/app-state-provider';
 import { useSession } from '@/lib/auth-client';
+import { isMobileOrWebView } from '@/lib/utils';
 import { speakQrisNotification } from './CheckoutModal';
 import { 
   QrCode, 
@@ -523,6 +524,10 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
   };
 
   const handleDownloadPdf = () => {
+    if (isMobileOrWebView()) {
+      alert("Pencetakan laporan PDF tidak didukung di HP/Tablet/APK. Silakan buka aplikasi kasir melalui Google Chrome di Laptop/PC untuk mengunduh laporan PDF.");
+      return;
+    }
     if (promoClaims.length === 0) {
       alert("Database kosong, tidak ada data untuk dicetak.");
       return;
@@ -1832,6 +1837,10 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
               <button
                 type="button"
                 onClick={() => {
+                  if (isMobileOrWebView()) {
+                    alert("Cetak slip QR meja tidak didukung langsung di HP/Tablet/APK. Silakan buka aplikasi kasir melalui Google Chrome di Laptop/PC untuk mencetak slip QR.");
+                    return;
+                  }
                   const tableNum = selectedQrTable.replace(/^(meja|order|self-order)[\s\-_]*/i, "");
                   const tableUrl = isCabang2 ? `${origin}/o/c2-${selectedQrTable}` : `${origin}/o/${selectedQrTable}`;
                   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(tableUrl)}`;

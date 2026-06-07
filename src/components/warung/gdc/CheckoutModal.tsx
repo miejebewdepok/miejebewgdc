@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { CartItem, Transaction, Settings } from '@/lib/types';
 import { X, CreditCard, Banknote, QrCode, FileText, Printer, CheckCircle, Loader2 } from 'lucide-react';
+import { isMobileOrWebView } from '@/lib/utils';
 
 export const angkaterbilang = (nilai: number): string => {
   const bilangan = [
@@ -537,9 +538,8 @@ export default function CheckoutModal({
                 )}
                 <div className="border-t border-black/10 dark:border-white/5 pt-4 flex flex-col gap-3 max-w-sm mx-auto w-full">
                     <button type="button" onClick={() => {
-                      const isCapacitor = typeof window !== "undefined" && (window as any).Capacitor?.isNativePlatform?.();
-                      if (isCapacitor) {
-                        alert("Pencetakan langsung tidak didukung di aplikasi APK. Silakan buka aplikasi kasir melalui Google Chrome di HP/Tablet/Laptop untuk mencetak struk.");
+                      if (isMobileOrWebView()) {
+                        alert("Pencetakan langsung tidak didukung di HP/Tablet/APK. Silakan buka aplikasi kasir melalui Google Chrome di Laptop/PC untuk mencetak struk.");
                       } else {
                         try { window.print(); } catch(e) {}
                       }

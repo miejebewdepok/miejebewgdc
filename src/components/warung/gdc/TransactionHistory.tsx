@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Transaction } from '@/lib/types';
 import { Search, Calendar, DollarSign, FileText, ShoppingBag, ArrowRight, Printer, FlameIcon, X, Trash2, Edit2, Save, Loader2 } from 'lucide-react';
 import { useAppState } from '@/components/providers/app-state-provider';
+import { isMobileOrWebView } from '@/lib/utils';
 
 interface TransactionHistoryProps {
   transactions: Transaction[];
@@ -516,9 +517,8 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                 <button
                   type="button"
                   onClick={() => {
-                    const isCapacitor = typeof window !== "undefined" && (window as any).Capacitor?.isNativePlatform?.();
-                    if (isCapacitor) {
-                      alert("Pencetakan langsung tidak didukung di aplikasi APK. Silakan buka aplikasi kasir melalui Google Chrome di HP/Tablet/Laptop untuk mencetak struk.");
+                    if (isMobileOrWebView()) {
+                      alert("Pencetakan langsung tidak didukung di HP/Tablet/APK. Silakan buka aplikasi kasir melalui Google Chrome di Laptop/PC untuk mencetak struk.");
                     } else {
                       try { window.print(); } catch(e) {}
                     }

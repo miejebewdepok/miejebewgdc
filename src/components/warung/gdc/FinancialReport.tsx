@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Transaction, Expense } from '@/lib/types';
 import { useAppState } from '@/components/providers/app-state-provider';
+import { isMobileOrWebView } from '@/lib/utils';
 import { useSession } from '@/lib/auth-client';
 import { 
   TrendingUp, 
@@ -558,9 +559,8 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
 
   // Print Summary PDF handler
   const printReport = () => {
-    const isCapacitor = typeof window !== "undefined" && (window as any).Capacitor?.isNativePlatform?.();
-    if (isCapacitor) {
-      alert("Pencetakan laporan tidak didukung langsung di aplikasi APK. Silakan buka aplikasi kasir melalui Google Chrome di HP/Tablet/Laptop untuk mencetak laporan.");
+    if (isMobileOrWebView()) {
+      alert("Pencetakan laporan tidak didukung di HP/Tablet/APK. Silakan buka aplikasi kasir melalui Google Chrome di Laptop/PC untuk mencetak laporan.");
     } else {
       try { window.print(); } catch(e) {}
     }

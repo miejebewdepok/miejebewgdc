@@ -228,112 +228,6 @@ export default function CheckoutModal({
   const formatRupiah = (val: number) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
 
-  const generateRawBtReceiptText = () => {
-    const is80 = settings.printerPaperSize === '80mm';
-    const width = is80 ? 48 : 32;
-    
-    const center = (text: string) => {
-      if (text.length >= width) return text.substring(0, width);
-      const pad = Math.floor((width - text.length) / 2);
-      return ' '.repeat(pad) + text;
-    };
-
-    const justify = (left: string, right: string) => {
-      const spaceNeeded = width - left.length - right.length;
-      if (spaceNeeded <= 0) {
-        return left + ' ' + right;
-      }
-      return left + ' '.repeat(spaceNeeded) + right;
-    };
-
-    let lines: string[] = [];
-    
-    // Header
-    lines.push(center(settings.merchantName || "MIE JEBEW GDC"));
-    if (settings.merchantAddress) {
-      lines.push(center(settings.merchantAddress));
-    }
-    if (settings.merchantPhone) {
-      lines.push(center(`Telp/WA: ${settings.merchantPhone}`));
-    }
-    lines.push('-'.repeat(width));
-
-    // Metadata
-    lines.push(justify("Invoice:", activeInvoiceNo));
-    lines.push(justify("Tanggal:", new Date().toLocaleDateString('id-ID')));
-    lines.push(justify("Kasir:", settings.userProfileName || settings.ownerName || 'Kasir'));
-    
-    const cleanCustName = (activeCustomerName || 'Umum').replace(/\bmeja\b/gi, 'Order').replace(/\bself\s*order\b/gi, 'Order');
-    lines.push(justify("Pelanggan:", cleanCustName));
-    lines.push(justify("Metode:", activePaymentMethod.toUpperCase()));
-    lines.push('='.repeat(width));
-
-    // Items
-    lines.push(justify("Item", "Total"));
-    lines.push('-'.repeat(width));
-    
-    activeCartItems.forEach((item) => {
-      const name = item.productName || item.product?.name || 'Menu';
-      lines.push(name);
-      
-      if (item.notes) {
-        item.notes.split('\n').map((n: string) => n.trim()).filter(Boolean).forEach((note: string) => {
-          lines.push(`  » ${note.toUpperCase()}`);
-        });
-      }
-
-      const qtyPrice = `${item.quantity} x ${item.sellPrice.toLocaleString('id-ID')}`;
-      const totalVal = (item.sellPrice * item.quantity).toLocaleString('id-ID');
-      lines.push(justify(`  ${qtyPrice}`, totalVal));
-    });
-
-    lines.push('-'.repeat(width));
-
-    // Totals
-    lines.push(justify("Subtotal:", `Rp ${activeSubtotal.toLocaleString('id-ID')}`));
-    if (settings.enableServiceCharge) {
-      lines.push(justify(`Layanan (${settings.serviceChargeRate}%):`, `Rp ${activeServiceCharge.toLocaleString('id-ID')}`));
-    }
-    lines.push(justify("TOTAL AKHIR:", `Rp ${activeTotal.toLocaleString('id-ID')}`));
-    lines.push(justify("Bayar:", `Rp ${activeAmountPaid ? activeAmountPaid.toLocaleString('id-ID') : activeTotal.toLocaleString('id-ID')}`));
-    lines.push(justify("Kembalian:", `Rp ${activePaymentMethod === 'Tunai' ? activeChange.toLocaleString('id-ID') : '0'}`));
-    lines.push('-'.repeat(width));
-
-    // Footer
-    if (settings.receiptHeader) lines.push(center(settings.receiptHeader));
-    if (settings.receiptFooter) lines.push(center(settings.receiptFooter));
-    lines.push(center(`*** LAYANAN WA: ${settings.merchantPhone || ''} ***`));
-    
-    lines.push("\n\n\n\n");
-
-    return lines.join("\n");
-  };
-
-  const handlePrintRawBt = () => {
-    try {
-      const isIos = typeof window !== "undefined" && (
-        /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-      );
-      
-      if (isIos) {
-        alert("Pencetakan RawBT hanya didukung di perangkat Android. Untuk iPad/iPhone, silakan gunakan tombol 'CETAK (PC)'.");
-        return;
-      }
-
-      const text = generateRawBtReceiptText();
-      const base64 = btoa(unescape(encodeURIComponent(text)));
-      const url = `rawbt:base64,${base64}`;
-      
-      if (typeof window !== "undefined" && (window as any).Capacitor?.isNativePlatform?.()) {
-        window.open(url, '_system');
-      } else {
-        window.open(url, '_blank');
-      }
-    } catch (err) {
-      alert("Gagal memformat struk untuk RawBT: " + err);
-    }
-  };
 
   const handlePresetClick = (amount: number) => {
     setAmountPaid(amount);
@@ -642,16 +536,10 @@ export default function CheckoutModal({
                   </div>
                 )}
                 <div className="border-t border-black/10 dark:border-white/5 pt-4 flex flex-col gap-3 max-w-sm mx-auto w-full">
-                  <div className="grid grid-cols-2 gap-2">
                     <button type="button" onClick={() => { try { window.print(); } catch(e) {} }}
-                      className="bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-foreground dark:text-white rounded-xl py-3 text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                      <Printer className="w-4 h-4 text-red-500" /> CETAK (PC)
+                      className="w-full bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-foreground dark:text-white rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer">
+                      <Printer className="w-4 h-4 text-red-500" /> CETAK STRUK
                     </button>
-                    <button type="button" onClick={handlePrintRawBt}
-                      className="bg-indigo-650 hover:bg-indigo-700 text-white rounded-xl py-3 text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-indigo-650/20">
-                      <Printer className="w-4 h-4 text-white" /> CETAK (RAWBT)
-                    </button>
-                  </div>
                   <button type="button" onClick={onClose}
                     className="w-full bg-red-600 hover:bg-red-700 text-white rounded-xl py-3.5 text-xs font-bold cursor-pointer">
                     MASUKKAN NOTA BARU

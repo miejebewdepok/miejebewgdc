@@ -22,7 +22,7 @@ function createPool() {
 
   return new Pool({
     connectionString: connStr,
-    max: 1, // Share 1 connection per serverless function to prevent database exhaustion
+    max: 8, // Support up to 8 parallel queries for bootstrap optimization (Supabase Transaction Mode pooler on 6543 allows high limits)
     idleTimeoutMillis: 1000, // Close idle connections after 1s of inactivity to free up slots
   });
 }

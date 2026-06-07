@@ -313,68 +313,84 @@ function normalizeSettings(settings: Settings): Settings {
 export async function getBootstrapState(userId: string): Promise<AppState> {
   await ensureAppReady();
 
-  const [profile] = await db
-    .select()
-    .from(storeProfiles)
-    .where(eq(storeProfiles.userId, userId))
-    .limit(1);
-
-  if (!profile) {
-    throw new Error("Profil warung tidak ditemukan.");
-  }
-
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - 45);
   const cutoffIso = cutoffDate.toISOString();
 
-  const productRows = await db
-    .select()
-    .from(products)
-    .where(eq(products.userId, userId))
-    .orderBy(desc(products.createdAt));
-
-  const transactionRows = await db
-    .select()
-    .from(transactions)
-    .where(
-      and(
-        eq(transactions.userId, userId),
-        gte(transactions.createdAt, cutoffIso)
+  // Execute all queries in parallel to eliminate network latency/database roundtrips sequentially
+  const [
+    profileRows,
+    productRows,
+    transactionRows,
+    itemRows,
+    debtRows,
+    expenseRows,
+    savedBillRows,
+  ] = await Promise.all([
+    db
+      .select()
+      .from(storeProfiles)
+      .where(eq(storeProfiles.userId, userId))
+      .limit(1),
+    db
+      .select()
+      .from(products)
+      .where(eq(products.userId, userId))
+      .orderBy(desc(products.createdAt)),
+    db
+      .select()
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.userId, userId),
+          gte(transactions.createdAt, cutoffIso)
+        )
       )
-    )
-    .orderBy(desc(transactions.createdAt));
-
-  const transactionIds = transactionRows.map((transaction) => transaction.id);
-  const itemRows =
-    transactionIds.length > 0
-      ? await db
-          .select()
-          .from(transactionItems)
-          .where(inArray(transactionItems.transactionId, transactionIds))
-      : [];
-
-  const debtRows = await db
-    .select()
-    .from(debts)
-    .where(eq(debts.userId, userId))
-    .orderBy(desc(debts.createdAt));
-
-  const expenseRows = await db
-    .select()
-    .from(expenses)
-    .where(
-      and(
-        eq(expenses.userId, userId),
-        gte(expenses.createdAt, cutoffIso)
+      .orderBy(desc(transactions.createdAt)),
+    db
+      .select({
+        id: transactionItems.id,
+        transactionId: transactionItems.transactionId,
+        productId: transactionItems.productId,
+        productName: transactionItems.productName,
+        quantity: transactionItems.quantity,
+        unitPrice: transactionItems.unitPrice,
+        costPrice: transactionItems.costPrice,
+      })
+      .from(transactionItems)
+      .innerJoin(transactions, eq(transactionItems.transactionId, transactions.id))
+      .where(
+        and(
+          eq(transactions.userId, userId),
+          gte(transactions.createdAt, cutoffIso)
+        )
+      ),
+    db
+      .select()
+      .from(debts)
+      .where(eq(debts.userId, userId))
+      .orderBy(desc(debts.createdAt)),
+    db
+      .select()
+      .from(expenses)
+      .where(
+        and(
+          eq(expenses.userId, userId),
+          gte(expenses.createdAt, cutoffIso)
+        )
       )
-    )
-    .orderBy(desc(expenses.createdAt));
+      .orderBy(desc(expenses.createdAt)),
+    db
+      .select()
+      .from(savedBills)
+      .where(eq(savedBills.userId, userId))
+      .orderBy(desc(savedBills.createdAt)),
+  ]);
 
-  const savedBillRows = await db
-    .select()
-    .from(savedBills)
-    .where(eq(savedBills.userId, userId))
-    .orderBy(desc(savedBills.createdAt));
+  const profile = profileRows[0];
+  if (!profile) {
+    throw new Error("Profil warung tidak ditemukan.");
+  }
 
   const productCategoryMap = new Map<string, string>();
   for (const product of productRows) {

@@ -212,8 +212,12 @@ export default function CheckoutModal({
   if (!isOpen) return null;
 
   const activeTotal = isCompleted && createdTransaction ? createdTransaction.total : total;
-  const activeSubtotal = isCompleted && createdTransaction ? createdTransaction.subtotal : subtotal;
-  const activeServiceCharge = isCompleted && createdTransaction ? createdTransaction.tax : serviceCharge;
+  const activeSubtotal = isCompleted && createdTransaction 
+    ? (createdTransaction.subtotal ?? createdTransaction.items.reduce((sum, item) => sum + (item.sellPrice || item.unitPrice || 0) * item.quantity, 0)) 
+    : subtotal;
+  const activeServiceCharge = isCompleted && createdTransaction 
+    ? (createdTransaction.tax ?? Math.max(0, createdTransaction.total - activeSubtotal)) 
+    : serviceCharge;
   const activeAmountPaid = isCompleted && createdTransaction ? (createdTransaction.amountPaid || 0) : amountPaid;
   const activeChange = isCompleted && createdTransaction ? (createdTransaction.change || 0) : (amountPaid >= total ? amountPaid - total : 0);
   const activeCartItems = isCompleted && createdTransaction ? createdTransaction.items : cartItems;
@@ -321,7 +325,7 @@ export default function CheckoutModal({
                     ))}
                   </td>
                   <td className="text-center py-1 text-slate-800 font-bold">{item.quantity}</td>
-                  <td className="text-right py-1 font-bold text-slate-800">{(item.sellPrice * item.quantity).toLocaleString('id-ID')}</td>
+                  <td className="text-right py-1 font-bold text-slate-800">{((item.sellPrice || item.unitPrice || 0) * item.quantity).toLocaleString('id-ID')}</td>
                 </tr>
               ))}
             </tbody>

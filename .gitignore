@@ -45,10 +45,6 @@ next-env.d.ts
 /scratch
 
 # db backups (sensitive production data)
-/src/db/backup/
-
-# junk files
-nul
-
 backups/
 *.sql
+!drizzle/*.sql

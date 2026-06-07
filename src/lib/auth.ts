@@ -46,13 +46,15 @@ function getTrustedAuthOrigins(request?: Request) {
 }
 
 function resolveAuthBaseUrl() {
-  if (process.env.BETTER_AUTH_URL) {
-    return process.env.BETTER_AUTH_URL;
+  const envUrl = process.env.BETTER_AUTH_URL;
+  const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV === "production";
+  if (envUrl && !(isVercel && (envUrl.includes("localhost") || envUrl.includes("127.0.0.1")))) {
+    return envUrl;
   }
 
   // If running in production (e.g. on Vercel), force base URL to use the custom domain
   // to prevent it from resolving to the localhost value defined in the repo's .env file.
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === "production" || isVercel) {
     return "https://miejebew.my.id";
   }
 

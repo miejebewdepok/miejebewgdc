@@ -7,6 +7,7 @@ import { emptyAppState } from "@/lib/empty-state";
 import { AppState, Debt, DebtDraft, PaymentMethod, Product, ProductDraft, SavedBill, Settings, Transaction } from "@/lib/types";
 import { calculateItemUnitPrice } from "@/lib/pricing";
 import { showLocalNotification } from "@/lib/capacitor/notifications";
+import { toast } from "sonner";
 
 type CartLine = {
   id: string;
@@ -464,9 +465,9 @@ export function AppStateProvider({
         setState((current) => ({
           ...response.appState,
           cart: current.cart,
-          paymentMethod: response.appState.settings.enabledPayments.includes(current.paymentMethod)
+          paymentMethod: (response.appState.settings.enabledPayments || []).includes(current.paymentMethod)
             ? current.paymentMethod
-            : response.appState.paymentMethod,
+            : (response.appState.paymentMethod || "Tunai"),
         }));
       })
       .catch((error) => {
@@ -477,6 +478,9 @@ export function AppStateProvider({
         if (error instanceof Error && error.message === "UNAUTHORIZED") {
           setState(emptyAppState);
           router.replace("/auth");
+        } else {
+          console.error("Bootstrap error:", error);
+          toast.error("Gagal sinkronisasi data dengan server: " + (error instanceof Error ? error.message : String(error)));
         }
       });
 

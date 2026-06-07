@@ -21,14 +21,21 @@ const AUTH_INTENTS = {
 type Intent = keyof typeof AUTH_INTENTS;
 
 function getBaseUrl(request: NextRequest) {
-  if (process.env.BETTER_AUTH_URL) {
-    return process.env.BETTER_AUTH_URL;
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "";
+  const isCapacitor = host.includes("localhost") || host.includes("127.0.0.1") || !host;
+
+  if (isCapacitor) {
+    const envUrl = process.env.BETTER_AUTH_URL;
+    const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV === "production";
+    if (envUrl && !(isVercel && (envUrl.includes("localhost") || envUrl.includes("127.0.0.1")))) {
+      return envUrl;
+    }
+
+    if (process.env.NODE_ENV === "production" || isVercel) {
+      return "https://miejebew.my.id";
+    }
   }
 
-  if (process.env.NODE_ENV === "production") {
-    return "https://miejebew.my.id";
-  }
-  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
   const protocol = request.headers.get("x-forwarded-proto") ?? "https";
   if (host) {
     return `${protocol}://${host}`;
@@ -118,7 +125,15 @@ export async function POST(
       return NextResponse.json({ success: true, message: successMsg, mode: "signin" });
     }
 
-    const redirectTarget = authResult?.url ?? callbackURL;
+    let redirectTarget = authResult?.url ?? callbackURL;
+    if (redirectTarget.startsWith("http://") || redirectTarget.startsWith("https://")) {
+      try {
+        const parsedUrl = new URL(redirectTarget);
+        redirectTarget = parsedUrl.pathname + parsedUrl.search;
+      } catch (e) {
+        redirectTarget = callbackURL;
+      }
+    }
     const response = NextResponse.json({ success: true, redirect: redirectTarget });
     appendSetCookieHeaders(authResponse, response);
     return response;

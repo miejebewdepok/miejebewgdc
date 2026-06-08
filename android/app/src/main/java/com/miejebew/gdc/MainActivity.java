@@ -21,4 +21,15 @@ public class MainActivity extends BridgeActivity {
             settings.setMediaPlaybackRequiresUserGesture(false);
         }
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Paksa WebView untuk menulis cookie dari RAM ke disk saat aplikasi beralih ke background/ditutup
+        try {
+            android.webkit.CookieManager.getInstance().flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

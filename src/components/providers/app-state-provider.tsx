@@ -48,6 +48,7 @@ type AppStateContextValue = AppState & {
   deleteBill: (id: string) => void;
   addExpense: (draft: { title: string; amount: number; category: string }) => Promise<void>;
   deleteExpense: (expenseId: string) => Promise<void>;
+  bootstrapReady: boolean;
 };
 
 const AppStateContext = createContext<AppStateContextValue | null>(null);
@@ -85,8 +86,34 @@ export function AppStateProvider({
   const router = useRouter();
   const pathname = usePathname();
   const [state, setState] = useState<AppState>(emptyAppState);
+  const [bootstrapReady, setBootstrapReady] = useState(false);
   const { data: session, isPending } = useSession();
   const sessionUserId = session?.user?.id ?? null;
+
+  // Hydrate lightweight cached settings from local storage so the first paint isn't empty
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const savedStoreName = localStorage.getItem('last_logged_in_store_name');
+      const savedLogo = localStorage.getItem('last_logged_in_store_logo');
+      const savedOwner = localStorage.getItem('last_logged_in_owner_name');
+      const savedPayment = localStorage.getItem('last_logged_in_payment_method');
+      setState((current) => ({
+        ...current,
+        settings: {
+          ...current.settings,
+          storeName: current.settings.storeName || savedStoreName || '',
+          merchantName: savedStoreName || current.settings.merchantName || '',
+          userProfileImage: savedLogo || current.settings.userProfileImage || '',
+          ownerName: savedOwner || current.settings.ownerName || '',
+          userProfileName: savedOwner || current.settings.userProfileName || '',
+        },
+        paymentMethod: (savedPayment as PaymentMethod) || current.paymentMethod || 'Tunai',
+      }));
+    } catch {
+      // ignore hydration errors on restricted storage
+    }
+  }, []);
 
   // Global browser audio unlock listener to bypass modern browser autoplay blocks
   useEffect(() => {
@@ -486,6 +513,7 @@ export function AppStateProvider({
             ? current.paymentMethod
             : (response.appState.paymentMethod || "Tunai"),
         }));
+        setBootstrapReady(true);
       })
       .catch((error) => {
         if (!isActive) {
@@ -999,9 +1027,18 @@ export function AppStateProvider({
         deleteBill,
         addExpense,
         deleteExpense,
+        bootstrapReady: bootstrapReady || !sessionUserId,
       }}
     >
-      {children}
+      {typeof window !== "undefined" && !bootstrapReady && sessionUserId ? (
+        <div className="w-full h-screen flex items-center justify-center bg-background text-slate-600">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <span className="text-sm font-semibold tracking-wide uppercase">Memuat data kasir...</span>
+          </div>
+        </div>
+      ) : (
+        children
+      )}
     </AppStateContext.Provider>
   );
 }

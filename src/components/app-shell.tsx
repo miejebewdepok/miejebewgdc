@@ -206,10 +206,10 @@ export function AppShell({
                     <img
                       src={displayLogo}
                       alt="Logo"
-                      className="w-14 h-14 rounded-2xl border border-white/10 object-cover shadow-lg animate-pulse"
+                      className="w-12 h-12 xs:w-14 xs:h-14 rounded-2xl border border-white/10 object-cover shadow-lg animate-[gentle-pulse_2s_ease-in-out_infinite]"
                     />
                   ) : (
-                    <div className="w-14 h-14 rounded-2xl bg-red-600 flex items-center justify-center shadow-lg animate-pulse">
+                    <div className="w-12 h-12 xs:w-14 xs:h-14 rounded-2xl bg-red-600 flex items-center justify-center shadow-lg animate-[gentle-pulse_2s_ease-in-out_infinite]">
                       <Store className="h-7 w-7 text-white" />
                     </div>
                   )}

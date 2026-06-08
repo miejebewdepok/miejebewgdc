@@ -397,3 +397,19 @@ html:not(.dark) {
 .animate-fade-in {
   animation: fade-in 0.2s ease-out forwards;
 }
+
+/* Gentle splash pulse for cold-start logo */
+@keyframes gentle-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(0.97);
+  }
+}
+
+.animate-gentle-pulse {
+  animation: gentle-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

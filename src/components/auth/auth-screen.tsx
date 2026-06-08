@@ -116,7 +116,8 @@ export function AuthScreen() {
       if (!res.ok || !data.success) {
         setErrorState(data.error || "Gagal masuk ke dashboard.");
       } else {
-        router.replace(data.redirect || "/dashboard");
+        // Force a full window refresh to ensure AppStateProvider and useSession reload with new session cookies
+        window.location.replace(data.redirect || "/dashboard");
       }
     } catch (err) {
       setErrorState("Terjadi kesalahan koneksi. Silakan coba lagi.");

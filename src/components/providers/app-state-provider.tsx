@@ -105,7 +105,16 @@ export function AppStateProvider({
             gain.connect(ctx.destination);
             osc.start();
             osc.stop(ctx.currentTime + 0.01);
+            setTimeout(() => {
+              try {
+                if (ctx.state !== 'closed') ctx.close();
+              } catch (err) {}
+            }, 100);
           });
+        } else {
+          try {
+            if (ctx.state !== 'closed') ctx.close();
+          } catch (err) {}
         }
         // Speak a silent empty utterance to pre-unlock the speech synthesis engine
         if ('speechSynthesis' in window) {
@@ -419,12 +428,20 @@ export function AppStateProvider({
                   }
                 };
 
-                // 3. Play the combined K-Pop loop sequence exactly 5 times, spaced 1.8 seconds apart (9 seconds total)
-                for (let i = 0; i < 5; i++) {
-                  const offset = i * 1.8;
-                  playBeatSequence(offset);
-                  speakVoiceOverlay(offset);
-                }
+                // Play the combined K-Pop loop sequence once (1.8 seconds)
+                playBeatSequence(0);
+                speakVoiceOverlay(0);
+
+                // Auto-close AudioContext after 2.5 seconds to prevent memory leaks and max AudioContexts crash
+                setTimeout(() => {
+                  try {
+                    if (ctx.state !== 'closed') {
+                      ctx.close();
+                    }
+                  } catch (closeErr) {
+                    console.error("Error closing AudioContext", closeErr);
+                  }
+                }, 2500);
               } catch (e) {
                 console.error("Upgraded audio engine error", e);
               }

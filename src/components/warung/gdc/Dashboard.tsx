@@ -100,6 +100,11 @@ export default function Dashboard({
       gain.connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + duration);
+      setTimeout(() => {
+        try {
+          if (ctx.state !== 'closed') ctx.close();
+        } catch (err) {}
+      }, (duration * 1000) + 100);
     } catch (e) {
       console.log('Audio error', e);
     }

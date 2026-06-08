@@ -26,7 +26,9 @@ function createAuthPool() {
 
   // Mask sensitive credentials for logging
   const maskedConn = connStr.replace(/:[^:@]+@/, ":***@");
-  console.log("Resolved authPool connection string:", maskedConn);
+  if (process.env.NEXT_PHASE !== "phase-production-build") {
+    console.log("Resolved authPool connection string:", maskedConn);
+  }
 
   if (connStr.includes("pooler.supabase.com:5432")) {
     connStr = connStr.replace("pooler.supabase.com:5432", "pooler.supabase.com:6543");

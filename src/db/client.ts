@@ -25,7 +25,9 @@ function createPool() {
 
   // Mask sensitive credentials for logging
   const maskedConn = connStr.replace(/:[^:@]+@/, ":***@");
-  console.log("Resolved main database connection string:", maskedConn);
+  if (process.env.NEXT_PHASE !== "phase-production-build") {
+    console.log("Resolved main database connection string:", maskedConn);
+  }
 
   // Self-healing database connection adapter for Supabase pooler.
   // Session mode (port 5432) strictly limits total clients to 15, causing serverless Vercel

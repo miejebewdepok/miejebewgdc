@@ -200,9 +200,23 @@ export function AppShell({
         <main className="flex-1 overflow-y-auto overflow-x-clip p-4 md:p-8">
           {(!bootstrapReady && !!userId) ? (
             <div className="flex items-center justify-center h-full">
-              <div className="flex flex-col items-center gap-3 text-slate-500">
-                <div className="h-3 w-3 rounded-full bg-red-500 animate-ping" />
-                <span className="text-xs font-semibold tracking-wide uppercase">Memuat data kasir...</span>
+              <div className="flex flex-col items-center gap-4 text-slate-600">
+                <div className="relative">
+                  {displayLogo ? (
+                    <img
+                      src={displayLogo}
+                      alt="Logo"
+                      className="w-14 h-14 rounded-2xl border border-white/10 object-cover shadow-lg animate-pulse"
+                    />
+                  ) : (
+                    <div className="w-14 h-14 rounded-2xl bg-red-600 flex items-center justify-center shadow-lg animate-pulse">
+                      <Store className="h-7 w-7 text-white" />
+                    </div>
+                  )}
+                </div>
+                <span className="text-[11px] font-semibold tracking-wide uppercase text-muted-foreground dark:text-slate-400">
+                  Menyiapkan data kasir...
+                </span>
               </div>
             </div>
           ) : (

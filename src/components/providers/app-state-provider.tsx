@@ -526,6 +526,7 @@ export function AppStateProvider({
         } else {
           console.error("Bootstrap error:", error);
           toast.error("Gagal sinkronisasi data dengan server: " + (error instanceof Error ? error.message : String(error)));
+          setBootstrapReady(true);
         }
       });
 

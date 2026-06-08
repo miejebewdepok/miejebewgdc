@@ -223,6 +223,11 @@ export async function getRequestUser() {
   return { userId, session };
 }
 
+export function isOwner(requestUser: { userId: string; session: any }) {
+  const userEmail = requestUser.session?.user?.email;
+  return userEmail !== "miejebew.crew@gmail.com";
+}
+
 function mapSettings(profile: typeof storeProfiles.$inferSelect): Settings {
   let extra: any = {};
   try {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRequestUser, updateProduct, deleteProduct } from "@/lib/server/app-service";
+import { deleteProduct, getRequestUser, isOwner, updateProduct } from "@/lib/server/app-service";
 import { handleRouteError } from "@/lib/server/route-error";
 import { ProductDraft } from "@/lib/types";
 
@@ -10,10 +10,14 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await getRequestUser();
+    const requestUser = await getRequestUser();
+    if (!isOwner(requestUser)) {
+      return NextResponse.json({ error: "Hanya Owner/Admin yang dapat mengubah produk." }, { status: 403 });
+    }
+
     const { id } = await context.params;
     const draft = (await request.json()) as ProductDraft;
-    const product = await updateProduct(userId, id, draft);
+    const product = await updateProduct(requestUser.userId, id, draft);
     return NextResponse.json({ product });
   } catch (error) {
     return handleRouteError(error, "Gagal memperbarui produk.");
@@ -25,9 +29,13 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await getRequestUser();
+    const requestUser = await getRequestUser();
+    if (!isOwner(requestUser)) {
+      return NextResponse.json({ error: "Hanya Owner/Admin yang dapat menghapus produk." }, { status: 403 });
+    }
+
     const { id } = await context.params;
-    await deleteProduct(userId, id);
+    await deleteProduct(requestUser.userId, id);
     return NextResponse.json({ success: true });
   } catch (error) {
     return handleRouteError(error, "Gagal menghapus produk.");

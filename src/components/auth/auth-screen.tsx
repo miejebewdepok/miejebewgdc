@@ -75,6 +75,14 @@ export function AuthScreen() {
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const savedEmail = localStorage.getItem('last_logged_in_email');
+    if (savedEmail) {
+      setSignInForm((current) => ({ ...current, email: savedEmail }));
+    }
+  }, []);
   const [signUpForm, setSignUpForm] = useState({
     name: "",
     email: "",
@@ -165,13 +173,14 @@ export function AuthScreen() {
     setSuccessState(null);
   };
 
+  // While determining current session state, show splash; if a session already exists, redirect.
   if (isSessionPending) {
     return (
       <div className="relative min-h-screen bg-[#fef2f2] dark:bg-[#090b11] flex flex-col items-center justify-center text-[#450a0a] dark:text-slate-100 font-sans transition-colors duration-300 dark overflow-hidden select-none">
         {/* Background blobs */}
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-200/50 dark:bg-red-600/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-amber-100/50 dark:bg-amber-500/10 rounded-full blur-[150px] pointer-events-none" />
-        
+
         <div className="flex flex-col items-center text-center gap-4 relative z-10 animate-pulse">
           <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-red-600 to-amber-500 shadow-[0_0_25px_rgba(239,68,68,0.45)] border border-white/10 overflow-hidden bg-white">
             {cachedStoreLogo ? (
@@ -190,6 +199,10 @@ export function AuthScreen() {
         </div>
       </div>
     );
+  }
+
+  if (session) {
+    return null;
   }
 
   return (

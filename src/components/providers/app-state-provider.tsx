@@ -8,6 +8,7 @@ import { AppState, Debt, DebtDraft, PaymentMethod, Product, ProductDraft, SavedB
 import { calculateItemUnitPrice } from "@/lib/pricing";
 import { showLocalNotification } from "@/lib/capacitor/notifications";
 import { toast } from "sonner";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 
 type CartLine = {
   id: string;
@@ -89,6 +90,7 @@ export function AppStateProvider({
   const [bootstrapReady, setBootstrapReady] = useState(false);
   const { data: session, isPending } = useSession();
   const sessionUserId = session?.user?.id ?? null;
+  const isOnline = useOnlineStatus();
 
   // Hydrate lightweight cached settings from local storage so the first paint isn't empty
   useEffect(() => {
@@ -499,36 +501,59 @@ export function AppStateProvider({
     }
 
     let isActive = true;
+    let attempts = 0;
 
-    void requestJson<{ appState: AppState }>("/api/bootstrap")
-      .then((response) => {
+    async function tryBootstrap() {
+      for (;;) {
         if (!isActive) {
           return;
         }
 
-        setState((current) => ({
-          ...response.appState,
-          cart: current.cart,
-          paymentMethod: (response.appState.settings.enabledPayments || []).includes(current.paymentMethod)
-            ? current.paymentMethod
-            : (response.appState.paymentMethod || "Tunai"),
-        }));
-        setBootstrapReady(true);
-      })
-      .catch((error) => {
-        if (!isActive) {
-          return;
-        }
+        try {
+          const response = await requestJson<{ appState: AppState }>("/api/bootstrap");
+          if (!isActive) {
+            return;
+          }
 
-        if (error instanceof Error && error.message === "UNAUTHORIZED") {
-          setState(emptyAppState);
-          router.replace("/auth");
-        } else {
-          console.error("Bootstrap error:", error);
-          toast.error("Gagal sinkronisasi data dengan server: " + (error instanceof Error ? error.message : String(error)));
+          setState((current) => ({
+            ...response.appState,
+            cart: current.cart,
+            paymentMethod: (response.appState.settings.enabledPayments || []).includes(current.paymentMethod)
+              ? current.paymentMethod
+              : (response.appState.paymentMethod || "Tunai"),
+          }));
           setBootstrapReady(true);
+          return;
+        } catch (error) {
+          if (!isActive) {
+            return;
+          }
+
+          if (error instanceof Error && error.message === "UNAUTHORIZED") {
+            setState(emptyAppState);
+            router.replace("/auth");
+            return;
+          }
+
+          if (attempts >= 2) {
+            console.error("Bootstrap failed after retries:", error);
+            toast.error("Gagal sinkronisasi data dengan server, menggunakan data tersimpan (offline).");
+            setBootstrapReady(true);
+            return;
+          }
+
+          attempts += 1;
+
+          const delay = attempts === 1 ? 1000 : 3000;
+          toast.warning(
+            `Menunggu koneksi... percobaan ulang ${attempts}/2 dalam ${delay / 1000} detik.`
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
-      });
+      }
+    }
+
+    tryBootstrap();
 
     return () => {
       isActive = false;
@@ -698,6 +723,11 @@ export function AppStateProvider({
 
   async function checkout(txData: { customerName?: string; paymentMethod?: PaymentMethod; amountPaid?: number; change?: number }) {
     if (state.cart.length === 0) {
+      return null;
+    }
+
+    if (!isOnline) {
+      toast.warning("Tidak ada koneksi. Silakan sambungkan internet untuk melanjutkan checkout.");
       return null;
     }
 

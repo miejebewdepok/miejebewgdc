@@ -12,6 +12,7 @@ import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { useSession } from "@/lib/auth-client";
 import { useAppState } from "@/components/providers/app-state-provider";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 
 export function AppShell({
   children,
@@ -27,6 +28,7 @@ export function AppShell({
   const [mounted, setMounted] = useState(false);
   const { data: session } = useSession();
   const isCrew = session?.user?.email === "miejebew.crew@gmail.com";
+  const isOnline = useOnlineStatus();
 
   const storeLocaleName = settings.merchantName || settings.storeName || "MIE JEBEW GDC";
   const ownerDisplayName = settings.userProfileName || settings.ownerName || "Kasir";
@@ -183,8 +185,14 @@ export function AppShell({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[9px] bg-red-650/15 border border-red-500/20 text-red-400 font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono">
-              Online
+            <span
+              className={
+                isOnline
+                  ? "text-[9px] bg-red-650/15 border border-red-500/20 text-red-400 font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono"
+                  : "text-[9px] bg-amber-500/10 border border-amber-400/30 text-amber-400 font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider font-mono animate-pulse"
+              }
+            >
+              {isOnline ? "Online" : "Offline"}
             </span>
           </div>
         </header>

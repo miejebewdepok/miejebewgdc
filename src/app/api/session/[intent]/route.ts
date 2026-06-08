@@ -83,7 +83,9 @@ export async function POST(
       ? {
           name: String(formData.get("name") ?? ""),
         }
-      : {}),
+      : {
+          rememberMe: true,
+        }),
     email: String(formData.get("email") ?? ""),
     password: String(formData.get("password") ?? ""),
   };

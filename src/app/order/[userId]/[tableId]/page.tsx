@@ -1171,7 +1171,7 @@ export default function CustomerOrderPage(props: {
                     {[
                       { label: "Beef Slice", surcharge: 0 },
                       { label: "Kornet", surcharge: 0 },
-                      { label: "Beef Patty", surcharge: 5000 },
+                      { label: "Beef Patty", surcharge: 4000 },
                       { label: "Chicken Katsu", surcharge: 5000 },
                       { label: "Special", surcharge: 10000 },
                     ].map((filling) => {

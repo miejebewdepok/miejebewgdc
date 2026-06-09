@@ -64,7 +64,8 @@ export function calculateFillingSurcharge(category: string, size: string | undef
       if (filling === 'Special') return 10000;
     }
   } else if (cleanCategory === 'lumpia beef') {
-    if (filling === 'Beef Patty' || filling === 'Chicken Katsu') return 5000;
+    if (filling === 'Beef Patty') return 4000;
+    if (filling === 'Chicken Katsu') return 5000;
     if (filling === 'Special') return 10000;
   }
   return 0;

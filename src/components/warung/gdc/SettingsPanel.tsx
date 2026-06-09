@@ -1624,7 +1624,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                       { label: "Level 4 Pedas (+Rp 2.000)", key: "level_4", def: 1200, type: "spicy" },
                       { label: "Level 5 Pedas (+Rp 2.000)", key: "level_5", def: 1200, type: "spicy" },
                       // Lumpia Beef Fillings
-                      { label: "Lumpia - Beef Patty (+Rp 5.000)", key: "filling_Beef Patty", def: 3000, type: "filling" },
+                      { label: "Lumpia - Beef Patty (+Rp 4.000)", key: "filling_Beef Patty", def: 2400, type: "filling" },
                       { label: "Lumpia - Chicken Katsu (+Rp 5.000)", key: "filling_Chicken Katsu", def: 3000, type: "filling" },
                       { label: "Lumpia - Special (+Rp 10.000)", key: "filling_Special", def: 6000, type: "filling" },
                       // Kebab Sizes & Fillings

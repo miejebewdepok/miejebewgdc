@@ -12,9 +12,11 @@ import {
   Loader2,
   XCircle,
   ArrowLeft,
-  Store
+  Store,
+  Download
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
+import { toPng } from "html-to-image";
 
 interface TransactionItem {
   id: string;
@@ -117,6 +119,31 @@ ${url}`;
     window.print();
   };
 
+  const handleDownloadImage = async () => {
+    const node = document.getElementById('receipt-card-area');
+    if (!node) {
+      toast.error("Struk belum siap dipindai.");
+      return;
+    }
+    try {
+      const dataUrl = await toPng(node, {
+        backgroundColor: '#09090b',
+        style: {
+          display: 'block',
+          borderRadius: '0px',
+        }
+      });
+      const link = document.createElement('a');
+      link.download = `struk-${transactionId}.png`;
+      link.href = dataUrl;
+      link.click();
+      toast.success("Gambar struk berhasil diunduh.");
+    } catch (err) {
+      console.error("Gagal mengunduh gambar struk:", err);
+      toast.error("Gagal mengunduh gambar.");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#09090b] text-[#fef2f2] flex flex-col items-center justify-center p-4">
@@ -178,7 +205,7 @@ ${url}`;
         </div>
 
         {/* Receipt Card Content */}
-        <div className="glass-morphism-intense rounded-3xl p-6 sm:p-7 border border-white/10 shadow-2xl relative">
+        <div id="receipt-card-area" className="glass-morphism-intense rounded-3xl p-6 sm:p-7 border border-white/10 shadow-2xl relative">
           
           {/* Lunas Stamp/Badge */}
           <div className="absolute top-5 right-5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-black text-[10px] rounded-lg tracking-widest uppercase flex items-center gap-1 select-none animate-in fade-in zoom-in-50 duration-300">
@@ -323,22 +350,31 @@ ${url}`;
         </div>
 
         {/* Action Buttons Footer Area */}
-        <div className="mt-5 grid grid-cols-2 gap-3.5 no-print">
+        <div className="mt-5 flex flex-col gap-3 no-print">
           <button
             type="button"
             onClick={handleShareWhatsapp}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider py-3.5 px-4 rounded-2xl flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-700/20 transition-all active:scale-[0.98] cursor-pointer"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider py-4 px-4 rounded-2xl flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-700/20 transition-all active:scale-[0.98] cursor-pointer"
           >
-            <Share2 className="w-4 h-4" /> Share Struk
+            <Share2 className="w-4 h-4" /> Share Struk (WhatsApp)
           </button>
           
-          <button
-            type="button"
-            onClick={handlePrint}
-            className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black text-xs uppercase tracking-wider py-3.5 px-4 rounded-2xl flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer"
-          >
-            <Printer className="w-4 h-4 text-red-500" /> Cetak Nota
-          </button>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={handleDownloadImage}
+              className="w-full bg-amber-600 hover:bg-amber-700 border border-amber-500 text-white font-black text-xs uppercase tracking-wider py-3.5 px-4 rounded-2xl flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <Download className="w-4 h-4" /> Unduh Gambar
+            </button>
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black text-xs uppercase tracking-wider py-3.5 px-4 rounded-2xl flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <Printer className="w-4 h-4 text-red-500" /> Cetak Nota
+            </button>
+          </div>
         </div>
 
       </div>

@@ -1,8 +1,10 @@
 // @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { CartItem, Transaction, Settings } from '@/lib/types';
-import { X, CreditCard, Banknote, QrCode, FileText, Printer, CheckCircle, Loader2 } from 'lucide-react';
+import { X, CreditCard, Banknote, QrCode, FileText, Printer, CheckCircle, Loader2, Copy, Download } from 'lucide-react';
 import { isMobileOrWebView } from '@/lib/utils';
+import { toBlob, toPng } from 'html-to-image';
+import { toast } from 'sonner';
 
 export const angkaterbilang = (nilai: number): string => {
   const bilangan = [
@@ -304,38 +306,73 @@ export default function CheckoutModal({
       cleanNum = "62" + cleanNum;
     }
 
-    const itemsText = activeCartItems.map(item => {
-      const name = item.productName || item.product?.name || 'Menu';
-      const cleanName = name.replace(/\n/g, ' - ');
-      return `- ${item.quantity}x *${cleanName}* [Rp ${((item.sellPrice || item.unitPrice || 0) * item.quantity).toLocaleString('id-ID')}]`;
-    }).join('\n');
-
     const text = `*${settings.merchantName || 'MIE JEBEW GDC'}*
 _Terima kasih atas kunjungan Anda!_
 
 *STRUK BELANJA DIGITAL*
----------------------------------------
 Invoice: *${activeInvoiceNo}*
-Tanggal: *${new Date().toLocaleDateString('id-ID')}*
-Kasir: *${settings.userProfileName || settings.ownerName || 'Kasir'}*
-Pelanggan: *${activeCustomerName || 'Umum'}*
-Metode: *${activePaymentMethod}*
----------------------------------------
-*PESANAN:*
-${itemsText}
-
-Subtotal: Rp ${activeSubtotal.toLocaleString('id-ID')}
-${settings.enableServiceCharge ? `Biaya Layanan: Rp ${activeServiceCharge.toLocaleString('id-ID')}\n` : ''}*Total Akhir: Rp ${activeTotal.toLocaleString('id-ID')}*
-Bayar: Rp ${activeAmountPaid ? activeAmountPaid.toLocaleString('id-ID') : activeTotal.toLocaleString('id-ID')}
-${activePaymentMethod === 'Tunai' ? `Kembalian: Rp ${activeChange.toLocaleString('id-ID')}` : ''}
----------------------------------------
-_${settings.receiptFooter || 'ATAS KUNJUNGAN ANDA'}_
+Total Akhir: *Rp ${activeTotal.toLocaleString('id-ID')}*
 
 🔗 *Lihat Struk Digital Lengkap:*
 ${window.location.origin}/receipt/${activeInvoiceNo}`;
 
     const waUrl = `https://api.whatsapp.com/send?phone=${cleanNum}&text=${encodeURIComponent(text)}`;
     window.open(waUrl, "_blank");
+  };
+
+  const handleCopyReceiptImage = async () => {
+    const node = document.getElementById('receipt-capture-area');
+    if (!node) {
+      toast.error("Struk belum siap dipindai.");
+      return;
+    }
+    try {
+      const blob = await toBlob(node, {
+        backgroundColor: '#ffffff',
+        style: {
+          display: 'block',
+          width: '320px',
+          padding: '16px',
+        }
+      });
+      if (!blob) throw new Error("Gagal merender gambar.");
+      
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          [blob.type]: blob
+        })
+      ]);
+      toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di WhatsApp.");
+    } catch (err) {
+      console.error("Gagal menyalin gambar struk:", err);
+      toast.error("Gagal menyalin gambar. Silakan gunakan tombol Unduh Gambar.");
+    }
+  };
+
+  const handleDownloadReceiptImage = async () => {
+    const node = document.getElementById('receipt-capture-area');
+    if (!node) {
+      toast.error("Struk belum siap dipindai.");
+      return;
+    }
+    try {
+      const dataUrl = await toPng(node, {
+        backgroundColor: '#ffffff',
+        style: {
+          display: 'block',
+          width: '320px',
+          padding: '16px',
+        }
+      });
+      const link = document.createElement('a');
+      link.download = `struk-${activeInvoiceNo}.png`;
+      link.href = dataUrl;
+      link.click();
+      toast.success("Gambar struk berhasil diunduh.");
+    } catch (err) {
+      console.error("Gagal mengunduh gambar struk:", err);
+      toast.error("Gagal mengunduh gambar.");
+    }
   };
 
   // Shared receipt content — rendered in both mobile tab and desktop aside
@@ -613,6 +650,22 @@ ${window.location.origin}/receipt/${activeInvoiceNo}`;
                 </div>
 
                 <div className="border-t border-black/10 dark:border-white/5 pt-4 flex flex-col gap-3 max-w-sm mx-auto w-full">
+                    <div className="grid grid-cols-2 gap-2 w-full">
+                      <button 
+                        type="button" 
+                        onClick={handleCopyReceiptImage}
+                        className="bg-amber-600 hover:bg-amber-700 text-white border border-amber-500 rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
+                      >
+                        <Copy className="w-3.5 h-3.5" /> SALIN GAMBAR
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={handleDownloadReceiptImage}
+                        className="bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
+                      >
+                        <Download className="w-3.5 h-3.5" /> UNDUH GAMBAR
+                      </button>
+                    </div>
                     <button type="button" onClick={() => {
                       if (isMobileOrWebView()) {
                         alert("Pencetakan langsung tidak didukung di HP/Tablet/APK. Silakan buka aplikasi kasir melalui Google Chrome di Laptop/PC untuk mencetak struk.");
@@ -665,6 +718,24 @@ ${window.location.origin}/receipt/${activeInvoiceNo}`;
             }
           }
         ` }} />
+        <ReceiptContent />
+      </div>
+
+      {/* ── CAPTURE ONLY AREA (OFFSCREEN) ── */}
+      <div 
+        id="receipt-capture-area" 
+        style={{ 
+          position: 'absolute', 
+          left: '-9999px', 
+          top: '-9999px', 
+          width: '320px', 
+          backgroundColor: '#ffffff', 
+          color: '#000000', 
+          padding: '16px', 
+          fontFamily: 'monospace' 
+        }}
+        className="bg-white text-black font-sans"
+      >
         <ReceiptContent />
       </div>
     </>

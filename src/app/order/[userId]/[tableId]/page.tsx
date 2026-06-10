@@ -41,6 +41,7 @@ interface CartItem {
   sellPrice: number; // configured sell price including surcharges
   filling?: string;
   size?: string;
+  note?: string;
 }
 
 export default function CustomerOrderPage(props: {
@@ -613,6 +614,7 @@ export default function CustomerOrderPage(props: {
             sellPrice: item.sellPrice,
             filling: item.filling,
             size: item.size,
+            note: item.note?.trim() || undefined,
             product: {
               id: item.product.id,
               name: item.product.name,
@@ -1400,7 +1402,25 @@ export default function CustomerOrderPage(props: {
                           </span>
                         )}
                       </div>
-                      <span className="text-xs font-mono font-bold text-yellow-500 block mt-1">
+
+                      <input
+                        type="text"
+                        placeholder="Catatan: kurang pedas, tanpa bawang..."
+                        value={item.note || ''}
+                        maxLength={200}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCart((current) =>
+                            current.map((cartItem) =>
+                              cartItem.id === item.id
+                                ? { ...cartItem, note: val }
+                                : cartItem
+                            )
+                          );
+                        }}
+                        className="mt-2 w-full bg-white/5 border border-white/5 rounded-xl py-2 px-3 text-[10px] font-bold text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                      />
+                      <span className="text-[10px] font-mono font-bold text-yellow-500 block mt-1">
                         {formatRupiah(item.sellPrice)}
                       </span>
                     </div>

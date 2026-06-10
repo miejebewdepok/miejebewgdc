@@ -527,7 +527,17 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                     const fallbackPhone = selectedTx?.customerPhone || settings?.merchantPhone || '';
                     const phone = window.prompt("Masukkan nomor WhatsApp penerima:", fallbackPhone);
                     if (!phone) return;
-                    const clean = phone.replace(/[^0-9]/g, '');
+                    
+                    // Clean and normalize WhatsApp number (convert 08xxx, 8xxx, +6208xxx, +628xxx to 628xxx)
+                    let clean = phone.replace(/\D/g, "");
+                    if (clean.startsWith("620")) {
+                      clean = "62" + clean.slice(3);
+                    } else if (clean.startsWith("0")) {
+                      clean = "62" + clean.slice(1);
+                    } else if (clean.startsWith("8")) {
+                      clean = "62" + clean;
+                    }
+
                     if (clean.length < 9) {
                       alert('Nomor WhatsApp tidak valid.');
                       return;

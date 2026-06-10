@@ -297,13 +297,19 @@ export default function CheckoutModal({
       return;
     }
     
-    // Clean and normalize WhatsApp number (convert 08xxx to 628xxx)
+    // Clean and normalize WhatsApp number (convert 08xxx, 8xxx, +6208xxx, +628xxx to 628xxx)
     let cleanNum = whatsappRecipient.replace(/\D/g, "");
-    if (cleanNum.startsWith("0")) {
+    if (cleanNum.startsWith("620")) {
+      cleanNum = "62" + cleanNum.slice(3);
+    } else if (cleanNum.startsWith("0")) {
       cleanNum = "62" + cleanNum.slice(1);
-    }
-    if (!cleanNum.startsWith("62") && cleanNum.length >= 9) {
+    } else if (cleanNum.startsWith("8")) {
       cleanNum = "62" + cleanNum;
+    }
+
+    if (cleanNum.length < 9) {
+      alert("Nomor WhatsApp tidak valid.");
+      return;
     }
 
     const text = `*${settings.merchantName || 'MIE JEBEW GDC'}*

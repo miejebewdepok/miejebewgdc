@@ -1,5 +1,7 @@
 // @ts-nocheck
 import React, { useState, useEffect } from 'react';
+import { toBlob } from 'html-to-image';
+import { toast } from 'sonner';
 import { Transaction } from '@/lib/types';
 import { Search, Calendar, DollarSign, FileText, ShoppingBag, ArrowRight, Printer, FlameIcon, X, Trash2, Edit2, Save, Loader2, Share2 } from 'lucide-react';
 import { useAppState } from '@/components/providers/app-state-provider';
@@ -408,7 +410,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                 </div>
 
                 {/* Simulated Printed Thermal Sticker in Slate theme */}
-                <div className="bg-slate-50 dark:bg-slate-900 border border-black/10 dark:border-white/10 rounded-2xl p-4 text-xs font-mono text-slate-700 dark:text-slate-300">
+                <div id="receipt-capture-area-history" className="bg-slate-50 dark:bg-slate-900 border border-black/10 dark:border-white/10 rounded-2xl p-4 text-xs font-mono text-slate-700 dark:text-slate-300">
                   <div className="text-center border-b border-dashed border-black/20 dark:border-white/20 pb-2 mb-3">
                     <span className="font-black text-foreground dark:text-white text-sm block">MIE JEBEW GDC</span>
                     <span className="text-[9px] text-slate-500 dark:text-slate-400 block">Jl. Boulevard Grand Depok City, Depok</span>
@@ -523,7 +525,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
               <div className="mt-4 space-y-2">
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     const fallbackPhone = selectedTx?.customerPhone || settings?.merchantPhone || '';
                     const phone = window.prompt("Masukkan nomor WhatsApp penerima:", fallbackPhone);
                     if (!phone) return;
@@ -542,25 +544,34 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                       alert('Nomor WhatsApp tidak valid.');
                       return;
                     }
-                    const total = selectedTx.total || 0;
-                    const invoiceId = selectedTx.id ?? 'belum-diketahui';
-                    const rawCustomerName = (selectedTx.customerName || 'Umum')
-                      .replace(/\bmeja\b/gi, 'Order')
-                      .replace(/\bself\s*order\b/gi, 'Order');
-                    const merchantName = settings?.merchantName || 'MIE JEBEW GDC';
-                    const receiptUrl = `${window.location.origin}/receipt/${invoiceId}`;
 
-                    const waUrl =
-                      `https://api.whatsapp.com/send?phone=${clean}` +
-                      `&text=${encodeURIComponent(
-                        `*${merchantName}*\n` +
-                        `Nota: *${invoiceId}*\n` +
-                        `Tanggal: *${new Date(selectedTx.createdAt).toLocaleString('id-ID')}*\n` +
-                        `Pelanggan: *${rawCustomerName}*\n` +
-                        `Metode: *${selectedTx.paymentMethod}*\n` +
-                        `Total: *Rp ${total.toLocaleString('id-ID')}*\n` +
-                        `Struk digital: ${receiptUrl}`
-                      )}`;
+                    // Automatically copy receipt image to clipboard
+                    const node = document.getElementById('receipt-capture-area-history');
+                    if (node) {
+                      try {
+                        const blob = await toBlob(node, {
+                          backgroundColor: '#ffffff',
+                          style: {
+                            display: 'block',
+                            width: '320px',
+                            padding: '16px',
+                            color: '#000000'
+                          }
+                        });
+                        if (blob) {
+                          await navigator.clipboard.write([
+                            new ClipboardItem({
+                              [blob.type]: blob
+                            })
+                          ]);
+                          toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di chat WhatsApp.");
+                        }
+                      } catch (err) {
+                        console.error("Gagal menyalin gambar struk:", err);
+                      }
+                    }
+
+                    const waUrl = `https://api.whatsapp.com/send?phone=${clean}`;
                     window.open(waUrl, '_blank');
                   }}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"

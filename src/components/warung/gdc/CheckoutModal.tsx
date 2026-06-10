@@ -291,7 +291,7 @@ export default function CheckoutModal({
     }
   };
 
-  const handleSendWhatsappReceipt = () => {
+  const handleSendWhatsappReceipt = async () => {
     if (!whatsappRecipient.trim()) {
       alert("Masukkan nomor WhatsApp penerima terlebih dahulu.");
       return;
@@ -312,17 +312,32 @@ export default function CheckoutModal({
       return;
     }
 
-    const text = `*${settings.merchantName || 'MIE JEBEW GDC'}*
-_Terima kasih atas kunjungan Anda!_
+    // Automatically copy receipt image to clipboard
+    const node = document.getElementById('receipt-capture-area');
+    if (node) {
+      try {
+        const blob = await toBlob(node, {
+          backgroundColor: '#ffffff',
+          style: {
+            display: 'block',
+            width: '320px',
+            padding: '16px',
+          }
+        });
+        if (blob) {
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              [blob.type]: blob
+            })
+          ]);
+          toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di chat WhatsApp.");
+        }
+      } catch (err) {
+        console.error("Gagal menyalin gambar struk:", err);
+      }
+    }
 
-*STRUK BELANJA DIGITAL*
-Invoice: *${activeInvoiceNo}*
-Total Akhir: *Rp ${activeTotal.toLocaleString('id-ID')}*
-
-🔗 *Lihat Struk Digital Lengkap:*
-${window.location.origin}/receipt/${activeInvoiceNo}`;
-
-    const waUrl = `https://api.whatsapp.com/send?phone=${cleanNum}&text=${encodeURIComponent(text)}`;
+    const waUrl = `https://api.whatsapp.com/send?phone=${cleanNum}`;
     window.open(waUrl, "_blank");
   };
 

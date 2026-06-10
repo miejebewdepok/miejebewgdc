@@ -985,18 +985,27 @@ export default function CheckoutModal({
         <ReceiptContent />
       </div>
 
-      {/* ── CAPTURE ONLY AREA (OFFSCREEN) ── */}
+      {/* ── CAPTURE ONLY AREA (OFFSCREEN WRAPPER) ── */}
       <div 
-        id="receipt-capture-area" 
         style={{ 
-          position: 'absolute', 
+          position: 'fixed', 
           left: '-9999px', 
           top: '-9999px', 
           width: '380px', 
-          backgroundColor: '#09090b', 
+          overflow: 'hidden',
+          zIndex: -9999,
+          pointerEvents: 'none'
         }}
       >
-        <PremiumReceiptContent />
+        <div 
+          id="receipt-capture-area" 
+          style={{ 
+            width: '380px', 
+            backgroundColor: '#09090b', 
+          }}
+        >
+          <PremiumReceiptContent />
+        </div>
       </div>
     </>
   );

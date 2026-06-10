@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSavedBill } from "@/lib/server/app-service";
 import { handleRouteError } from "@/lib/server/route-error";
 import { db } from "@/db/client";
-import { customerPromoClaims, storeProfiles } from "@/db/schema";
-import { and, eq, inArray } from "drizzle-orm";
+import { customerPromoClaims, savedBills, storeProfiles } from "@/db/schema";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { validateWhatsappNumber } from "@/lib/server/whatsapp";
 import crypto from "crypto";
 
@@ -161,6 +161,26 @@ export async function POST(request: NextRequest) {
 
     const cleanTable = tableName.replace(/^(meja|order|self-order)[\s\-_]*/i, "");
     const name = `${cleanTable} - ${customerName}`;
+
+    // Prevent same-table accidental duplicate submissions within 15s
+    const dedupeWindowMs = 15_000;
+    const [recentBill] = await db
+      .select({ id: savedBills.id, createdAt: savedBills.createdAt })
+      .from(savedBills)
+      .where(and(eq(savedBills.userId, userId), eq(savedBills.name, name)))
+      .orderBy(desc(savedBills.createdAt))
+      .limit(1);
+
+    if (recentBill) {
+      const age = Date.now() - new Date(recentBill.createdAt).getTime();
+      if (age >= 0 && age < dedupeWindowMs) {
+        return NextResponse.json(
+          { error: "Pesanan untuk meja ini baru saja dikirim. Mohon tunggu sebentar." },
+          { status: 409 }
+        );
+      }
+    }
+
     const bill = await createSavedBill(userId, name, finalItems);
 
     return NextResponse.json({

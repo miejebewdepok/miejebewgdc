@@ -396,7 +396,7 @@ export function KasirView() {
       const toppingStr = Object.entries(counts)
         .map(([name, count]) => count > 1 ? `${name} (x${count})` : name)
         .join(', ');
-      notesArr.push(toppingStr);
+      notesArr.push(`Topping: ${toppingStr}`);
     }
     
     const originalNotes = line.notes || (line as any).note;

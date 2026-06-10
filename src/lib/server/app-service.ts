@@ -793,7 +793,7 @@ export async function createTransaction(
       const formattedToppings = Object.entries(counts)
         .map(([topping, count]) => (count > 1 ? `${topping} (x${count})` : topping))
         .join(", ");
-      extras.push(formattedToppings);
+      extras.push(`Topping: ${formattedToppings}`);
     }
     const cleanNote = (item.notes || item.note) ? String(item.notes || item.note).trim() : "";
     if (cleanNote && cleanNote.length <= 200) extras.push(`Catatan: ${cleanNote}`);

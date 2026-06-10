@@ -25,6 +25,7 @@ interface TransactionItem {
   quantity: number;
   unitPrice: number;
   costPrice: number;
+  notes?: string | null;
 }
 
 interface Transaction {
@@ -300,16 +301,33 @@ export default function ReceiptPage(props: {
                   <div className="flex-1 pr-3">
                     {(() => {
                       const lines = item.productName.split("\n");
+                      const notes = item.notes || '';
                       return (
                         <>
                           <span className="text-white font-bold leading-tight block">
                             {lines[0]}
                           </span>
-                          {lines.slice(1).map((line, i) => (
-                            <span key={i} className="text-[9px] text-red-400 font-extrabold uppercase block tracking-tight mt-0.5">
-                              » {line}
-                            </span>
-                          ))}
+                          {lines.slice(1).map((line, i) => {
+                            const isNote = line.toLowerCase().startsWith("catatan:");
+                            return (
+                              <span key={i} className={`text-[9px] font-extrabold uppercase block tracking-tight mt-0.5 ${isNote ? "text-[#f97316] mt-1.5 border-t border-white/5 pt-1" : "text-red-400"}`}>
+                                » {line}
+                              </span>
+                            );
+                          })}
+                          {notes && notes.split('\n').map((n: string) => n.trim()).filter(Boolean).map((note: string, i: number) => {
+                            const cleanProductName = item.productName.toLowerCase();
+                            const cleanNote = note.toLowerCase();
+                            const isAlreadyInName = cleanProductName.includes(cleanNote) || 
+                                                    (cleanNote.startsWith("catatan:") && cleanProductName.includes(cleanNote.replace("catatan:", "").trim()));
+                            if (isAlreadyInName) return null;
+                            const isNote = note.toLowerCase().startsWith("catatan:");
+                            return (
+                              <span key={i} className={`text-[9px] font-extrabold uppercase block tracking-tight mt-0.5 ${isNote ? "text-[#f97316] mt-1.5 border-t border-white/5 pt-1" : "text-red-400"}`}>
+                                » {note}
+                              </span>
+                            );
+                          })}
                         </>
                       );
                     })()}

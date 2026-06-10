@@ -367,6 +367,7 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
         quantity: transactionItems.quantity,
         unitPrice: transactionItems.unitPrice,
         costPrice: transactionItems.costPrice,
+        notes: transactionItems.notes,
       })
       .from(transactionItems)
       .innerJoin(transactions, eq(transactionItems.transactionId, transactions.id))
@@ -419,6 +420,7 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
       costPrice: item.costPrice,
       sellPrice: item.unitPrice,
       id: item.productId,
+      notes: item.notes ?? undefined,
       category: productCategoryMap.get(item.productId) || 'Lainnya',
     });
     itemsByTransaction.set(item.transactionId, existing);
@@ -606,6 +608,8 @@ export async function createTransaction(
       toppings?: string[];
       filling?: string;
       size?: string;
+      notes?: string;
+      note?: string;
     }>;
   }
 ) {
@@ -791,7 +795,7 @@ export async function createTransaction(
         .join(", ");
       extras.push(formattedToppings);
     }
-    const cleanNote = (item as any).note ? String((item as any).note).trim() : "";
+    const cleanNote = (item.notes || item.note) ? String(item.notes || item.note).trim() : "";
     if (cleanNote && cleanNote.length <= 200) extras.push(`Catatan: ${cleanNote}`);
     const finalName = extras.length > 0 ? `${product.name}\n${extras.join('\n')}` : product.name;
 
@@ -801,6 +805,7 @@ export async function createTransaction(
       unitPrice,
       costPrice,
       productName: finalName,
+      notes: cleanNote || null,
     };
   });
 
@@ -832,6 +837,7 @@ export async function createTransaction(
         quantity: item.quantity,
         unitPrice: item.unitPrice,
         costPrice: item.costPrice,
+        notes: item.notes,
       }))
     );
 

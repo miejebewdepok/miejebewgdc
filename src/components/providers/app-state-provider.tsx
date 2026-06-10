@@ -19,6 +19,7 @@ type CartLine = {
   toppings: string[];
   filling?: string;
   size?: string;
+  notes?: string;
 };
 
 type AppStateContextValue = AppState & {
@@ -637,6 +638,7 @@ export function AppStateProvider({
         toppings,
         filling,
         size,
+        notes: line.notes || (line as any).note,
       },
     ];
   });
@@ -753,6 +755,7 @@ export function AppStateProvider({
           toppings: item.toppings ?? [],
           filling: item.filling,
           size: item.size,
+          notes: item.notes || (item as any).note || "",
         })),
       }),
     });
@@ -947,7 +950,8 @@ export function AppStateProvider({
       spicyLevel: line.spicyLevel,
       toppings: line.toppings,
       product: line.product,
-      sellPrice: line.product.sellPrice
+      sellPrice: line.product.sellPrice,
+      notes: line.notes
     }));
 
     const response = await requestJson<{ savedBill: SavedBill }>("/api/saved-bills", {
@@ -973,7 +977,8 @@ export function AppStateProvider({
       spicyLevel: item.spicyLevel ?? 0,
       toppings: item.toppings ?? [],
       filling: item.filling,
-      size: item.size
+      size: item.size,
+      notes: item.notes || item.note || ""
     }));
 
     // Delete it from the server

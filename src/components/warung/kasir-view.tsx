@@ -399,6 +399,11 @@ export function KasirView() {
       notesArr.push(toppingStr);
     }
     
+    const originalNotes = line.notes || (line as any).note;
+    if (originalNotes && String(originalNotes).trim()) {
+      notesArr.push(`Catatan: ${String(originalNotes).trim()}`);
+    }
+    
     const customNote = notesArr.join('\n');   
     
     return {

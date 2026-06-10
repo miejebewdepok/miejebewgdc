@@ -525,16 +525,27 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                               <span className="text-white font-bold leading-tight block">
                                 {lines[0]}
                               </span>
-                              {lines.slice(1).map((line, i) => (
-                                <span key={i} className="text-[9px] text-[#f87171] font-extrabold uppercase block tracking-tight mt-0.5">
-                                  » {line}
-                                </span>
-                              ))}
-                              {notes && notes.split('\n').map((n: string) => n.trim()).filter(Boolean).map((note: string, i: number) => (
-                                <span key={i} className="text-[9px] text-[#f87171] font-extrabold uppercase block tracking-tight mt-0.5">
-                                  » {note}
-                                </span>
-                              ))}
+                              {lines.slice(1).map((line, i) => {
+                                const isNote = line.toLowerCase().startsWith("catatan:");
+                                return (
+                                  <span key={i} className={`text-[9px] font-extrabold uppercase block tracking-tight mt-0.5 ${isNote ? "text-[#f97316] mt-1.5 border-t border-white/5 pt-1" : "text-[#f87171]"}`}>
+                                    » {line}
+                                  </span>
+                                );
+                              })}
+                              {notes && notes.split('\n').map((n: string) => n.trim()).filter(Boolean).map((note: string, i: number) => {
+                                const cleanProductName = productName.toLowerCase();
+                                const cleanNote = note.toLowerCase();
+                                const isAlreadyInName = cleanProductName.includes(cleanNote) || 
+                                                        (cleanNote.startsWith("catatan:") && cleanProductName.includes(cleanNote.replace("catatan:", "").trim()));
+                                if (isAlreadyInName) return null;
+                                const isNote = note.toLowerCase().startsWith("catatan:");
+                                return (
+                                  <span key={i} className={`text-[9px] font-extrabold uppercase block tracking-tight mt-0.5 ${isNote ? "text-[#f97316] mt-1.5 border-t border-white/5 pt-1" : "text-[#f87171]"}`}>
+                                    » {note}
+                                  </span>
+                                );
+                              })}
                             </div>
                             <div className="w-10 text-center text-[#d4d4d8] font-bold font-mono">
                               {quantity}x
@@ -811,13 +822,26 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                       return (
                         <tr key={idx} className="align-top">
                           <td className="py-1">
-                            {productName.split('\n').map((line, idx) => (
-                              <span key={idx} className={idx === 0 ? "block font-bold text-slate-700 break-words whitespace-normal pr-1 leading-tight" : "block text-[8.5px] text-red-600 font-extrabold uppercase tracking-tight mt-0.5"}>
-                                {idx === 0 ? line : `» ${line}`}
-                              </span>
-                            ))}
-                            {item.notes && (
-                              <span className="block text-[8.5px] text-red-600 font-extrabold uppercase tracking-tight mt-0.5">
+                            {productName.split('\n').map((line, idx) => {
+                              if (idx === 0) {
+                                return (
+                                  <span key={idx} className="block font-bold text-slate-700 break-words whitespace-normal pr-1 leading-tight">
+                                    {line}
+                                  </span>
+                                );
+                              }
+                              const isNote = line.toLowerCase().startsWith("catatan:");
+                              return (
+                                <span key={idx} className={`block text-[8.5px] font-extrabold uppercase tracking-tight mt-0.5 ${isNote ? "text-[#ea580c] mt-1 border-t border-slate-100 pt-0.5" : "text-red-600"}`}>
+                                  » {line}
+                                </span>
+                              );
+                            })}
+                            {item.notes && !(
+                              productName.toLowerCase().includes(item.notes.toLowerCase()) ||
+                              (item.notes.toLowerCase().startsWith("catatan:") && productName.toLowerCase().includes(item.notes.toLowerCase().replace("catatan:", "").trim()))
+                            ) && (
+                              <span className="block text-[8.5px] text-[#ea580c] font-extrabold uppercase tracking-tight mt-1 border-t border-slate-100 pt-0.5">
                                 » {item.notes}
                               </span>
                             )}

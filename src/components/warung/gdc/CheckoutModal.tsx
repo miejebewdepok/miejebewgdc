@@ -528,16 +528,27 @@ export default function CheckoutModal({
                   <span className="text-white font-bold leading-tight block">
                     {lines[0]}
                   </span>
-                  {lines.slice(1).map((line, i) => (
-                    <span key={i} className="text-[9px] text-[#f87171] font-extrabold uppercase block tracking-tight mt-0.5">
-                      » {line}
-                    </span>
-                  ))}
-                  {notes && notes.split('\n').map((n: string) => n.trim()).filter(Boolean).map((note: string, i: number) => (
-                    <span key={i} className="text-[9px] text-[#f87171] font-extrabold uppercase block tracking-tight mt-0.5">
-                      » {note}
-                    </span>
-                  ))}
+                  {lines.slice(1).map((line, i) => {
+                    const isNote = line.toLowerCase().startsWith("catatan:");
+                    return (
+                      <span key={i} className={`text-[9px] font-extrabold uppercase block tracking-tight mt-0.5 ${isNote ? "text-[#f97316] mt-1.5 border-t border-white/5 pt-1" : "text-[#f87171]"}`}>
+                        » {line}
+                      </span>
+                    );
+                  })}
+                  {notes && notes.split('\n').map((n: string) => n.trim()).filter(Boolean).map((note: string, i: number) => {
+                    const cleanProductName = productName.toLowerCase();
+                    const cleanNote = note.toLowerCase();
+                    const isAlreadyInName = cleanProductName.includes(cleanNote) || 
+                                            (cleanNote.startsWith("catatan:") && cleanProductName.includes(cleanNote.replace("catatan:", "").trim()));
+                    if (isAlreadyInName) return null;
+                    const isNote = note.toLowerCase().startsWith("catatan:");
+                    return (
+                      <span key={i} className={`text-[9px] font-extrabold uppercase block tracking-tight mt-0.5 ${isNote ? "text-[#f97316] mt-1.5 border-t border-white/5 pt-1" : "text-[#f87171]"}`}>
+                        » {note}
+                      </span>
+                    );
+                  })}
                 </div>
                 <div className="w-10 text-center text-[#d4d4d8] font-bold font-mono">
                   {quantity}x

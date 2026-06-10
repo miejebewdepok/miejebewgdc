@@ -20,6 +20,8 @@ export async function POST(request: NextRequest) {
         toppings?: string[];
         filling?: string;
         size?: string;
+        notes?: string;
+        note?: string;
       }>;
     };
     const result = await createTransaction(userId, body);

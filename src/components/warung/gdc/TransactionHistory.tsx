@@ -1,7 +1,7 @@
 // @ts-nocheck
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Transaction } from '@/lib/types';
-import { Search, Calendar, DollarSign, FileText, ShoppingBag, ArrowRight, Printer, FlameIcon, X, Trash2, Edit2, Save, Loader2 } from 'lucide-react';
+import { Search, Calendar, DollarSign, FileText, ShoppingBag, ArrowRight, Printer, FlameIcon, X, Trash2, Edit2, Save, Loader2, Share2 } from 'lucide-react';
 import { useAppState } from '@/components/providers/app-state-provider';
 import { isMobileOrWebView } from '@/lib/utils';
 
@@ -45,6 +45,13 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
   const { settings, deleteTransaction, deleteTransactionsBulk, updateTransaction } = useAppState();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+  const [whatsappRecipient, setWhatsappRecipient] = useState('');
+
+  useEffect(() => {
+    if (!selectedTx) return;
+    const saved = localStorage.getItem('miejebew_checkout_whatsapp_recipient');
+    if (saved) setWhatsappRecipient(saved);
+  }, [selectedTx?.id]);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editPaymentMethod, setEditPaymentMethod] = useState<string>('');
@@ -513,7 +520,38 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                 </div>
               </div>
 
-              <div className="mt-4">
+              <div className="mt-4 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const phone = window.prompt("Masukkan nomor WhatsApp penerima:", settings?.merchantPhone || "");
+                    if (!phone) return;
+                    const clean = phone.replace(/[^0-9]/g, "");
+                    if (clean.length < 9) {
+                      alert("Nomor WhatsApp tidak valid.");
+                      return;
+                    }
+                    const orderSubtotal = selectedTx.items.reduce((sum, item) => sum + (item.sellPrice || item.unitPrice || 0) * item.quantity, 0);
+                    const total = selectedTx.total || 0;
+                    const serviceCharge = Math.max(0, total - orderSubtotal);
+                    const waUrl =
+                      `https://api.whatsapp.com/send?phone=${clean}` +
+                      `&text=${encodeURIComponent(
+                        `*${settings?.merchantName || "MIE JEBEW GDC"}*\n` +
+                        `Nota: *${selectedTx.id}*\n` +
+                        `Tanggal: *${new Date(selectedTx.createdAt).toLocaleString("id-ID")}*\n` +
+                        `Pelanggan: *${(selectedTx.customerName || "Umum").replace(/\bmeja\b/gi, "Order").replace(/\bself\s*order\b/gi, "Order")}*\n` +
+                        `Metode: *${selectedTx.paymentMethod}*\n` +
+                        `Total: *Rp ${total.toLocaleString("id-ID")}*\n` +
+                        `Struk digital: ${window.location.origin}/receipt/${selectedTx.id}`
+                      )}`;
+                    window.open(waUrl, "_blank");
+                  }}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Share2 className="w-4 h-4" /> KIRIM STRUK VIA WA
+                </button>
+
                 <button
                   type="button"
                   onClick={() => {

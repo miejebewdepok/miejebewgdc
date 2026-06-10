@@ -233,9 +233,7 @@ export default function ReceiptPage(props: {
 
           {/* Brand Header */}
           <div className="text-center pb-5 border-b border-white/5 mb-5 flex flex-col items-center">
-            <div className="w-12 h-12 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-3 border border-red-500/20">
-              <CheckCircle className="w-6 h-6 animate-pulse" />
-            </div>
+            <img src="/logo.png" className="w-12 h-12 rounded-full mb-3 object-cover border border-white/10" alt="Logo" />
             <h1 className="text-base font-black tracking-tight uppercase text-white leading-tight">
               {merchant.storeName}
             </h1>

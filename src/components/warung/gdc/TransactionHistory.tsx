@@ -422,14 +422,12 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
 
                   {/* Brand Header */}
                   <div className="text-center pb-5 border-b border-white/5 mb-5 flex flex-col items-center">
-                    <div className="w-12 h-12 bg-[#ef4444]/10 text-[#ef4444] rounded-full flex items-center justify-center mb-3 border border-[#ef4444]/20">
-                      <CheckCircle className="w-6 h-6" />
-                    </div>
+                    <img src="/logo.png" className="w-12 h-12 rounded-full mb-3 object-cover border border-white/10" alt="Logo" />
                     <h1 className="text-base font-black tracking-tight uppercase text-white leading-tight">
                       {settings?.merchantName || "MIE JEBEW GDC"}
                     </h1>
                     <p className="text-[10px] text-slate-400 italic mt-0.5 font-medium leading-none">
-                      Mie Jebew Terpedas & Terlezat
+                      Coba Sekali, Nagih Berkali-Kali
                     </p>
                     <div className="flex flex-col gap-1 mt-3 text-[10px] text-[#a1a1aa] font-medium font-sans">
                       <div className="flex items-center justify-center gap-1">

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Transaction } from '@/lib/types';
 import { Search, Calendar, DollarSign, FileText, ShoppingBag, ArrowRight, Printer, FlameIcon, X, Trash2, Edit2, Save, Loader2, Share2 } from 'lucide-react';
 import { useAppState } from '@/components/providers/app-state-provider';
@@ -524,28 +524,34 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                 <button
                   type="button"
                   onClick={() => {
-                    const phone = window.prompt("Masukkan nomor WhatsApp penerima:", settings?.merchantPhone || "");
+                    const fallbackPhone = selectedTx?.customerPhone || settings?.merchantPhone || '';
+                    const phone = window.prompt("Masukkan nomor WhatsApp penerima:", fallbackPhone);
                     if (!phone) return;
-                    const clean = phone.replace(/[^0-9]/g, "");
+                    const clean = phone.replace(/[^0-9]/g, '');
                     if (clean.length < 9) {
-                      alert("Nomor WhatsApp tidak valid.");
+                      alert('Nomor WhatsApp tidak valid.');
                       return;
                     }
-                    const orderSubtotal = selectedTx.items.reduce((sum, item) => sum + (item.sellPrice || item.unitPrice || 0) * item.quantity, 0);
                     const total = selectedTx.total || 0;
-                    const serviceCharge = Math.max(0, total - orderSubtotal);
+                    const invoiceId = selectedTx.id ?? 'belum-diketahui';
+                    const rawCustomerName = (selectedTx.customerName || 'Umum')
+                      .replace(/\bmeja\b/gi, 'Order')
+                      .replace(/\bself\s*order\b/gi, 'Order');
+                    const merchantName = settings?.merchantName || 'MIE JEBEW GDC';
+                    const receiptUrl = `${window.location.origin}/receipt/${invoiceId}`;
+
                     const waUrl =
                       `https://api.whatsapp.com/send?phone=${clean}` +
                       `&text=${encodeURIComponent(
-                        `*${settings?.merchantName || "MIE JEBEW GDC"}*\n` +
-                        `Nota: *${selectedTx.id}*\n` +
-                        `Tanggal: *${new Date(selectedTx.createdAt).toLocaleString("id-ID")}*\n` +
-                        `Pelanggan: *${(selectedTx.customerName || "Umum").replace(/\bmeja\b/gi, "Order").replace(/\bself\s*order\b/gi, "Order")}*\n` +
+                        `*${merchantName}*\n` +
+                        `Nota: *${invoiceId}*\n` +
+                        `Tanggal: *${new Date(selectedTx.createdAt).toLocaleString('id-ID')}*\n` +
+                        `Pelanggan: *${rawCustomerName}*\n` +
                         `Metode: *${selectedTx.paymentMethod}*\n` +
-                        `Total: *Rp ${total.toLocaleString("id-ID")}*\n` +
-                        `Struk digital: ${window.location.origin}/receipt/${selectedTx.id}`
+                        `Total: *Rp ${total.toLocaleString('id-ID')}*\n` +
+                        `Struk digital: ${receiptUrl}`
                       )}`;
-                    window.open(waUrl, "_blank");
+                    window.open(waUrl, '_blank');
                   }}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
                 >

@@ -291,7 +291,7 @@ export default function CheckoutModal({
     }
   };
 
-  const handleSendWhatsappReceipt = async () => {
+  const handleSendWhatsappReceipt = () => {
     if (!whatsappRecipient.trim()) {
       alert("Masukkan nomor WhatsApp penerima terlebih dahulu.");
       return;
@@ -312,33 +312,38 @@ export default function CheckoutModal({
       return;
     }
 
-    // Automatically copy receipt image to clipboard
-    const node = document.getElementById('receipt-capture-area');
-    if (node) {
-      try {
-        const blob = await toBlob(node, {
-          backgroundColor: '#ffffff',
-          style: {
-            display: 'block',
-            width: '320px',
-            padding: '16px',
-          }
-        });
-        if (blob) {
-          await navigator.clipboard.write([
-            new ClipboardItem({
-              [blob.type]: blob
-            })
-          ]);
-          toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di chat WhatsApp.");
-        }
-      } catch (err) {
-        console.error("Gagal menyalin gambar struk:", err);
-      }
-    }
-
+    // 1. Open WhatsApp immediately (synchronous to prevent popup blocker)
     const waUrl = `https://api.whatsapp.com/send?phone=${cleanNum}`;
     window.open(waUrl, "_blank");
+
+    // 2. Automatically copy receipt image to clipboard in the background
+    const node = document.getElementById('receipt-capture-area');
+    if (node) {
+      toBlob(node, {
+        backgroundColor: '#ffffff',
+        style: {
+          display: 'block',
+          width: '320px',
+          padding: '16px',
+        }
+      }).then(async (blob) => {
+        if (blob) {
+          try {
+            await navigator.clipboard.write([
+              new ClipboardItem({
+                [blob.type]: blob
+              })
+            ]);
+            toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di chat WhatsApp.");
+          } catch (clipErr) {
+            console.error("Gagal menulis ke clipboard:", clipErr);
+            toast.error("Gagal menyalin gambar otomatis. Silakan gunakan tombol SALIN GAMBAR di bawah.");
+          }
+        }
+      }).catch((err) => {
+        console.error("Gagal merender gambar struk:", err);
+      });
+    }
   };
 
   const handleCopyReceiptImage = async () => {

@@ -525,7 +525,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
               <div className="mt-4 space-y-2">
                 <button
                   type="button"
-                  onClick={async () => {
+                  onClick={() => {
                     const fallbackPhone = selectedTx?.customerPhone || settings?.merchantPhone || '';
                     const phone = window.prompt("Masukkan nomor WhatsApp penerima:", fallbackPhone);
                     if (!phone) return;
@@ -545,34 +545,39 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                       return;
                     }
 
-                    // Automatically copy receipt image to clipboard
-                    const node = document.getElementById('receipt-capture-area-history');
-                    if (node) {
-                      try {
-                        const blob = await toBlob(node, {
-                          backgroundColor: '#ffffff',
-                          style: {
-                            display: 'block',
-                            width: '320px',
-                            padding: '16px',
-                            color: '#000000'
-                          }
-                        });
-                        if (blob) {
-                          await navigator.clipboard.write([
-                            new ClipboardItem({
-                              [blob.type]: blob
-                            })
-                          ]);
-                          toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di chat WhatsApp.");
-                        }
-                      } catch (err) {
-                        console.error("Gagal menyalin gambar struk:", err);
-                      }
-                    }
-
+                    // 1. Open WhatsApp immediately (synchronous to prevent popup blocker)
                     const waUrl = `https://api.whatsapp.com/send?phone=${clean}`;
                     window.open(waUrl, '_blank');
+
+                    // 2. Automatically copy receipt image to clipboard in the background
+                    const node = document.getElementById('receipt-capture-area-history');
+                    if (node) {
+                      toBlob(node, {
+                        backgroundColor: '#ffffff',
+                        style: {
+                          display: 'block',
+                          width: '320px',
+                          padding: '16px',
+                          color: '#000000'
+                        }
+                      }).then(async (blob) => {
+                        if (blob) {
+                          try {
+                            await navigator.clipboard.write([
+                              new ClipboardItem({
+                                [blob.type]: blob
+                              })
+                            ]);
+                            toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di chat WhatsApp.");
+                          } catch (clipErr) {
+                            console.error("Gagal menulis ke clipboard:", clipErr);
+                            toast.error("Gagal menyalin gambar otomatis. Silakan gunakan tombol screenshot/unduh.");
+                          }
+                        }
+                      }).catch((err) => {
+                        console.error("Gagal merender gambar struk:", err);
+                      });
+                    }
                   }}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
                 >

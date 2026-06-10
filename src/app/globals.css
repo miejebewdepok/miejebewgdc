@@ -308,11 +308,6 @@ html:not(.dark) {
    Print Styles specifically for 58mm Thermal Printer
    ========================================================================= */
 @media print {
-  @page {
-    margin: 0;
-    size: 58mm auto;
-  }
-  
   body * {
     visibility: hidden;
   }
@@ -325,12 +320,10 @@ html:not(.dark) {
     position: absolute;
     left: 0;
     top: 0;
-    width: 58mm !important;
     margin: 0 !important;
     padding: 0 2mm !important; /* tiny margin for thermal paper */
     color: #000 !important;
     background: transparent !important;
-    font-size: 10px !important; 
     line-height: 1.2 !important;
   }
   

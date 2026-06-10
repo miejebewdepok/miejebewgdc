@@ -540,11 +540,17 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
             @media print {
               @page {
                 margin: 0;
-                size: ${settings?.printerPaperSize || '58mm'} auto;
+                size: ${settings?.printerPaperSize === '80mm' ? '80mm' : '58mm'} auto;
               }
               #print-receipt {
-                width: ${settings?.printerPaperSize || '58mm'} !important;
-                font-size: ${settings?.printerPaperSize === '80mm' ? '12px' : '10px'} !important;
+                width: ${settings?.printerPaperSize === '80mm' ? '76mm' : '54mm'} !important;
+                font-size: ${settings?.printerPaperSize === '80mm' ? '12px' : '9.5px'} !important;
+              }
+              #print-receipt table, #print-receipt td, #print-receipt th, #print-receipt div, #print-receipt p, #print-receipt span {
+                font-size: ${settings?.printerPaperSize === '80mm' ? '12px' : '9.5px'} !important;
+              }
+              #print-receipt .text-\\[8\\.5px\\], #print-receipt .text-\\[8px\\], #print-receipt .text-\\[9px\\] {
+                font-size: ${settings?.printerPaperSize === '80mm' ? '10px' : '8px'} !important;
               }
             }
           ` }} />

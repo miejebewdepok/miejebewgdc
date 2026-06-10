@@ -126,10 +126,10 @@ export function KasirView() {
   const userEmail = session?.user?.email;
   const isCabang2 = settings.branchCode === "CABANG_2";
 
-  const calculateToppingsSurcharge = (toppings: string[]) => {
+  const calculateToppingsSurcharge = (toppings: string[], category?: string) => {
     const isCabang2 = settings.branchCode === "CABANG_2";
     const branchCode = isCabang2 ? "CABANG_2" : "CABANG_1";
-    return sharedCalculateToppingsSurcharge(toppings, branchCode);
+    return sharedCalculateToppingsSurcharge(toppings, branchCode, category);
   };
 
   const defaultCategories = useMemo(() => {
@@ -1177,20 +1177,26 @@ export function KasirView() {
                 </div>
               )}
               {selectedToppings.length > 0 && (() => {
-                const totalSurcharge = calculateToppingsSurcharge(selectedToppings);
-                "const isCabang2 = isCabang2;"
+                const totalSurcharge = calculateToppingsSurcharge(selectedToppings, customizingProduct.category);
+                const isCabang2 = settings.branchCode === "CABANG_2";
+                const cleanCategory = customizingProduct?.category?.toLowerCase() || "";
+                const isLumpiaOrKebab = cleanCategory === "lumpia beef" || cleanCategory === "kebab";
                 const premiumKeys = isCabang2 
                   ? ["Telur"] 
                   : ["Beef Slice", "Keju Slice", "Telur"];
                 const premiumToppings = selectedToppings.filter((t) => premiumKeys.includes(t));
-                const standardToppings = selectedToppings.filter((t) => !premiumKeys.includes(t));
+                const standardToppings = selectedToppings.filter((t) => !premiumToppings.includes(t));
                 const stdCount = standardToppings.length;
                 return (
                   <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
                     <span>
                       Tambahan {selectedToppings.length} Topping 
-                      {stdCount > 0 && ` (${stdCount} Std${stdCount === 3 ? " Paket 3" : stdCount === 7 ? " Paket 7" : ""})`}
-                      {premiumToppings.length > 0 && ` (${premiumToppings.length} Premium)`}
+                      {!isLumpiaOrKebab && (
+                        <>
+                          {stdCount > 0 && ` (${stdCount} Std${stdCount === 3 ? " Paket 3" : stdCount === 7 ? " Paket 7" : ""})`}
+                          {premiumToppings.length > 0 && ` (${premiumToppings.length} Premium)`}
+                        </>
+                      )}
                     </span>
                     <span className="font-mono">
                       + Rp {totalSurcharge.toLocaleString('id-ID')}

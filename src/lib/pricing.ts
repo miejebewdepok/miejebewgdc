@@ -15,7 +15,13 @@ export function calculateSpicySurcharge(level: number, category: string, branchC
   return (level === 4 || level === 5) ? 2000 : 0;
 }
 
-export function calculateToppingsSurcharge(toppings: string[], branchCode: string) {
+export function calculateToppingsSurcharge(toppings: string[], branchCode: string, category?: string) {
+  const cleanCategory = category?.toLowerCase() || "";
+  if (cleanCategory === "lumpia beef" || cleanCategory === "kebab") {
+    const kejuCount = toppings.filter((t) => t === "Keju").length;
+    return kejuCount * 3000;
+  }
+
   const isCabang2 = branchCode === "CABANG_2";
   const premiumKeys = isCabang2 ? ["Telur"] : ["Telur", "Keju Slice"];
   const specialKeys = isCabang2 
@@ -94,14 +100,7 @@ export function calculateItemUnitPrice(
   
   const spicySurcharge = calculateSpicySurcharge(options.spicyLevel ?? 0, category, branchCode, isRisoles);
   
-  const cleanCategory = category?.toLowerCase() || "";
-  let toppingsSurcharge = 0;
-  if (cleanCategory === "lumpia beef" || cleanCategory === "kebab") {
-    const kejuCount = options.toppings?.filter((t) => t === "Keju").length || 0;
-    toppingsSurcharge = kejuCount * 3000;
-  } else {
-    toppingsSurcharge = calculateToppingsSurcharge(options.toppings ?? [], branchCode);
-  }
+  const toppingsSurcharge = calculateToppingsSurcharge(options.toppings ?? [], branchCode, category);
 
   const fillingSurcharge = calculateFillingSurcharge(category, options.size, options.filling);
   const spaghettiSurcharge = calculateSpaghettiSurcharge(name, options.size);

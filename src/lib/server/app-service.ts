@@ -702,7 +702,7 @@ export async function createTransaction(
       const isRisoles = product.name.toLowerCase().includes("risoles");
       const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
       const spicySurcharge = calculateSpicySurcharge(item.spicyLevel ?? 0, product.category, branchCode, isRisoles);
-      const toppingsSurcharge = calculateToppingsSurcharge(item.toppings ?? [], branchCode);
+      const toppingsSurcharge = calculateToppingsSurcharge(item.toppings ?? [], branchCode, product.category);
       const fillingSurcharge = calculateFillingSurcharge(product.category, item.size, item.filling);
       const spaghettiSurcharge = calculateSpaghettiSurcharge(product.name, item.size);
 

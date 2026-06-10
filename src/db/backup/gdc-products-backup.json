@@ -1,0 +1,262 @@
+[
+  {
+    "name": "Kebab",
+    "category": "Kebab",
+    "buyPrice": 5000,
+    "sellPrice": 10000,
+    "stock": 40,
+    "minStock": 5,
+    "desc": "Kebab ukuran Reguler/Large dengan varian isi",
+    "image_url": "https://i.ibb.co.com/XrzHnFHJ/KEBAB-BEEF.webp"
+  },
+  {
+    "name": "Lumpia Beef",
+    "category": "Lumpia Beef",
+    "buyPrice": 5000,
+    "sellPrice": 10000,
+    "stock": 48,
+    "minStock": 5,
+    "desc": "Lumpia isi daging sapi pilihan",
+    "image_url": "https://i.ibb.co.com/p6Z6y4cJ/LUMPIA-BEEF.webp"
+  },
+  {
+    "name": "Mie Jebew",
+    "category": "Mie Pedas",
+    "buyPrice": 5000,
+    "sellPrice": 10000,
+    "stock": 33,
+    "minStock": 5,
+    "desc": "Mie pedas khas Jebew dengan level 0-5",
+    "image_url": "https://i.ibb.co.com/VRd5DmT/MIE-JEBEW.webp"
+  },
+  {
+    "name": "Spaghetti  Goreng",
+    "category": "Mie Pedas",
+    "buyPrice": 5000,
+    "sellPrice": 10000,
+    "stock": 39,
+    "minStock": 5,
+    "desc": "Spaghetti goreng porsi Single/Double",
+    "image_url": "https://i.ibb.co.com/pr2ZrV8H/SPAGHETTI-GORENGS.webp"
+  },
+  {
+    "name": "Americano",
+    "category": "Qalla Coffee",
+    "buyPrice": 4000,
+    "sellPrice": 8000,
+    "stock": 30,
+    "minStock": 5,
+    "desc": "Espresso + air panas",
+    "image_url": "https://i.ibb.co.com/hJJcZ41t/Iced-Americano.webp"
+  },
+  {
+    "name": "Aren Latte",
+    "category": "Qalla Coffee",
+    "buyPrice": 6000,
+    "sellPrice": 11000,
+    "stock": 30,
+    "minStock": 5,
+    "desc": "Menu asli Mie Jebew GDC",
+    "image_url": "https://i.ibb.co.com/GG9Ctgy/Iced-Aren-Latte.webp"
+  },
+  {
+    "name": "Butterscotch Latte",
+    "category": "Qalla Coffee",
+    "buyPrice": 6000,
+    "sellPrice": 12000,
+    "stock": 30,
+    "minStock": 5,
+    "desc": "Menu asli Mie Jebew GDC",
+    "image_url": "https://i.ibb.co.com/gMSq6D8K/Iced-Butterscotch-Latte.webp"
+  },
+  {
+    "name": "Chocolatte",
+    "category": "Qalla Coffee",
+    "buyPrice": 3000,
+    "sellPrice": 6000,
+    "stock": 30,
+    "minStock": 5,
+    "desc": "Espresso + steamed milk + foam",
+    "image_url": "https://i.ibb.co.com/LD801GcJ/Iced-Chocolatte.webp"
+  },
+  {
+    "name": "Salted Caramel Latte",
+    "category": "Qalla Coffee",
+    "buyPrice": 5500,
+    "sellPrice": 11000,
+    "stock": 30,
+    "minStock": 5,
+    "desc": "Menu asli Mie Jebew GDC",
+    "image_url": "https://i.ibb.co.com/WWM38Mdq/Iced-Caramel-Latte.webp"
+  },
+  {
+    "name": "Vanilla Latte",
+    "category": "Qalla Coffee",
+    "buyPrice": 5000,
+    "sellPrice": 10000,
+    "stock": 30,
+    "minStock": 5,
+    "desc": "Menu asli Mie Jebew GDC",
+    "image_url": "https://i.ibb.co.com/My5C0TqB/Iced-Vanilla-Latte.webp"
+  },
+  {
+    "name": "Lemonade",
+    "category": "Qalla Juice",
+    "buyPrice": 3500,
+    "sellPrice": 7000,
+    "stock": 25,
+    "minStock": 5,
+    "desc": "Menu asli Mie Jebew GDC",
+    "image_url": "https://i.ibb.co.com/0VvPHkg2/Lemonade.webp"
+  },
+  {
+    "name": "Strawberry Lemon",
+    "category": "Qalla Juice",
+    "buyPrice": 4500,
+    "sellPrice": 9000,
+    "stock": 20,
+    "minStock": 5,
+    "desc": "Menu asli Mie Jebew GDC",
+    "image_url": "https://i.ibb.co.com/YB6PfzxX/Strawberry-Lemonade.webp"
+  },
+  {
+    "name": "Strawberry Milky",
+    "category": "Qalla Juice",
+    "buyPrice": 6000,
+    "sellPrice": 12000,
+    "stock": 30,
+    "minStock": 5,
+    "desc": "Menu asli Mie Jebew GDC",
+    "image_url": "https://i.ibb.co.com/RkcCB67Z/Strawberry-Milky.webp"
+  },
+  {
+    "name": "Strawberry Slush",
+    "category": "Qalla Juice",
+    "buyPrice": 5000,
+    "sellPrice": 10000,
+    "stock": 30,
+    "minStock": 5,
+    "desc": "Menu asli Mie Jebew GDC",
+    "image_url": "https://i.ibb.co.com/KxCqsgVr/Strawberry-Slush.webp"
+  },
+  {
+    "name": "Jasmine Tea",
+    "category": "Qalla Tea",
+    "buyPrice": 2000,
+    "sellPrice": 5000,
+    "stock": 23,
+    "minStock": 5,
+    "desc": "Menu asli Mie Jebew GDC",
+    "image_url": "https://i.ibb.co.com/hx5yL3SG/JASMINE-TEA.webp"
+  },
+  {
+    "name": "Lemon Tea",
+    "category": "Qalla Tea",
+    "buyPrice": 2000,
+    "sellPrice": 5000,
+    "stock": 30,
+    "minStock": 5,
+    "desc": "Menu asli Mie Jebew GDC",
+    "image_url": "https://i.ibb.co.com/XfNks5hX/LEMON-TEA.webp"
+  },
+  {
+    "name": "Lychee Tea",
+    "category": "Qalla Tea",
+    "buyPrice": 2500,
+    "sellPrice": 5000,
+    "stock": 19,
+    "minStock": 5,
+    "desc": "Menu asli Mie Jebew GDC",
+    "image_url": "https://i.ibb.co.com/1fW5TJP8/LYCHEE-TEA.webp"
+  },
+  {
+    "name": "Matcha Aren Latte",
+    "category": "Qalla Tea",
+    "buyPrice": 6000,
+    "sellPrice": 12000,
+    "stock": 20,
+    "minStock": 5,
+    "desc": "Menu asli Mie Jebew GDC",
+    "image_url": "https://i.ibb.co.com/chrKLrFm/Iced-Matcha-Aren-Latte.webp"
+  },
+  {
+    "name": "Matcha Latte",
+    "category": "Qalla Tea",
+    "buyPrice": 5000,
+    "sellPrice": 10000,
+    "stock": 30,
+    "minStock": 5,
+    "desc": "Menu asli Mie Jebew GDC",
+    "image_url": "https://i.ibb.co.com/j9BKS44n/Iced-Matcha-Latte.webp"
+  },
+  {
+    "name": "Sakura Tea",
+    "category": "Qalla Tea",
+    "buyPrice": 25000,
+    "sellPrice": 5000,
+    "stock": 19,
+    "minStock": 5,
+    "desc": "Menu asli Mie Jebew GDC",
+    "image_url": "https://i.ibb.co.com/pvPgDFPT/SAKURA-TEA.webp"
+  },
+  {
+    "name": "Strawberry Matcha Latte",
+    "category": "Qalla Tea",
+    "buyPrice": 7000,
+    "sellPrice": 14000,
+    "stock": 30,
+    "minStock": 5,
+    "desc": "Menu asli Mie Jebew GDC",
+    "image_url": "https://i.ibb.co.com/7xmD1Ndv/Iced-Strawberry-Matcha-Latte.webp"
+  },
+  {
+    "name": "Vanilla Tea",
+    "category": "Qalla Tea",
+    "buyPrice": 2000,
+    "sellPrice": 5000,
+    "stock": 30,
+    "minStock": 5,
+    "desc": "Menu asli Mie Jebew GDC",
+    "image_url": "https://i.ibb.co.com/QjD5Rkmq/VANILLA-TEA.webp"
+  },
+  {
+    "name": "Chicken Katsu",
+    "category": "Snack",
+    "buyPrice": 3500,
+    "sellPrice": 7000,
+    "stock": 0,
+    "minStock": 5,
+    "desc": "Chicken katsu renyah",
+    "image_url": "https://i.ibb.co.com/vM6j5d4/CHICKEN-KATSU.webp"
+  },
+  {
+    "name": "Lumpia Udang",
+    "category": "Snack",
+    "buyPrice": 1500,
+    "sellPrice": 3000,
+    "stock": 0,
+    "minStock": 5,
+    "desc": "Lumpia udang renyah",
+    "image_url": "https://i.ibb.co.com/CK7m7ZpQ/LUMPIA-UDANG.webp"
+  },
+  {
+    "name": "Risoles",
+    "category": "Snack",
+    "buyPrice": 2000,
+    "sellPrice": 4000,
+    "stock": 0,
+    "minStock": 5,
+    "desc": "{\"text\":\"Menu asli Mie Jebew GDC\",\"mentaiImageUrl\":\"https://i.ibb.co.com/4gSF05jb/RISOLES-KAKEK-MENTAI.webp\",\"ragoutImageUrl\":\"https://i.ibb.co.com/bMPPhRv0/RISOLES-KAKEK-RAGOUT.webp\"}",
+    "image_url": "https://i.ibb.co.com/bnd8T4c/RISOLES-KAKEK-MAYO.webp"
+  },
+  {
+    "name": "Udang Keju",
+    "category": "Snack",
+    "buyPrice": 2000,
+    "sellPrice": 4000,
+    "stock": 0,
+    "minStock": 5,
+    "desc": "Udang keju goreng krispi",
+    "image_url": "https://i.ibb.co.com/Dfsq9Dx0/UDANG-KEJU.webp"
+  }
+]

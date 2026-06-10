@@ -1572,6 +1572,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                       { label: "Telur (+Rp 5.000)", key: "Telur", def: 2400 },
                       { label: "Beef Slice (+Rp 2.500)", key: "Beef Slice", def: 1500 },
                       { label: "Keju Slice (+Rp 3.000)", key: "Keju Slice", def: 1800 },
+                      { label: "Keju (+Rp 3.000)", key: "Keju", def: 1800 },
                       { label: "Bakso (+Rp 2.000)", key: "Bakso", def: 1200 },
                       { label: "Sosis (+Rp 2.000)", key: "Sosis", def: 1200 },
                       { label: "Nugget (+Rp 2.000)", key: "Nugget", def: 1200 },
@@ -1626,6 +1627,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                       // Lumpia Beef Fillings
                       { label: "Lumpia - Beef Patty (+Rp 4.000)", key: "filling_Beef Patty", def: 2400, type: "filling" },
                       { label: "Lumpia - Chicken Katsu (+Rp 5.000)", key: "filling_Chicken Katsu", def: 3000, type: "filling" },
+                      { label: "Lumpia - Telur Dadar (+Rp 5.000)", key: "filling_Telur Dadar", def: 3000, type: "filling" },
                       { label: "Lumpia - Special (+Rp 10.000)", key: "filling_Special", def: 6000, type: "filling" },
                       // Kebab Sizes & Fillings
                       { label: "Kebab Reg - Beef (+Rp 2.000)", key: "filling_Beef", def: 1200, type: "filling" },

@@ -65,7 +65,7 @@ export function calculateFillingSurcharge(category: string, size: string | undef
     }
   } else if (cleanCategory === 'lumpia beef') {
     if (filling === 'Beef Patty') return 4000;
-    if (filling === 'Chicken Katsu') return 5000;
+    if (filling === 'Chicken Katsu' || filling === 'Telur Dadar') return 5000;
     if (filling === 'Special') return 10000;
   }
   return 0;
@@ -93,7 +93,16 @@ export function calculateItemUnitPrice(
   if (bypassed) return basePrice;
   
   const spicySurcharge = calculateSpicySurcharge(options.spicyLevel ?? 0, category, branchCode, isRisoles);
-  const toppingsSurcharge = calculateToppingsSurcharge(options.toppings ?? [], branchCode);
+  
+  const cleanCategory = category?.toLowerCase() || "";
+  let toppingsSurcharge = 0;
+  if (cleanCategory === "lumpia beef" || cleanCategory === "kebab") {
+    const kejuCount = options.toppings?.filter((t) => t === "Keju").length || 0;
+    toppingsSurcharge = kejuCount * 3000;
+  } else {
+    toppingsSurcharge = calculateToppingsSurcharge(options.toppings ?? [], branchCode);
+  }
+
   const fillingSurcharge = calculateFillingSurcharge(category, options.size, options.filling);
   const spaghettiSurcharge = calculateSpaghettiSurcharge(name, options.size);
 

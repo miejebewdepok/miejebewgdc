@@ -863,6 +863,7 @@ export function KasirView() {
                     { label: "Kornet", surcharge: 0 },
                     { label: "Beef Patty", surcharge: 4000 },
                     { label: "Chicken Katsu", surcharge: 5000 },
+                    { label: "Telur Dadar", surcharge: 5000 },
                     { label: "Special", surcharge: 10000 },
                   ].map((filling) => {
                     const isSelected = selectedFilling === filling.label;
@@ -890,6 +891,48 @@ export function KasirView() {
                       </button>
                     );
                   })}
+                </div>
+              </div>
+            )}
+
+            {/* Topping Selection for Kebab and Lumpia Beef (Only Keju) */}
+            {(customizingProduct.category === 'Kebab' || customizingProduct.category === 'Lumpia Beef') && (
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                  Pilihan Topping
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  {(() => {
+                    const t = "Keju";
+                    const isSelected = selectedToppings.includes(t);
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => {
+                          if (isSelected) {
+                            setSelectedToppings(selectedToppings.filter(x => x !== t));
+                          } else {
+                            setSelectedToppings([...selectedToppings, t]);
+                          }
+                        }}
+                        className={cn(
+                          "py-2.5 px-3 rounded-2xl text-xs font-bold font-sans cursor-pointer transition-all duration-200 flex flex-col items-center justify-center border",
+                          isSelected
+                            ? "bg-red-600 border-red-500 text-white shadow-lg shadow-red-600/35"
+                            : "bg-sidebar-accent/50 dark:bg-white/5 border-sidebar-border dark:border-white/5 text-foreground/80 dark:text-slate-200 hover:bg-sidebar-accent dark:hover:bg-white/10"
+                        )}
+                      >
+                        <span className="text-center leading-tight">{t}</span>
+                        <span className={cn(
+                          "text-[8px] mt-0.5 font-bold",
+                          isSelected ? "text-yellow-300" : "text-yellow-600 dark:text-yellow-400"
+                        )}>
+                          +Rp 3k
+                        </span>
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             )}

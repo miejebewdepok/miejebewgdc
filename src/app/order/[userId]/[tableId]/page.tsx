@@ -1176,6 +1176,7 @@ export default function CustomerOrderPage(props: {
                       { label: "Kornet", surcharge: 0 },
                       { label: "Beef Patty", surcharge: 4000 },
                       { label: "Chicken Katsu", surcharge: 5000 },
+                      { label: "Telur Dadar", surcharge: 5000 },
                       { label: "Special", surcharge: 10000 },
                     ].map((filling) => {
                       const isSelected = selectedFilling === filling.label;
@@ -1231,6 +1232,44 @@ export default function CustomerOrderPage(props: {
                         </button>
                       );
                     })}
+                  </div>
+                </div>
+              )}
+
+              {/* Topping Selection for Kebab and Lumpia Beef (Only Keju) */}
+              {(customizingProduct.category === "Kebab" || customizingProduct.category === "Lumpia Beef") && (
+                <div className="my-5 border-t border-white/5 pt-4">
+                  <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-2">
+                    Topping Tambahan
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(() => {
+                      const t = "Keju";
+                      const isSelected = selectedToppings.includes(t);
+                      return (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => {
+                            if (isSelected) {
+                              setSelectedToppings(selectedToppings.filter(x => x !== t));
+                            } else {
+                              setSelectedToppings([...selectedToppings, t]);
+                            }
+                          }}
+                          className={`py-2.5 border rounded-xl text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
+                            isSelected
+                              ? "bg-red-600 border-red-500 text-white shadow-md shadow-red-600/25"
+                              : "bg-white/5 border-white/5 text-slate-450 hover:text-white"
+                          }`}
+                        >
+                          <span>{t}</span>
+                          <span className="text-[8px] text-yellow-500 font-mono mt-0.5">
+                            +Rp 3.000
+                          </span>
+                        </button>
+                      );
+                    })()}
                   </div>
                 </div>
               )}

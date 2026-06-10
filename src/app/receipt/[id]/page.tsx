@@ -243,14 +243,14 @@ export default function ReceiptPage(props: {
                 {merchant.storeTagline}
               </p>
             )}
-            <div className="flex flex-col gap-1 mt-3 text-[10px] text-slate-400 font-medium font-sans">
-              <div className="flex items-center justify-center gap-1">
-                <MapPin className="w-3 h-3 text-red-500 shrink-0" />
-                <span>{merchant.storeAddress}, {merchant.city}</span>
+            <div className="flex flex-col gap-1.5 mt-3 text-[10px] text-slate-400 font-medium font-sans">
+              <div className="flex items-start justify-center gap-1.5 max-w-[280px] mx-auto text-center">
+                <MapPin className="w-3 h-3 text-red-500 shrink-0 mt-0.5" />
+                <span className="leading-tight text-center">{merchant.storeAddress}, {merchant.city}</span>
               </div>
-              <div className="flex items-center justify-center gap-1 mt-0.5">
+              <div className="flex items-center justify-center gap-1.5 mt-1 text-center">
                 <Phone className="w-3 h-3 text-emerald-500 shrink-0" />
-                <span>WA: {merchant.merchantPhone || merchant.ownerWhatsapp}</span>
+                <span className="leading-none text-center">WA: {merchant.merchantPhone || merchant.ownerWhatsapp}</span>
               </div>
             </div>
           </div>

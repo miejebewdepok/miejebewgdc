@@ -147,6 +147,7 @@ export default function CheckoutModal({
   // Mobile tab switcher
   const [mobileTab, setMobileTab] = useState<'payment' | 'receipt'>('payment');
   const [whatsappRecipient, setWhatsappRecipient] = useState('');
+  const [mobileReceiptImg, setMobileReceiptImg] = useState<string | null>(null);
 
   useEffect(() => {
     const rand = Math.floor(1000 + Math.random() * 9000);
@@ -434,11 +435,16 @@ export default function CheckoutModal({
         backgroundColor: '#09090b',
         pixelRatio: 3,
       });
-      const link = document.createElement('a');
-      link.download = `struk-${activeInvoiceNo}.png`;
-      link.href = dataUrl;
-      link.click();
-      toast.success("Gambar struk berhasil diunduh.");
+      if (isMobileOrWebView()) {
+        setMobileReceiptImg(dataUrl);
+        toast.info("Gunakan sentuh & tahan pada gambar struk untuk mengunduh.");
+      } else {
+        const link = document.createElement('a');
+        link.download = `struk-${activeInvoiceNo}.png`;
+        link.href = dataUrl;
+        link.click();
+        toast.success("Gambar struk berhasil diunduh.");
+      }
     } catch (err) {
       console.error("Gagal mengunduh gambar struk:", err);
       toast.error("Gagal mengunduh gambar.");
@@ -463,14 +469,14 @@ export default function CheckoutModal({
         <p className="text-[10px] text-slate-400 italic mt-0.5 font-medium leading-none">
           Coba Sekali, Nagih Berkali-Kali
         </p>
-        <div className="flex flex-col gap-1 mt-3 text-[10px] text-[#a1a1aa] font-medium font-sans">
-          <div className="flex items-center justify-center gap-1">
-            <MapPin className="w-3 h-3 text-[#ef4444] shrink-0" />
-            <span>{settings.merchantAddress}</span>
+        <div className="flex flex-col gap-1.5 mt-3 text-[10px] text-[#a1a1aa] font-medium font-sans">
+          <div className="flex items-start justify-center gap-1.5 max-w-[280px] mx-auto text-center">
+            <MapPin className="w-3 h-3 text-[#ef4444] shrink-0 mt-0.5" />
+            <span className="leading-tight text-center">{settings.merchantAddress}</span>
           </div>
-          <div className="flex items-center justify-center gap-1 mt-0.5">
+          <div className="flex items-center justify-center gap-1.5 mt-1 text-center">
             <Phone className="w-3 h-3 text-[#10b981] shrink-0" />
-            <span>WA: {settings.merchantPhone}</span>
+            <span className="leading-none text-center">WA: {settings.merchantPhone}</span>
           </div>
         </div>
       </div>
@@ -1007,6 +1013,33 @@ export default function CheckoutModal({
           <PremiumReceiptContent />
         </div>
       </div>
+      {mobileReceiptImg && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[999] flex flex-col items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-900/90 border border-white/10 p-5 rounded-3xl w-full max-w-sm flex flex-col items-center gap-4 relative animate-in zoom-in-95 duration-250">
+            <button
+              onClick={() => setMobileReceiptImg(null)}
+              className="absolute top-4 right-4 p-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-slate-400 hover:text-white transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="text-center pt-2">
+              <h4 className="text-sm font-black text-white uppercase tracking-wider">Unduh Gambar Struk</h4>
+              <p className="text-[10.5px] text-slate-400 mt-1 max-w-[280px]">
+                Sentuh & tahan (tekan lama) gambar di bawah ini, lalu pilih <strong className="text-yellow-500">"Simpan Gambar"</strong> atau <strong className="text-yellow-500">"Download Image"</strong>.
+              </p>
+            </div>
+            <div className="w-full max-h-[60vh] overflow-y-auto rounded-2xl border border-white/5 bg-black p-2 no-scrollbar">
+              <img src={mobileReceiptImg} className="w-full h-auto rounded-lg select-text" alt="Struk Pembayaran" />
+            </div>
+            <button
+              onClick={() => setMobileReceiptImg(null)}
+              className="w-full bg-red-600 hover:bg-red-700 text-white rounded-xl py-3 text-xs font-bold cursor-pointer transition-colors"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

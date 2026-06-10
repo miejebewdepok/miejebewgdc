@@ -57,6 +57,7 @@ export async function GET(
         storeName: store?.storeName ?? "MIE JEBEW GDC",
         storeAddress: store?.storeAddress ?? "",
         ownerWhatsapp: store?.ownerWhatsapp ?? "",
+        merchantPhone: store?.ownerWhatsapp ?? "",
         city: store?.city ?? "",
         receiptHeader: businessNotes?.receiptHeader ?? "TERIMA KASIH",
         receiptFooter: businessNotes?.receiptFooter ?? "ATAS KUNJUNGAN ANDA",

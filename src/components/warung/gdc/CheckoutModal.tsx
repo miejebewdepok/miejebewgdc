@@ -851,10 +851,7 @@ export default function CheckoutModal({
                   </div>
                 )}
 
-                {/* RECEIPT PREVIEW PANEL */}
-                <div className="max-w-sm mx-auto w-full mb-4 bg-[#09090b] border border-white/10 rounded-3xl p-1 max-h-[35vh] overflow-y-auto no-scrollbar shadow-inner">
-                  <PremiumReceiptContent />
-                </div>
+
 
                 <div className="border-t border-black/10 dark:border-white/5 pt-4 flex flex-col gap-3 max-w-sm mx-auto w-full">
                     <button 

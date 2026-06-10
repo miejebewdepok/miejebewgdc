@@ -1013,7 +1013,10 @@ export default function CustomerOrderPage(props: {
               </div>
 
               {/* Spicy level selector */}
-              {!(["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(customizingProduct.category)) && (
+              {!(isCabang2
+                  ? ["Tea Series", "Delight Series", "chocolatte"].includes(customizingProduct.category)
+                  : ["Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(customizingProduct.category)
+                ) && (
                 <div className="my-5">
                   <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-2.5">
                     Tingkat Kepedasan
@@ -1233,7 +1236,10 @@ export default function CustomerOrderPage(props: {
               )}
 
               {/* Toppings selector (Only for non-Kebab, non-Lumpia Beef, non-Snack, non-Drinks) */}
-              {!["Kebab", "Lumpia Beef", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(customizingProduct.category) && (
+              {!(isCabang2
+                  ? ["Tea Series", "Delight Series", "chocolatte"].includes(customizingProduct.category)
+                  : ["Kebab", "Lumpia Beef", "Snack", "Qalla Coffee", "Qalla Tea", "Qalla Juice"].includes(customizingProduct.category)
+                ) && (
                 <div className="my-5 border-t border-white/5 pt-4">
                   <label className="text-[9px] font-black text-slate-455 uppercase tracking-wider block mb-2">
                     Toppings Tambahan

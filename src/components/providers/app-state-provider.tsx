@@ -199,7 +199,10 @@ export function AppStateProvider({
       try {
         const response = await requestJson<{ savedBills: SavedBill[] }>("/api/saved-bills");
         
-        if (response.savedBills.length > state.savedBills.length) {
+        const currentIds = new Set(state.savedBills.map((b) => b.id));
+        const hasNewBills = response.savedBills.some((b) => !currentIds.has(b.id));
+        
+        if (hasNewBills && state.savedBills.length > 0) {
           await showLocalNotification({
             title: 'Pesanan Baru',
             body: `Ada pesanan masuk dari meja. Total bill saat ini: ${response.savedBills.length}`,
@@ -208,8 +211,10 @@ export function AppStateProvider({
         }
         
         setState((current) => {
-          // Compare length of incoming bills with current bills to play audio alert
-          if (response.savedBills.length > current.savedBills.length) {
+          const prevIds = new Set(current.savedBills.map((b) => b.id));
+          const hasIncoming = response.savedBills.some((b) => !prevIds.has(b.id));
+          
+          if (hasIncoming && current.savedBills.length > 0) {
 
             // Play Gojek/Shopee style cheerful marimba arpeggio tune (rich bell tone + loud gain + autoplay bypass)
             // Play Upgraded Exciting Beat and Indonesian Female Voice Overlay (repeats exactly 5 times)

@@ -15,19 +15,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Missing userId parameter" }, { status: 400 });
     }
 
-    // Get products
-    const productRows = await db
-      .select()
-      .from(products)
-      .where(eq(products.userId, userId))
-      .orderBy(desc(products.createdAt));
-
     // Get store name & details
     const [profile] = await db
       .select()
       .from(storeProfiles)
       .where(eq(storeProfiles.userId, userId))
       .limit(1);
+
+    if (!profile) {
+      return NextResponse.json({ error: "Warung tidak ditemukan atau belum aktif." }, { status: 404 });
+    }
+
+    // Get products
+    const productRows = await db
+      .select()
+      .from(products)
+      .where(eq(products.userId, userId))
+      .orderBy(desc(products.createdAt));
 
     let productOrder: string[] = [];
     let branchCode = "CABANG_1";

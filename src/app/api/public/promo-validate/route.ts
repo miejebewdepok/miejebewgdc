@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/client";
-import { customerPromoClaims } from "@/db/schema";
+import { customerPromoClaims, storeProfiles } from "@/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
 import { handleRouteError } from "@/lib/server/route-error";
 
@@ -15,6 +15,17 @@ export async function GET(request: NextRequest) {
 
     if (!userId) {
       return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+    }
+
+    // Check if store profile exists
+    const [profile] = await db
+      .select()
+      .from(storeProfiles)
+      .where(eq(storeProfiles.userId, userId))
+      .limit(1);
+
+    if (!profile) {
+      return NextResponse.json({ error: "Warung tidak ditemukan atau belum aktif." }, { status: 404 });
     }
 
     let whatsappUsed = false;

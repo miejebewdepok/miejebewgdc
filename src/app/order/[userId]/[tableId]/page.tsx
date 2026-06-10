@@ -151,12 +151,12 @@ export default function CustomerOrderPage(props: {
       .finally(() => setLoading(false));
   }, [userId]);
 
-  // Auto-reset success screen back to menu after 10 seconds so the next customer starts fresh
+  // Auto-reset success screen back to menu after 120 seconds (2 minutes) so the next customer starts fresh
   useEffect(() => {
     if (orderSuccess) {
       const timer = setTimeout(() => {
         setOrderSuccess(false);
-      }, 10000);
+      }, 120000);
       return () => clearTimeout(timer);
     }
   }, [orderSuccess]);
@@ -731,13 +731,6 @@ export default function CustomerOrderPage(props: {
           Silakan konfirmasi ke kasir untuk pembayaran, atau tunggu makanan lezat Anda disajikan langsung!
         </p>
 
-        <button
-          onClick={() => setOrderSuccess(false)}
-          className="mt-8 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-xs font-extrabold cursor-pointer transition-colors"
-        >
-          Pesan Menu Tambahan
-        </button>
-
         {(() => {
           const waNumber = isCabang2 ? "6281310718192" : "628989419121";
           const customerDisplayName = lastBillName.split(" - ").slice(1).join(" - ") || lastBillName;
@@ -748,13 +741,20 @@ export default function CustomerOrderPage(props: {
               href={waHref}
               target="_blank"
               rel="noreferrer"
-              className="mt-3 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-xs font-black cursor-pointer transition-colors flex items-center justify-center gap-2"
+              className="mt-8 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-xs font-black cursor-pointer transition-colors flex items-center justify-center gap-2"
             >
               <MessageCircle className="w-4 h-4" />
-              Chat Kasir
+              Konfirmasi Pesanan
             </a>
           );
         })()}
+
+        <button
+          onClick={() => setOrderSuccess(false)}
+          className="mt-3 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-xs font-extrabold cursor-pointer transition-colors"
+        >
+          Pesan Menu Tambahan
+        </button>
       </div>
     );
   }

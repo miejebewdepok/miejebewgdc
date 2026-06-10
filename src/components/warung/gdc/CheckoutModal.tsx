@@ -144,6 +144,7 @@ export default function CheckoutModal({
   const [createdTransaction, setCreatedTransaction] = useState<Transaction | null>(null);
   // Mobile tab switcher
   const [mobileTab, setMobileTab] = useState<'payment' | 'receipt'>('payment');
+  const [whatsappRecipient, setWhatsappRecipient] = useState('');
 
   useEffect(() => {
     const rand = Math.floor(1000 + Math.random() * 9000);
@@ -286,6 +287,55 @@ export default function CheckoutModal({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSendWhatsappReceipt = () => {
+    if (!whatsappRecipient.trim()) {
+      alert("Masukkan nomor WhatsApp penerima terlebih dahulu.");
+      return;
+    }
+    
+    // Clean and normalize WhatsApp number (convert 08xxx to 628xxx)
+    let cleanNum = whatsappRecipient.replace(/\D/g, "");
+    if (cleanNum.startsWith("0")) {
+      cleanNum = "62" + cleanNum.slice(1);
+    }
+    if (!cleanNum.startsWith("62") && cleanNum.length >= 9) {
+      cleanNum = "62" + cleanNum;
+    }
+
+    const itemsText = activeCartItems.map(item => {
+      const name = item.productName || item.product?.name || 'Menu';
+      const cleanName = name.replace(/\n/g, ' - ');
+      return `- ${item.quantity}x *${cleanName}* [Rp ${((item.sellPrice || item.unitPrice || 0) * item.quantity).toLocaleString('id-ID')}]`;
+    }).join('\n');
+
+    const text = `*${settings.merchantName || 'MIE JEBEW GDC'}*
+_Terima kasih atas kunjungan Anda!_
+
+*STRUK BELANJA DIGITAL*
+---------------------------------------
+Invoice: *${activeInvoiceNo}*
+Tanggal: *${new Date().toLocaleDateString('id-ID')}*
+Kasir: *${settings.userProfileName || settings.ownerName || 'Kasir'}*
+Pelanggan: *${activeCustomerName || 'Umum'}*
+Metode: *${activePaymentMethod}*
+---------------------------------------
+*PESANAN:*
+${itemsText}
+
+Subtotal: Rp ${activeSubtotal.toLocaleString('id-ID')}
+${settings.enableServiceCharge ? `Biaya Layanan: Rp ${activeServiceCharge.toLocaleString('id-ID')}\n` : ''}*Total Akhir: Rp ${activeTotal.toLocaleString('id-ID')}*
+Bayar: Rp ${activeAmountPaid ? activeAmountPaid.toLocaleString('id-ID') : activeTotal.toLocaleString('id-ID')}
+${activePaymentMethod === 'Tunai' ? `Kembalian: Rp ${activeChange.toLocaleString('id-ID')}` : ''}
+---------------------------------------
+_${settings.receiptFooter || 'ATAS KUNJUNGAN ANDA'}_
+
+🔗 *Lihat Struk Digital Lengkap:*
+${window.location.origin}/receipt/${activeInvoiceNo}`;
+
+    const waUrl = `https://api.whatsapp.com/send?phone=${cleanNum}&text=${encodeURIComponent(text)}`;
+    window.open(waUrl, "_blank");
   };
 
   // Shared receipt content — rendered in both mobile tab and desktop aside
@@ -540,6 +590,28 @@ export default function CheckoutModal({
                     <div className="px-3 py-1.5 bg-yellow-500 text-slate-950 font-black rounded-xl text-xs uppercase">Lunas</div>
                   </div>
                 )}
+
+                {/* WHATSAPP RECEIPT SHARE PANEL */}
+                <div className="max-w-sm mx-auto w-full mb-4 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl p-4 flex flex-col gap-2.5">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider block">KIRIM STRUK DIGITAL (WHATSAPP)</span>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="e.g. 08123456789"
+                      value={whatsappRecipient}
+                      onChange={(e) => setWhatsappRecipient(e.target.value)}
+                      className="flex-1 bg-black/10 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl py-2 px-3 text-xs text-foreground dark:text-white font-semibold font-mono focus:outline-none focus:ring-1 focus:ring-red-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSendWhatsappReceipt}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl px-4 py-2 flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer"
+                    >
+                      Kirim
+                    </button>
+                  </div>
+                </div>
+
                 <div className="border-t border-black/10 dark:border-white/5 pt-4 flex flex-col gap-3 max-w-sm mx-auto w-full">
                     <button type="button" onClick={() => {
                       if (isMobileOrWebView()) {

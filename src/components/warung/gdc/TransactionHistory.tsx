@@ -1,9 +1,9 @@
 // @ts-nocheck
 import React, { useState, useEffect } from 'react';
-import { toBlob } from 'html-to-image';
+import { toBlob, toPng } from 'html-to-image';
 import { toast } from 'sonner';
 import { Transaction } from '@/lib/types';
-import { Search, Calendar, DollarSign, FileText, ShoppingBag, ArrowRight, Printer, FlameIcon, X, Trash2, Edit2, Save, Loader2, Share2 } from 'lucide-react';
+import { Search, Calendar, DollarSign, FileText, ShoppingBag, ArrowRight, Printer, FlameIcon, X, Trash2, Edit2, Save, Loader2, Share2, Download, CheckCircle, MapPin, Phone } from 'lucide-react';
 import { useAppState } from '@/components/providers/app-state-provider';
 import { isMobileOrWebView } from '@/lib/utils';
 
@@ -410,114 +410,182 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                 </div>
 
                 {/* Simulated Printed Thermal Sticker in Slate theme */}
-                <div id="receipt-capture-area-history" className="bg-slate-50 dark:bg-slate-900 border border-black/10 dark:border-white/10 rounded-2xl p-4 text-xs font-mono text-slate-700 dark:text-slate-300">
-                  <div className="text-center border-b border-dashed border-black/20 dark:border-white/20 pb-2 mb-3">
-                    <span className="font-black text-foreground dark:text-white text-sm block">MIE JEBEW GDC</span>
-                    <span className="text-[9px] text-slate-500 dark:text-slate-400 block">Jl. Boulevard Grand Depok City, Depok</span>
+                <div 
+                  id="receipt-capture-area-history" 
+                  className="w-full bg-[#09090b] text-[#fef2f2] font-sans p-6 rounded-3xl border border-white/10 shadow-2xl relative select-none"
+                >
+                  {/* Lunas Stamp/Badge */}
+                  <div className="absolute top-5 right-5 px-3 py-1 bg-[#10b981]/10 border border-[#10b981]/30 text-[#34d399] font-black text-[10px] rounded-lg tracking-widest uppercase flex items-center gap-1 select-none">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
+                    Lunas
                   </div>
 
-                  <div className="flex flex-col gap-1.5 mb-3 text-[10px]">
-                    <div className="flex justify-between">
-                      <span>Nota ID:</span>
-                      <span className="font-semibold text-foreground dark:text-white">{selectedTx.id}</span>
+                  {/* Brand Header */}
+                  <div className="text-center pb-5 border-b border-white/5 mb-5 flex flex-col items-center">
+                    <div className="w-12 h-12 bg-[#ef4444]/10 text-[#ef4444] rounded-full flex items-center justify-center mb-3 border border-[#ef4444]/20">
+                      <CheckCircle className="w-6 h-6" />
                     </div>
-                    <div className="flex justify-between items-center my-1">
-                      <span>Tanggal:</span>
-                      {isEditing ? (
-                        <input 
-                          type="datetime-local"
-                          value={editCreatedAt}
-                          onChange={(e) => setEditCreatedAt(e.target.value)}
-                          className="bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded px-1.5 py-0.5 text-[10px] text-foreground dark:text-white outline-none focus:ring-1 focus:ring-red-500 w-44"
-                        />
-                      ) : (
-                        <span>{new Date(selectedTx.createdAt).toLocaleDateString()} {new Date(selectedTx.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                      )}
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Kasir:</span>
-                      <span>{settings?.userProfileName || settings?.ownerName || 'Kasir'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Pelanggan:</span>
-                      <span className="text-foreground dark:text-white font-bold">{(selectedTx.customerName || '').replace(/\bmeja\b/gi, 'Order').replace(/\bself\s*order\b/gi, 'Order')}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Metode:</span>
-                      {isEditing ? (
-                        <div className="flex items-center gap-1.5">
-                          <select 
-                            value={editPaymentMethod}
-                            onChange={(e) => setEditPaymentMethod(e.target.value)}
-                            className="bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded px-1.5 py-0.5 text-[10px] text-foreground dark:text-white outline-none focus:ring-1 focus:ring-red-500"
-                          >
-                            <option value="Tunai">Tunai</option>
-                            <option value="QRIS">QRIS</option>
-                            <option value="Transfer">Transfer</option>
-                          </select>
-                          <button 
-                            onClick={handleSave} 
-                            disabled={isSaving}
-                            className="bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 p-1 rounded transition-colors disabled:opacity-50"
-                            title="Simpan Perubahan"
-                          >
-                            {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="text-red-500 dark:text-red-400 font-bold uppercase">{selectedTx.paymentMethod}</span>
-                      )}
+                    <h1 className="text-base font-black tracking-tight uppercase text-white leading-tight">
+                      {settings?.merchantName || "MIE JEBEW GDC"}
+                    </h1>
+                    <p className="text-[10px] text-slate-400 italic mt-0.5 font-medium leading-none">
+                      Mie Jebew Terpedas & Terlezat
+                    </p>
+                    <div className="flex flex-col gap-1 mt-3 text-[10px] text-[#a1a1aa] font-medium font-sans">
+                      <div className="flex items-center justify-center gap-1">
+                        <MapPin className="w-3 h-3 text-[#ef4444] shrink-0" />
+                        <span>{settings?.merchantAddress || "Jl. Boulevard Grand Depok City, Depok"}</span>
+                      </div>
+                      <div className="flex items-center justify-center gap-1 mt-0.5">
+                        <Phone className="w-3 h-3 text-[#10b981] shrink-0" />
+                        <span>WA: {settings?.merchantPhone || "0812-xxxx-xxxx"}</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="border-t border-b border-dashed border-black/20 dark:border-white/20 py-2 my-2 text-[10px]">
-                    <table className="w-full text-left">
-                      <thead>
-                        <tr className="text-slate-500 dark:text-slate-400 font-normal">
-                          <th>Menu</th>
-                          <th className="text-center">Qty</th>
-                          <th className="text-right">Total</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {selectedTx.items.map((item, idx) => (
-                          <tr key={idx} className="align-top">
-                            <td className="py-1">
-                              {(() => {
-                                const productName = item.productName || item.product?.name || 'Menu';
-                                return productName.split('\n').map((line, i) => (
-                                  <span key={i} className={i === 0 ? "block text-foreground dark:text-white font-bold break-words whitespace-normal pr-1 leading-tight" : "block text-[9px] text-red-500 dark:text-red-400 font-extrabold uppercase tracking-tight mt-0.5"}>
-                                    {i === 0 ? line : `» ${line}`}
-                                  </span>
-                                ));
-                              })()}
-                              {item.notes && <span className="block text-[8px] text-yellow-600 dark:text-yellow-500 italic mt-0.5">* {item.notes}</span>}
-                            </td>
-                            <td className="text-center py-1 text-foreground dark:text-white font-bold">{item.quantity}</td>
-                            <td className="text-right py-1 text-foreground dark:text-white">{((item.sellPrice || item.unitPrice || 0) * item.quantity).toLocaleString('id-ID')}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  {/* Meta Info Table */}
+                  <div className="grid grid-cols-2 gap-3.5 text-[10.5px] border-b border-white/5 pb-5 mb-5">
+                    <div className="flex flex-col gap-1.5 text-left font-sans">
+                      <div>
+                        <span className="text-[#71717a] block uppercase font-bold text-[8.5px] tracking-wider mb-0.5">Pelanggan</span>
+                        <span className="text-white font-bold">
+                          {(selectedTx.customerName || 'Umum').replace(/\bmeja\b/gi, 'Order').replace(/\bself\s*order\b/gi, 'Order')}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[#71717a] block uppercase font-bold text-[8.5px] tracking-wider mb-0.5">Metode Bayar</span>
+                        {isEditing ? (
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <select 
+                              value={editPaymentMethod}
+                              onChange={(e) => setEditPaymentMethod(e.target.value)}
+                              className="bg-zinc-900 border border-white/20 rounded px-1.5 py-0.5 text-[10px] text-white outline-none focus:ring-1 focus:ring-red-500"
+                            >
+                              <option value="Tunai">Tunai</option>
+                              <option value="QRIS">QRIS</option>
+                              <option value="Transfer">Transfer</option>
+                            </select>
+                            <button 
+                              onClick={handleSave} 
+                              disabled={isSaving}
+                              className="bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-450 p-1 rounded transition-colors disabled:opacity-50"
+                              title="Simpan Perubahan"
+                            >
+                              {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-[#f87171] font-black uppercase">
+                            {selectedTx.paymentMethod}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5 text-right font-sans">
+                      <div>
+                        <span className="text-[#71717a] block uppercase font-bold text-[8.5px] tracking-wider mb-0.5">Tanggal</span>
+                        {isEditing ? (
+                          <input 
+                            type="datetime-local"
+                            value={editCreatedAt}
+                            onChange={(e) => setEditCreatedAt(e.target.value)}
+                            className="bg-white/10 border border-white/20 rounded px-1.5 py-0.5 text-[10px] text-white outline-none focus:ring-1 focus:ring-red-500 w-32 ml-auto"
+                          />
+                        ) : (
+                          <span className="text-white font-semibold font-mono">
+                            {new Date(selectedTx.createdAt).toLocaleDateString("id-ID")}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <span className="text-[#71717a] block uppercase font-bold text-[8.5px] tracking-wider mb-0.5">Waktu</span>
+                        <span className="text-white font-semibold font-mono">
+                          {new Date(selectedTx.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex flex-col gap-1 text-[10px]">
-                    <div className="flex justify-between">
-                      <span>Subtotal:</span>
-                      <span>{formatRupiah(calculatedSubtotal)}</span>
+                  {/* Items Section */}
+                  <div className="border-b border-white/5 pb-4 mb-4">
+                    <div className="flex items-center gap-1.5 mb-3 text-[#a1a1aa] text-left font-sans">
+                      <ShoppingBag className="w-3.5 h-3.5 text-[#ef4444]" />
+                      <span className="text-[10px] uppercase font-black tracking-wider">Item Belanjaan</span>
                     </div>
-                    <div className="flex justify-between font-bold text-foreground dark:text-white border-t border-black/10 dark:border-white/10 pt-1 mt-1">
-                      <span>Total tagihan:</span>
-                      <span className="text-yellow-600 dark:text-yellow-400">{formatRupiah(selectedTx.total)}</span>
+                    
+                    <div className="space-y-3 text-left font-sans">
+                      {selectedTx.items.map((item, idx) => {
+                        const productName = item.productName || item.product?.name || 'Menu';
+                        const quantity = item.quantity;
+                        const sellPrice = item.sellPrice || item.unitPrice || 0;
+                        const notes = item.notes || '';
+                        const lines = productName.split('\n');
+                        return (
+                          <div key={idx} className="flex justify-between items-start text-[11px]">
+                            <div className="flex-1 pr-3">
+                              <span className="text-white font-bold leading-tight block">
+                                {lines[0]}
+                              </span>
+                              {lines.slice(1).map((line, i) => (
+                                <span key={i} className="text-[9px] text-[#f87171] font-extrabold uppercase block tracking-tight mt-0.5">
+                                  » {line}
+                                </span>
+                              ))}
+                              {notes && notes.split('\n').map((n: string) => n.trim()).filter(Boolean).map((note: string, i: number) => (
+                                <span key={i} className="text-[9px] text-[#f87171] font-extrabold uppercase block tracking-tight mt-0.5">
+                                  » {note}
+                                </span>
+                              ))}
+                            </div>
+                            <div className="w-10 text-center text-[#d4d4d8] font-bold font-mono">
+                              {quantity}x
+                            </div>
+                            <div className="w-20 text-right text-white font-bold font-mono">
+                              {((item.sellPrice || item.unitPrice || 0) * item.quantity).toLocaleString('id-ID')}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                    <div className="flex justify-between text-slate-550 dark:text-slate-400">
-                      <span>Dibayarkan:</span>
-                      <span>{formatRupiah(amountPaidVal)}</span>
+                  </div>
+
+                  {/* Pricing Summary */}
+                  <div className="space-y-2 text-[11px] border-b border-white/5 pb-4 mb-4 font-sans text-left">
+                    <div className="flex justify-between text-[#a1a1aa]">
+                      <span>Subtotal Menu</span>
+                      <span className="font-mono">Rp {calculatedSubtotal.toLocaleString('id-ID')}</span>
                     </div>
-                    <div className="flex justify-between font-bold text-emerald-600 dark:text-emerald-400">
-                      <span>Uang Kembali:</span>
-                      <span>{formatRupiah(changeVal)}</span>
+                    {settings?.enableServiceCharge && serviceChargeVal > 0 && (
+                      <div className="flex justify-between text-[#a1a1aa]">
+                        <span>Biaya Layanan ({settings?.serviceChargeRate}%)</span>
+                        <span className="font-mono">Rp {serviceChargeVal.toLocaleString('id-ID')}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-black text-[13px] pt-1.5 border-t border-white/5">
+                      <span className="text-white">Total Akhir</span>
+                      <span className="text-[#eab308] font-mono">Rp {selectedTx.total.toLocaleString('id-ID')}</span>
                     </div>
+                    <div className="flex justify-between text-[#a1a1aa]">
+                      <span>Jumlah Uang Bayar</span>
+                      <span className="font-mono">Rp {(amountPaidVal || selectedTx.total).toLocaleString('id-ID')}</span>
+                    </div>
+                    {selectedTx.paymentMethod === "Tunai" && (
+                      <div className="flex justify-between font-bold text-[#34d399]">
+                        <span>Uang Kembalian</span>
+                        <span className="font-mono">Rp {changeVal.toLocaleString('id-ID')}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Footer Note */}
+                  <div className="text-center pt-2 font-sans">
+                    <span className="text-[9px] text-[#71717a] font-black uppercase tracking-widest block mb-0.5">
+                      {settings?.receiptHeader || "TERIMA KASIH"}
+                    </span>
+                    <span className="text-[9px] text-[#a1a1aa] font-black uppercase tracking-widest block">
+                      {settings?.receiptFooter || "ATAS KUNJUNGAN ANDA"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -553,18 +621,12 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
 
                     const nav = typeof navigator !== 'undefined' ? (navigator as any) : null;
                     const canUseShare = nav && nav.share && nav.canShare;
-
                     if (canUseShare) {
                       // Mobile native share flow
                       try {
                         const blob = await toBlob(node, {
-                          backgroundColor: '#ffffff',
-                          style: {
-                            display: 'block',
-                            width: '320px',
-                            padding: '16px',
-                            color: '#000000'
-                          }
+                          backgroundColor: '#09090b',
+                          pixelRatio: 3,
                         });
                         if (blob) {
                           const file = new File([blob], `struk-${selectedTx.id}.png`, { type: 'image/png' });
@@ -591,30 +653,73 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                     // 2. Automatically copy receipt image to clipboard in the background
                     try {
                       const blob = await toBlob(node, {
-                        backgroundColor: '#ffffff',
-                        style: {
-                          display: 'block',
-                          width: '320px',
-                          padding: '16px',
-                          color: '#000000'
-                        }
+                        backgroundColor: '#09090b',
+                        pixelRatio: 3,
                       });
                       if (blob) {
-                        await navigator.clipboard.write([
-                          new ClipboardItem({
-                            [blob.type]: blob
-                          })
-                        ]);
-                        toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di chat WhatsApp.");
+                        if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
+                          await navigator.clipboard.write([
+                            new ClipboardItem({
+                              [blob.type]: blob
+                            })
+                          ]);
+                          toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di chat WhatsApp.");
+                        } else if (navigator.clipboard?.writeText) {
+                          // Fallback to text copy if ClipboardItem is not supported (WebView / APK)
+                          const summaryText = `Struk Resmi ${settings?.merchantName || 'MIE JEBEW GDC'}\nInvoice: ${selectedTx.id}\nTotal: Rp ${selectedTx.total.toLocaleString('id-ID')}\nLink: https://miejebew.my.id/receipt/${selectedTx.id}`;
+                          await navigator.clipboard.writeText(summaryText);
+                          toast.success("Ringkasan teks struk disalin!");
+                        }
                       }
                     } catch (clipErr) {
                       console.error("Gagal menulis ke clipboard:", clipErr);
-                      toast.error("Gagal menyalin gambar otomatis. Silakan gunakan tombol screenshot/unduh.");
+                      // Fallback: trigger download automatically in WebView/APK if copying fails
+                      try {
+                        const dataUrl = await toPng(node, {
+                          backgroundColor: '#09090b',
+                          pixelRatio: 3,
+                        });
+                        const link = document.createElement('a');
+                        link.download = `struk-${selectedTx.id}.png`;
+                        link.href = dataUrl;
+                        link.click();
+                        toast.info("Gambar struk diunduh otomatis ke Galeri Anda.");
+                      } catch (dlErr) {
+                        console.error("Gagal mengunduh gambar otomatis:", dlErr);
+                      }
                     }
                   }}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Share2 className="w-4 h-4" /> KIRIM STRUK VIA WA
+                </button>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const node = document.getElementById('receipt-capture-area-history');
+                    if (!node) {
+                      toast.error("Struk belum siap dipindai.");
+                      return;
+                    }
+                    try {
+                      const dataUrl = await toPng(node, {
+                        backgroundColor: '#09090b',
+                        pixelRatio: 3,
+                      });
+                      const link = document.createElement('a');
+                      link.download = `struk-${selectedTx.id}.png`;
+                      link.href = dataUrl;
+                      link.click();
+                      toast.success("Gambar struk berhasil diunduh.");
+                    } catch (err) {
+                      console.error("Gagal mengunduh gambar struk:", err);
+                      toast.error("Gagal mengunduh gambar.");
+                    }
+                  }}
+                  className="w-full bg-amber-600 hover:bg-amber-700 border border-amber-500 text-white rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Download className="w-4 h-4" /> UNDUH GAMBAR STRUK
                 </button>
 
                 <button

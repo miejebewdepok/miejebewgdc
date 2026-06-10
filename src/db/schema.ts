@@ -50,6 +50,7 @@ export const transactionItems = pgTable("transaction_items", {
   quantity: integer("quantity").notNull(),
   unitPrice: integer("unit_price").notNull(),
   costPrice: integer("cost_price").notNull(),
+  notes: text("notes"),
 });
 
 export const debts = pgTable("debts", {

@@ -791,6 +791,8 @@ export async function createTransaction(
         .join(", ");
       extras.push(formattedToppings);
     }
+    const cleanNote = (item as any).note ? String((item as any).note).trim() : "";
+    if (cleanNote && cleanNote.length <= 200) extras.push(`Catatan: ${cleanNote}`);
     const finalName = extras.length > 0 ? `${product.name}\n${extras.join('\n')}` : product.name;
 
     return {

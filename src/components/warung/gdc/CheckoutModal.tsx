@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { CartItem, Transaction, Settings } from '@/lib/types';
-import { X, CreditCard, Banknote, QrCode, FileText, Printer, CheckCircle, Loader2, Copy, Download } from 'lucide-react';
+import { X, CreditCard, Banknote, QrCode, FileText, Printer, CheckCircle, Loader2, Copy, Download, MapPin, Phone, ShoppingBag } from 'lucide-react';
 import { isMobileOrWebView } from '@/lib/utils';
 import { toBlob, toPng } from 'html-to-image';
 import { toast } from 'sonner';
@@ -325,12 +325,8 @@ export default function CheckoutModal({
       // Mobile native share flow (directly attach image to WhatsApp/other apps)
       try {
         const blob = await toBlob(node, {
-          backgroundColor: '#ffffff',
-          style: {
-            display: 'block',
-            width: '320px',
-            padding: '16px',
-          }
+          backgroundColor: '#09090b',
+          pixelRatio: 3,
         });
         if (blob) {
           const file = new File([blob], `struk-${activeInvoiceNo}.png`, { type: 'image/png' });
@@ -354,27 +350,43 @@ export default function CheckoutModal({
     const waUrl = `https://api.whatsapp.com/send?phone=${cleanNum}`;
     window.open(waUrl, "_blank");
 
-    // 2. Automatically copy receipt image to clipboard in the background
+    // 2. Automatically copy receipt image to clipboard in the background or download automatically
     try {
       const blob = await toBlob(node, {
-        backgroundColor: '#ffffff',
-        style: {
-          display: 'block',
-          width: '320px',
-          padding: '16px',
-        }
+        backgroundColor: '#09090b',
+        pixelRatio: 3,
       });
       if (blob) {
-        await navigator.clipboard.write([
-          new ClipboardItem({
-            [blob.type]: blob
-          })
-        ]);
-        toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di chat WhatsApp.");
+        if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              [blob.type]: blob
+            })
+          ]);
+          toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di chat WhatsApp.");
+        } else if (navigator.clipboard?.writeText) {
+          // Fallback to text copy if ClipboardItem is not supported (WebView / APK)
+          const summaryText = `Struk Resmi ${settings.merchantName}\nInvoice: ${activeInvoiceNo}\nTotal: Rp ${activeTotal.toLocaleString('id-ID')}\nLink: https://miejebew.my.id/receipt/${activeInvoiceNo}`;
+          await navigator.clipboard.writeText(summaryText);
+          toast.success("Ringkasan teks struk disalin!");
+        }
       }
     } catch (clipErr) {
       console.error("Gagal menulis ke clipboard:", clipErr);
-      toast.error("Gagal menyalin gambar otomatis. Silakan gunakan tombol SALIN GAMBAR di bawah.");
+      // Fallback: trigger download automatically in WebView/APK if copying fails
+      try {
+        const dataUrl = await toPng(node, {
+          backgroundColor: '#09090b',
+          pixelRatio: 3,
+        });
+        const link = document.createElement('a');
+        link.download = `struk-${activeInvoiceNo}.png`;
+        link.href = dataUrl;
+        link.click();
+        toast.info("Gambar struk diunduh otomatis ke Galeri Anda.");
+      } catch (dlErr) {
+        console.error("Gagal mengunduh gambar otomatis:", dlErr);
+      }
     }
   };
 
@@ -386,24 +398,28 @@ export default function CheckoutModal({
     }
     try {
       const blob = await toBlob(node, {
-        backgroundColor: '#ffffff',
-        style: {
-          display: 'block',
-          width: '320px',
-          padding: '16px',
-        }
+        backgroundColor: '#09090b',
+        pixelRatio: 3,
       });
       if (!blob) throw new Error("Gagal merender gambar.");
       
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          [blob.type]: blob
-        })
-      ]);
-      toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di WhatsApp.");
+      if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            [blob.type]: blob
+          })
+        ]);
+        toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di WhatsApp.");
+      } else if (navigator.clipboard?.writeText) {
+        const summaryText = `Struk Resmi ${settings.merchantName}\nInvoice: ${activeInvoiceNo}\nTotal: Rp ${activeTotal.toLocaleString('id-ID')}\nLink: https://miejebew.my.id/receipt/${activeInvoiceNo}`;
+        await navigator.clipboard.writeText(summaryText);
+        toast.success("Teks nota berhasil disalin ke clipboard!");
+      } else {
+        throw new Error("Clipboard tidak didukung.");
+      }
     } catch (err) {
       console.error("Gagal menyalin gambar struk:", err);
-      toast.error("Gagal menyalin gambar. Silakan gunakan tombol Unduh Gambar.");
+      toast.error("Gagal menyalin. Silakan gunakan tombol Unduh Gambar.");
     }
   };
 
@@ -415,12 +431,8 @@ export default function CheckoutModal({
     }
     try {
       const dataUrl = await toPng(node, {
-        backgroundColor: '#ffffff',
-        style: {
-          display: 'block',
-          width: '320px',
-          padding: '16px',
-        }
+        backgroundColor: '#09090b',
+        pixelRatio: 3,
       });
       const link = document.createElement('a');
       link.download = `struk-${activeInvoiceNo}.png`;
@@ -432,6 +444,154 @@ export default function CheckoutModal({
       toast.error("Gagal mengunduh gambar.");
     }
   };
+
+  // Premium dark receipt content for capture & sharing (replicates the public digital receipt page layout)
+  const PremiumReceiptContent = () => (
+    <div className="w-full bg-[#09090b] text-[#fef2f2] font-sans p-6 rounded-3xl border border-white/10 shadow-2xl relative select-none">
+      {/* Lunas Stamp/Badge */}
+      <div className="absolute top-5 right-5 px-3 py-1 bg-[#10b981]/10 border border-[#10b981]/30 text-[#34d399] font-black text-[10px] rounded-lg tracking-widest uppercase flex items-center gap-1 select-none">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
+        Lunas
+      </div>
+
+      {/* Brand Header */}
+      <div className="text-center pb-5 border-b border-white/5 mb-5 flex flex-col items-center">
+        <div className="w-12 h-12 bg-[#ef4444]/10 text-[#ef4444] rounded-full flex items-center justify-center mb-3 border border-[#ef4444]/20">
+          <CheckCircle className="w-6 h-6" />
+        </div>
+        <h1 className="text-base font-black tracking-tight uppercase text-white leading-tight">
+          {settings.merchantName}
+        </h1>
+        <p className="text-[10px] text-slate-400 italic mt-0.5 font-medium leading-none">
+          Mie Jebew Terpedas & Terlezat
+        </p>
+        <div className="flex flex-col gap-1 mt-3 text-[10px] text-[#a1a1aa] font-medium font-sans">
+          <div className="flex items-center justify-center gap-1">
+            <MapPin className="w-3 h-3 text-[#ef4444] shrink-0" />
+            <span>{settings.merchantAddress}</span>
+          </div>
+          <div className="flex items-center justify-center gap-1 mt-0.5">
+            <Phone className="w-3 h-3 text-[#10b981] shrink-0" />
+            <span>WA: {settings.merchantPhone}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Meta Info Table */}
+      <div className="grid grid-cols-2 gap-3.5 text-[10.5px] border-b border-white/5 pb-5 mb-5">
+        <div className="flex flex-col gap-1.5 text-left">
+          <div>
+            <span className="text-[#71717a] block uppercase font-bold text-[8.5px] tracking-wider mb-0.5">Pelanggan</span>
+            <span className="text-white font-bold">
+              {(activeCustomerName || 'Umum').replace(/\bmeja\b/gi, 'Order').replace(/\bself\s*order\b/gi, 'Order')}
+            </span>
+          </div>
+          <div>
+            <span className="text-[#71717a] block uppercase font-bold text-[8.5px] tracking-wider mb-0.5">Metode Bayar</span>
+            <span className="text-[#f87171] font-black uppercase">
+              {activePaymentMethod}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1.5 text-right">
+          <div>
+            <span className="text-[#71717a] block uppercase font-bold text-[8.5px] tracking-wider mb-0.5">Tanggal</span>
+            <span className="text-white font-semibold font-mono">
+              {new Date().toLocaleDateString("id-ID")}
+            </span>
+          </div>
+          <div>
+            <span className="text-[#71717a] block uppercase font-bold text-[8.5px] tracking-wider mb-0.5">Waktu</span>
+            <span className="text-white font-semibold font-mono">
+              {new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Items Section */}
+      <div className="border-b border-white/5 pb-4 mb-4">
+        <div className="flex items-center gap-1.5 mb-3 text-[#a1a1aa] text-left">
+          <ShoppingBag className="w-3.5 h-3.5 text-[#ef4444]" />
+          <span className="text-[10px] uppercase font-black tracking-wider">Item Belanjaan</span>
+        </div>
+        
+        <div className="space-y-3 text-left">
+          {activeCartItems.map((item, idx) => {
+            const productName = item.productName || item.product?.name || 'Menu';
+            const quantity = item.quantity;
+            const sellPrice = item.sellPrice || item.unitPrice || 0;
+            const notes = item.notes || '';
+            const lines = productName.split('\n');
+            return (
+              <div key={idx} className="flex justify-between items-start text-[11px]">
+                <div className="flex-1 pr-3">
+                  <span className="text-white font-bold leading-tight block">
+                    {lines[0]}
+                  </span>
+                  {lines.slice(1).map((line, i) => (
+                    <span key={i} className="text-[9px] text-[#f87171] font-extrabold uppercase block tracking-tight mt-0.5">
+                      » {line}
+                    </span>
+                  ))}
+                  {notes && notes.split('\n').map((n: string) => n.trim()).filter(Boolean).map((note: string, i: number) => (
+                    <span key={i} className="text-[9px] text-[#f87171] font-extrabold uppercase block tracking-tight mt-0.5">
+                      » {note}
+                    </span>
+                  ))}
+                </div>
+                <div className="w-10 text-center text-[#d4d4d8] font-bold font-mono">
+                  {quantity}x
+                </div>
+                <div className="w-20 text-right text-white font-bold font-mono">
+                  {((item.sellPrice || item.unitPrice || 0) * item.quantity).toLocaleString('id-ID')}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Pricing Summary */}
+      <div className="space-y-2 text-[11px] border-b border-white/5 pb-4 mb-4 font-sans text-left">
+        <div className="flex justify-between text-[#a1a1aa]">
+          <span>Subtotal Menu</span>
+          <span className="font-mono">Rp {activeSubtotal.toLocaleString('id-ID')}</span>
+        </div>
+        {settings.enableServiceCharge && (
+          <div className="flex justify-between text-[#a1a1aa]">
+            <span>Biaya Layanan ({settings.serviceChargeRate}%)</span>
+            <span className="font-mono">Rp {activeServiceCharge.toLocaleString('id-ID')}</span>
+          </div>
+        )}
+        <div className="flex justify-between font-black text-[13px] pt-1.5 border-t border-white/5">
+          <span className="text-white">Total Akhir</span>
+          <span className="text-[#eab308] font-mono">Rp {activeTotal.toLocaleString('id-ID')}</span>
+        </div>
+        <div className="flex justify-between text-[#a1a1aa]">
+          <span>Jumlah Uang Bayar</span>
+          <span className="font-mono">Rp {(activeAmountPaid || activeTotal).toLocaleString('id-ID')}</span>
+        </div>
+        {activePaymentMethod === "Tunai" && (
+          <div className="flex justify-between font-bold text-[#34d399]">
+            <span>Uang Kembalian</span>
+            <span className="font-mono">Rp {activeChange.toLocaleString('id-ID')}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Footer Note */}
+      <div className="text-center pt-2">
+        <span className="text-[9px] text-[#71717a] font-black uppercase tracking-widest block mb-0.5 font-sans">
+          {settings.receiptHeader || "TERIMA KASIH"}
+        </span>
+        <span className="text-[9px] text-[#a1a1aa] font-black uppercase tracking-widest block">
+          {settings.receiptFooter || "ATAS KUNJUNGAN ANDA"}
+        </span>
+      </div>
+    </div>
+  );
 
   // Shared receipt content — rendered in both mobile tab and desktop aside
   const ReceiptContent = () => (
@@ -832,15 +992,11 @@ export default function CheckoutModal({
           position: 'absolute', 
           left: '-9999px', 
           top: '-9999px', 
-          width: '320px', 
-          backgroundColor: '#ffffff', 
-          color: '#000000', 
-          padding: '16px', 
-          fontFamily: 'monospace' 
+          width: '380px', 
+          backgroundColor: '#09090b', 
         }}
-        className="bg-white text-black font-sans"
       >
-        <ReceiptContent />
+        <PremiumReceiptContent />
       </div>
     </>
   );

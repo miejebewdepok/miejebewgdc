@@ -639,16 +639,62 @@ ${window.location.origin}/receipt/${activeInvoiceNo}`;
                   <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider block">KIRIM STRUK DIGITAL (WHATSAPP)</span>
                   <div className="flex gap-2">
                     <input
-                      type="text"
-                      placeholder="e.g. 08123456789"
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      placeholder="cth: 0812xxxx / +62812xxxx"
                       value={whatsappRecipient}
-                      onChange={(e) => setWhatsappRecipient(e.target.value)}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        const digits = raw.replace(/\D/g, "");
+
+                        if (!digits) {
+                          setWhatsappRecipient("");
+                          return;
+                        }
+
+                        if (digits.startsWith("620")) {
+                          setWhatsappRecipient("+62" + digits.slice(3));
+                          return;
+                        }
+
+                        if (digits.startsWith("62")) {
+                          setWhatsappRecipient("+62" + digits.slice(2));
+                          return;
+                        }
+
+                        if (digits.startsWith("0")) {
+                          setWhatsappRecipient("+62" + digits.slice(1));
+                          return;
+                        }
+
+                        if (digits.startsWith("8")) {
+                          setWhatsappRecipient("+62" + digits);
+                          return;
+                        }
+
+                        setWhatsappRecipient(digits);
+                      }}
+                      onBlur={() => {
+                        if (
+                          whatsappRecipient &&
+                          !/^\+62\d{9,14}$/.test(whatsappRecipient) &&
+                          /^\d+$/.test(whatsappRecipient)
+                        ) {
+                          const digits = whatsappRecipient.replace(/\D/g, "");
+                          if (digits.startsWith("620")) setWhatsappRecipient("+62" + digits.slice(3));
+                          else if (digits.startsWith("62")) setWhatsappRecipient("+62" + digits.slice(2));
+                          else if (digits.startsWith("0")) setWhatsappRecipient("+62" + digits.slice(1));
+                          else if (digits.startsWith("8")) setWhatsappRecipient("+62" + digits);
+                        }
+                      }}
                       className="flex-1 bg-black/10 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl py-2 px-3 text-xs text-foreground dark:text-white font-semibold font-mono focus:outline-none focus:ring-1 focus:ring-red-500"
                     />
                     <button
                       type="button"
                       onClick={handleSendWhatsappReceipt}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl px-4 py-2 flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer"
+                      disabled={!whatsappRecipient.trim()}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl px-4 py-2 flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Kirim
                     </button>

@@ -839,8 +839,8 @@ export default function CheckoutModal({
               /* SUCCESS STATE */
               <div className="flex-1 p-6 flex flex-col justify-between overflow-y-auto">
                 <div className="text-center py-6">
-                  <div className="w-16 h-16 bg-red-500/10 text-red-600 dark:text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/30">
-                    <CheckCircle className="w-8 h-8" />
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-black/10 dark:border-white/10 overflow-hidden shadow-md">
+                    <img src="/logo.png" className="w-full h-full object-cover" alt="Logo" />
                   </div>
                   <h3 className="text-2xl font-bold text-foreground dark:text-white mb-1">Nota Pembayaran Sukses</h3>
                   <p className="text-slate-600 dark:text-slate-400 text-sm">Pesanan Mie Jebew GDC siap dimasak di dapur.</p>
@@ -923,22 +923,13 @@ export default function CheckoutModal({
                 </div>
 
                 <div className="border-t border-black/10 dark:border-white/5 pt-4 flex flex-col gap-3 max-w-sm mx-auto w-full">
-                    <div className="grid grid-cols-2 gap-2 w-full">
-                      <button 
-                        type="button" 
-                        onClick={handleCopyReceiptImage}
-                        className="bg-amber-600 hover:bg-amber-700 text-white border border-amber-500 rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
-                      >
-                        <Copy className="w-3.5 h-3.5" /> SALIN GAMBAR
-                      </button>
-                      <button 
-                        type="button" 
-                        onClick={handleDownloadReceiptImage}
-                        className="bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
-                      >
-                        <Download className="w-3.5 h-3.5" /> UNDUH GAMBAR
-                      </button>
-                    </div>
+                    <button 
+                      type="button" 
+                      onClick={handleDownloadReceiptImage}
+                      className="w-full bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
+                    >
+                      <Download className="w-3.5 h-3.5" /> UNDUH GAMBAR
+                    </button>
                     <button type="button" onClick={() => {
                       if (isMobileOrWebView()) {
                         alert("Pencetakan langsung tidak didukung di HP/Tablet/APK. Silakan buka aplikasi kasir melalui Google Chrome di Laptop/PC untuk mencetak struk.");

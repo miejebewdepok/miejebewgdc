@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { CartItem, Transaction, Settings } from '@/lib/types';
 import { X, CreditCard, Banknote, QrCode, FileText, Printer, CheckCircle, Loader2, Copy, Download, MapPin, Phone, ShoppingBag } from 'lucide-react';
-import { isMobileOrWebView } from '@/lib/utils';
+import { isMobileOrWebView, saveReceiptImage } from '@/lib/utils';
 import { toBlob, toPng } from 'html-to-image';
 import { toast } from 'sonner';
 
@@ -434,11 +434,7 @@ export default function CheckoutModal({
         backgroundColor: '#09090b',
         pixelRatio: 3,
       });
-      const link = document.createElement('a');
-      link.download = `struk-${activeInvoiceNo}.png`;
-      link.href = dataUrl;
-      link.click();
-      toast.success("Gambar struk berhasil diunduh.");
+      await saveReceiptImage(dataUrl, `struk-${activeInvoiceNo}.png`);
     } catch (err) {
       console.error("Gagal mengunduh gambar struk:", err);
       toast.error("Gagal mengunduh gambar.");

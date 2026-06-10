@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { toast } from "sonner"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -22,4 +23,35 @@ export function isMobileOrWebView(): boolean {
   const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua);
   
   return isAndroidWebView || isIOSWebView || isMobileDevice;
+}
+
+export async function saveReceiptImage(dataUrl: string, filename: string): Promise<boolean> {
+  if (typeof window === "undefined") return false;
+  
+  const cap = (window as any).Capacitor;
+  if (cap?.isNativePlatform?.() && cap?.Plugins?.ImageSaver) {
+    try {
+      await cap.Plugins.ImageSaver.saveBase64Image({ base64: dataUrl });
+      toast.success("Gambar struk berhasil diunduh ke Galeri!");
+      return true;
+    } catch (err: any) {
+      console.error("Gagal menyimpan gambar lewat native plugin:", err);
+      toast.error("Gagal mengunduh gambar ke Galeri: " + (err.message || err));
+      return false;
+    }
+  } else {
+    // Fallback untuk browser biasa
+    try {
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = dataUrl;
+      link.click();
+      toast.success("Gambar struk berhasil diunduh.");
+      return true;
+    } catch (err) {
+      console.error("Gagal mengunduh gambar di browser:", err);
+      toast.error("Gagal mengunduh gambar.");
+      return false;
+    }
+  }
 }

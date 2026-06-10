@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { Transaction } from '@/lib/types';
 import { Search, Calendar, DollarSign, FileText, ShoppingBag, ArrowRight, Printer, FlameIcon, X, Trash2, Edit2, Save, Loader2, Share2, Download, CheckCircle, MapPin, Phone } from 'lucide-react';
 import { useAppState } from '@/components/providers/app-state-provider';
-import { isMobileOrWebView } from '@/lib/utils';
+import { isMobileOrWebView, saveReceiptImage } from '@/lib/utils';
 
 interface TransactionHistoryProps {
   transactions: Transaction[];
@@ -688,11 +688,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                           backgroundColor: '#09090b',
                           pixelRatio: 3,
                         });
-                        const link = document.createElement('a');
-                        link.download = `struk-${selectedTx.id}.png`;
-                        link.href = dataUrl;
-                        link.click();
-                        toast.info("Gambar struk diunduh otomatis ke Galeri Anda.");
+                        await saveReceiptImage(dataUrl, `struk-${selectedTx.id}.png`);
                       } catch (dlErr) {
                         console.error("Gagal mengunduh gambar otomatis:", dlErr);
                       }
@@ -716,11 +712,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                         backgroundColor: '#09090b',
                         pixelRatio: 3,
                       });
-                      const link = document.createElement('a');
-                      link.download = `struk-${selectedTx.id}.png`;
-                      link.href = dataUrl;
-                      link.click();
-                      toast.success("Gambar struk berhasil diunduh.");
+                      await saveReceiptImage(dataUrl, `struk-${selectedTx.id}.png`);
                     } catch (err) {
                       console.error("Gagal mengunduh gambar struk:", err);
                       toast.error("Gagal mengunduh gambar.");

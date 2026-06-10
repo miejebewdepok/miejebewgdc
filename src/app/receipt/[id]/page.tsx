@@ -16,7 +16,7 @@ import {
   Download
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
-import { toPng } from "html-to-image";
+import { toBlob, toPng } from "html-to-image";
 
 interface TransactionItem {
   id: string;
@@ -98,21 +98,39 @@ export default function ReceiptPage(props: {
       maximumFractionDigits: 0
     }).format(val);
 
-  const handleShareWhatsapp = () => {
+  const handleShareWhatsapp = async () => {
     if (!data) return;
     const { transaction, merchant } = data;
-    const url = window.location.href;
-    const text = `Halo! Berikut adalah Struk Digital Resmi dari *${merchant.storeName}* untuk pesanan Anda:
-    
-Nomor Nota: *${transaction.id}*
-Total Bayar: *${formatRupiah(transaction.total)}*
-Status: *LUNAS (Lunas)*
+    const text = `Struk resmi ${merchant.storeName || 'WarungOS'}\nNomor Nota: ${transaction.id}\nTotal Bayar: ${formatRupiah(transaction.total)}\nStatus: LUNAS`;
 
-Lihat rincian lengkap struk belanja di sini:
-${url}`;
+    const node = document.getElementById('receipt-card-area');
+    const fileShare = async () => {
+      if (!node) throw new Error('Struk belum siap dibagikan.');
+      const blob = await toBlob(node, { backgroundColor: '#09090b', style: { display: 'block', borderRadius: '0px' } });
+      if (!blob) throw new Error('Gagal membuat gambar struk.');
+      const file = new File([blob], `struk-${transactionId}.png`, { type: 'image/png' });
+      const share = { title: 'Struk Belanja', text, files: [file] } as any;
+      const nav = typeof navigator !== 'undefined' ? (navigator as any) : null;
+      if (nav && nav.canShare && !nav.canShare(share)) throw new Error('Perangkat tidak mendukung bagikan file.');
+      if (nav && nav.share) {
+        await nav.share(share);
+      }
+    };
+
+    try {
+      const nav = typeof navigator !== 'undefined' ? (navigator as any) : null;
+      if (nav && nav.share) {
+        await fileShare();
+        return;
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      if (msg === 'Share canceled') return;
+      if (!(err instanceof DOMException && err.name === 'AbortError')) console.warn('Share failed', err);
+    }
 
     const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-    window.open(waUrl, "_blank");
+    window.open(waUrl, '_blank');
   };
 
   const handlePrint = () => {

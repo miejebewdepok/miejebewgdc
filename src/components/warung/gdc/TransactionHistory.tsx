@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Transaction } from '@/lib/types';
 import { Search, Calendar, DollarSign, FileText, ShoppingBag, ArrowRight, Printer, FlameIcon, X, Trash2, Edit2, Save, Loader2, Share2 } from 'lucide-react';
 import { useAppState } from '@/components/providers/app-state-provider';

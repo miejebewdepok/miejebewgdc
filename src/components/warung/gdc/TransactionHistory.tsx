@@ -525,7 +525,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
               <div className="mt-4 space-y-2">
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     const fallbackPhone = selectedTx?.customerPhone || settings?.merchantPhone || '';
                     const phone = window.prompt("Masukkan nomor WhatsApp penerima:", fallbackPhone);
                     if (!phone) return;
@@ -545,14 +545,52 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                       return;
                     }
 
+                    const node = document.getElementById('receipt-capture-area-history');
+                    if (!node) {
+                      alert('Struk belum siap dibagikan.');
+                      return;
+                    }
+
+                    const nav = typeof navigator !== 'undefined' ? (navigator as any) : null;
+                    const canUseShare = nav && nav.share && nav.canShare;
+
+                    if (canUseShare) {
+                      // Mobile native share flow
+                      try {
+                        const blob = await toBlob(node, {
+                          backgroundColor: '#ffffff',
+                          style: {
+                            display: 'block',
+                            width: '320px',
+                            padding: '16px',
+                            color: '#000000'
+                          }
+                        });
+                        if (blob) {
+                          const file = new File([blob], `struk-${selectedTx.id}.png`, { type: 'image/png' });
+                          const shareData = {
+                            files: [file],
+                            title: 'Struk Belanja',
+                            text: `Struk resmi - Invoice: ${selectedTx.id}`
+                          };
+                          if (nav.canShare(shareData)) {
+                            await nav.share(shareData);
+                            return;
+                          }
+                        }
+                      } catch (err) {
+                        console.warn("Gagal menggunakan native share, fallback ke clipboard:", err);
+                      }
+                    }
+
+                    // Desktop/Fallback flow (Clipboard Copy + Open Link)
                     // 1. Open WhatsApp immediately (synchronous to prevent popup blocker)
                     const waUrl = `https://api.whatsapp.com/send?phone=${clean}`;
                     window.open(waUrl, '_blank');
 
                     // 2. Automatically copy receipt image to clipboard in the background
-                    const node = document.getElementById('receipt-capture-area-history');
-                    if (node) {
-                      toBlob(node, {
+                    try {
+                      const blob = await toBlob(node, {
                         backgroundColor: '#ffffff',
                         style: {
                           display: 'block',
@@ -560,23 +598,18 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                           padding: '16px',
                           color: '#000000'
                         }
-                      }).then(async (blob) => {
-                        if (blob) {
-                          try {
-                            await navigator.clipboard.write([
-                              new ClipboardItem({
-                                [blob.type]: blob
-                              })
-                            ]);
-                            toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di chat WhatsApp.");
-                          } catch (clipErr) {
-                            console.error("Gagal menulis ke clipboard:", clipErr);
-                            toast.error("Gagal menyalin gambar otomatis. Silakan gunakan tombol screenshot/unduh.");
-                          }
-                        }
-                      }).catch((err) => {
-                        console.error("Gagal merender gambar struk:", err);
                       });
+                      if (blob) {
+                        await navigator.clipboard.write([
+                          new ClipboardItem({
+                            [blob.type]: blob
+                          })
+                        ]);
+                        toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di chat WhatsApp.");
+                      }
+                    } catch (clipErr) {
+                      console.error("Gagal menulis ke clipboard:", clipErr);
+                      toast.error("Gagal menyalin gambar otomatis. Silakan gunakan tombol screenshot/unduh.");
                     }
                   }}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"

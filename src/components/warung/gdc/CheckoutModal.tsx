@@ -291,7 +291,7 @@ export default function CheckoutModal({
     }
   };
 
-  const handleSendWhatsappReceipt = () => {
+  const handleSendWhatsappReceipt = async () => {
     if (!whatsappRecipient.trim()) {
       alert("Masukkan nomor WhatsApp penerima terlebih dahulu.");
       return;
@@ -312,37 +312,69 @@ export default function CheckoutModal({
       return;
     }
 
+    const node = document.getElementById('receipt-capture-area');
+    if (!node) {
+      alert("Struk belum siap dibagikan.");
+      return;
+    }
+
+    const nav = typeof navigator !== 'undefined' ? (navigator as any) : null;
+    const canUseShare = nav && nav.share && nav.canShare;
+
+    if (canUseShare) {
+      // Mobile native share flow (directly attach image to WhatsApp/other apps)
+      try {
+        const blob = await toBlob(node, {
+          backgroundColor: '#ffffff',
+          style: {
+            display: 'block',
+            width: '320px',
+            padding: '16px',
+          }
+        });
+        if (blob) {
+          const file = new File([blob], `struk-${activeInvoiceNo}.png`, { type: 'image/png' });
+          const shareData = {
+            files: [file],
+            title: 'Struk Belanja',
+            text: `Struk resmi ${settings.merchantName || 'MIE JEBEW GDC'} - Invoice: ${activeInvoiceNo}`
+          };
+          if (nav.canShare(shareData)) {
+            await nav.share(shareData);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Gagal menggunakan native share, fallback ke clipboard:", err);
+      }
+    }
+
+    // Desktop/Fallback flow (Clipboard Copy + Open Link)
     // 1. Open WhatsApp immediately (synchronous to prevent popup blocker)
     const waUrl = `https://api.whatsapp.com/send?phone=${cleanNum}`;
     window.open(waUrl, "_blank");
 
     // 2. Automatically copy receipt image to clipboard in the background
-    const node = document.getElementById('receipt-capture-area');
-    if (node) {
-      toBlob(node, {
+    try {
+      const blob = await toBlob(node, {
         backgroundColor: '#ffffff',
         style: {
           display: 'block',
           width: '320px',
           padding: '16px',
         }
-      }).then(async (blob) => {
-        if (blob) {
-          try {
-            await navigator.clipboard.write([
-              new ClipboardItem({
-                [blob.type]: blob
-              })
-            ]);
-            toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di chat WhatsApp.");
-          } catch (clipErr) {
-            console.error("Gagal menulis ke clipboard:", clipErr);
-            toast.error("Gagal menyalin gambar otomatis. Silakan gunakan tombol SALIN GAMBAR di bawah.");
-          }
-        }
-      }).catch((err) => {
-        console.error("Gagal merender gambar struk:", err);
       });
+      if (blob) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            [blob.type]: blob
+          })
+        ]);
+        toast.success("Gambar struk disalin! Tekan Ctrl+V (paste) di chat WhatsApp.");
+      }
+    } catch (clipErr) {
+      console.error("Gagal menulis ke clipboard:", clipErr);
+      toast.error("Gagal menyalin gambar otomatis. Silakan gunakan tombol SALIN GAMBAR di bawah.");
     }
   };
 

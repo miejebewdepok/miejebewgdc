@@ -206,7 +206,7 @@ export function AppStateProvider({
         if (hasNewBills && state.savedBills.length > 0) {
           await showLocalNotification({
             title: 'Pesanan Baru',
-            body: `Ada pesanan masuk dari meja. Total bill saat ini: ${response.savedBills.length}`,
+            body: `Ada pesanan masuk dari order. Total bill saat ini: ${response.savedBills.length}`,
             id: 101,
           });
         }

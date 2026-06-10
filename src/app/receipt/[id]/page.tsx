@@ -261,7 +261,7 @@ export default function ReceiptPage(props: {
               <div>
                 <span className="text-slate-500 block uppercase font-bold text-[8.5px] tracking-wider mb-0.5">Pelanggan</span>
                 <span className="text-white font-bold">
-                  {transaction.customerName.replace(/\bmeja\b/gi, 'Order').replace(/\bself\s*order\b/gi, 'Order')}
+                  {transaction.customerName.replace(/meja/gi, 'Order').replace(/self\s*order/gi, 'Order')}
                 </span>
               </div>
               <div>

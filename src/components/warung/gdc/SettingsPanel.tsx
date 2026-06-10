@@ -506,7 +506,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
     }
     
     let csvContent = "\uFEFF"; // BOM for UTF-8 Excel compatibility
-    csvContent += "Nama Pelanggan,Nomor WhatsApp,Email,Order/Meja,Tanggal Klaim\n";
+    csvContent += "Nama Pelanggan,Nomor WhatsApp,Email,Order,Tanggal Klaim\n";
     
     promoClaims.forEach((claim) => {
       const name = `"${claim.customerName.replace(/"/g, '""')}"`;
@@ -932,7 +932,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
 
           </div>)}
 
-          {/* QR MEJA SETUP (SELF-ORDERING) CARD */}
+          {/* QR ORDER SETUP (SELF-ORDERING) CARD */}
           <div className="glass-morphism rounded-3xl p-6 relative overflow-hidden flex flex-col gap-5">
             <div className="flex items-center gap-2.5">
               <div className="p-2 bg-red-500/10 text-red-500 rounded-xl">
@@ -1826,7 +1826,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                     
                     const link = document.createElement("a");
                     link.href = blobUrl;
-                    link.download = `QR_Self_Order_Meja_${selectedQrTable.replace(/^(meja|order|self-order)[\s\-_]*/i, "")}.png`;
+                    link.download = `QR_Self_Order_Order_${selectedQrTable.replace(/^(meja|order|self-order)[\s\-_]*/i, "")}.png`;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
@@ -1845,7 +1845,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                 type="button"
                 onClick={() => {
                   if (isMobileOrWebView()) {
-                    alert("Cetak slip QR meja tidak didukung langsung di HP/Tablet/APK. Silakan buka aplikasi kasir melalui Google Chrome di Laptop/PC untuk mencetak slip QR.");
+                    alert("Cetak slip QR order tidak didukung langsung di HP/Tablet/APK. Silakan buka aplikasi kasir melalui Google Chrome di Laptop/PC untuk mencetak slip QR.");
                     return;
                   }
                   const tableNum = selectedQrTable.replace(/^(meja|order|self-order)[\s\-_]*/i, "");
@@ -1865,7 +1865,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                   printWindow.document.write(`
                     <html>
                       <head>
-                        <title>QR Self Order - Meja ${tableNum}</title>
+                        <title>QR Self Order - Order ${tableNum}</title>
                         <style>
                           body {
                             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -1972,7 +1972,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                           
                           <p class="instructions">
                             Pindai kode QR di bawah untuk melihat menu<br>
-                            & memesan makanan langsung dari meja Anda.
+                            & memesan makanan langsung.
                           </p>
                           
                           <div class="qr-container">

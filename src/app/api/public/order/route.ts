@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
       const age = Date.now() - new Date(recentBill.createdAt).getTime();
       if (age >= 0 && age < dedupeWindowMs) {
         return NextResponse.json(
-          { error: "Pesanan untuk meja ini baru saja dikirim. Mohon tunggu sebentar." },
+          { error: "Pesanan untuk order ini baru saja dikirim. Mohon tunggu sebentar." },
           { status: 409 }
         );
       }

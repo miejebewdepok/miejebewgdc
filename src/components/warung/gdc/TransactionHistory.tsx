@@ -447,7 +447,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                       <div>
                         <span className="text-[#71717a] block uppercase font-bold text-[8.5px] tracking-wider mb-0.5">Pelanggan</span>
                         <span className="text-white font-bold">
-                          {(selectedTx.customerName || 'Umum').replace(/\bmeja\b/gi, 'Order').replace(/\bself\s*order\b/gi, 'Order')}
+                          {(selectedTx.customerName || 'Umum').replace(/meja/gi, 'Order').replace(/self\s*order/gi, 'Order')}
                         </span>
                       </div>
                       <div>
@@ -789,7 +789,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                   </tr>
                   <tr>
                     <td className="text-slate-500">Pelanggan:</td>
-                    <td className="text-right font-bold text-slate-800">{(selectedTx.customerName || 'Umum').replace(/\bmeja\b/gi, 'Order').replace(/\bself\s*order\b/gi, 'Order')}</td>
+                    <td className="text-right font-bold text-slate-800">{(selectedTx.customerName || 'Umum').replace(/meja/gi, 'Order').replace(/self\s*order/gi, 'Order')}</td>
                   </tr>
                   <tr>
                     <td className="text-slate-500">Metode:</td>

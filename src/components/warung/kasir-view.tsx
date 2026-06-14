@@ -818,14 +818,13 @@ export function KasirView() {
                     { label: "Beef Slice", reqLarge: false, reqReguler: true },
                     { label: "Telur", reqLarge: false, reqReguler: true },
                     { label: "Beef", reqLarge: false, reqReguler: false },
-                    { label: "Chicken", reqLarge: false, reqReguler: false },
                     { label: "Chicken Katsu", reqLarge: true, reqReguler: false },
                     { label: "Special", reqLarge: true, reqReguler: false },
                   ].map((filling) => {
                     const isSelected = selectedFilling === filling.label;
                     const isDisabled = (filling.reqLarge && selectedSize === 'REGULER') || (filling.reqReguler && selectedSize === 'LARGE');
                     let displaySurcharge = 0;
-                    if (selectedSize === 'REGULER' && (filling.label === 'Beef' || filling.label === 'Chicken' || filling.label === 'Telur')) displaySurcharge = 2000;
+                    if (selectedSize === 'REGULER' && (filling.label === 'Beef' || filling.label === 'Telur')) displaySurcharge = 2000;
                     if (selectedSize === 'LARGE' && filling.label === 'Special') displaySurcharge = 5000;
 
                     if (isDisabled) return null;
@@ -1163,7 +1162,7 @@ export function KasirView() {
               {/* Filling Pricing (Kebab) */}
               {customizingProduct.category === 'Kebab' && (
                 <>
-                  {selectedSize === 'REGULER' && (selectedFilling === 'Beef' || selectedFilling === 'Chicken' || selectedFilling === 'Telur') && (
+                  {selectedSize === 'REGULER' && (selectedFilling === 'Beef' || selectedFilling === 'Telur') && (
                     <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
                       <span>Varian Isi {selectedFilling}</span>
                       <span className="font-mono">+ Rp 2.000</span>

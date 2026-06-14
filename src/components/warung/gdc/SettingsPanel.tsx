@@ -1627,7 +1627,7 @@ export default function SettingsPanel({ settings, onUpdateSettings }: SettingsPa
                       // Lumpia Beef Fillings
                       { label: "Lumpia - Beef Patty (+Rp 4.000)", key: "filling_Beef Patty", def: 2400, type: "filling" },
                       { label: "Lumpia - Chicken Katsu (+Rp 5.000)", key: "filling_Chicken Katsu", def: 3000, type: "filling" },
-                      { label: "Lumpia - Telur Dadar (+Rp 5.000)", key: "filling_Telur Dadar", def: 3000, type: "filling" },
+                      { label: "Lumpia - Telur (+Rp 2.000)", key: "filling_Telur", def: 1200, type: "filling" },
                       { label: "Lumpia - Special (+Rp 10.000)", key: "filling_Special", def: 6000, type: "filling" },
                       // Kebab Sizes & Fillings
                       { label: "Kebab Reg - Beef (+Rp 2.000)", key: "filling_Beef", def: 1200, type: "filling" },

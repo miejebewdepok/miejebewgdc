@@ -1199,7 +1199,7 @@ export default function CustomerOrderPage(props: {
                       { label: "Kornet", surcharge: 0 },
                       { label: "Beef Patty", surcharge: 4000 },
                       { label: "Chicken Katsu", surcharge: 5000 },
-                      { label: "Telur Dadar", surcharge: 5000 },
+                      { label: "Telur", surcharge: 2000 },
                       { label: "Special", surcharge: 10000 },
                     ].map((filling) => {
                       const isSelected = selectedFilling === filling.label;

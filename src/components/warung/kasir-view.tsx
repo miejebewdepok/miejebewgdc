@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
 import { useSession } from "@/lib/auth-client";
 import { Product, ProductCategory, Transaction } from "@/lib/types";
-import { calculateItemUnitPrice, calculateToppingsSurcharge as sharedCalculateToppingsSurcharge } from "@/lib/pricing";
+import { calculateItemUnitPrice, calculateToppingsSurcharge as sharedCalculateToppingsSurcharge, calculateFillingSurcharge } from "@/lib/pricing";
 import ProductCard from "./gdc/ProductCard";
 import CartSection from "./gdc/CartSection";
 import CheckoutModal from "./gdc/CheckoutModal";
@@ -870,7 +870,7 @@ export function KasirView() {
                     { label: "Kornet", surcharge: 0 },
                     { label: "Beef Patty", surcharge: 4000 },
                     { label: "Chicken Katsu", surcharge: 5000 },
-                    { label: "Telur Dadar", surcharge: 5000 },
+                    { label: "Telur", surcharge: 2000 },
                     { label: "Special", surcharge: 10000 },
                   ].map((filling) => {
                     const isSelected = selectedFilling === filling.label;
@@ -1177,12 +1177,15 @@ export function KasirView() {
                   )}
                 </>
               )}
-              {customizingProduct.category === 'Lumpia Beef' && !['Beef Slice', 'Kornet'].includes(selectedFilling) && (
-                <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
-                  <span>Varian Isi {selectedFilling}</span>
-                  <span className="font-mono">+ Rp {(selectedFilling === 'Special' ? 10000 : 5000).toLocaleString('id-ID')}</span>
-                </div>
-              )}
+              {customizingProduct.category === 'Lumpia Beef' && !['Beef Slice', 'Kornet'].includes(selectedFilling) && (() => {
+                 const surcharge = calculateFillingSurcharge(customizingProduct.category, selectedSize, selectedFilling);
+                 return (
+                   <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
+                     <span>Varian Isi {selectedFilling}</span>
+                     <span className="font-mono">+ Rp {surcharge.toLocaleString('id-ID')}</span>
+                   </div>
+                 );
+               })()}
               {selectedToppings.length > 0 && (() => {
                 const totalSurcharge = calculateToppingsSurcharge(selectedToppings, customizingProduct.category);
                 const isCabang2 = settings.branchCode === "CABANG_2";

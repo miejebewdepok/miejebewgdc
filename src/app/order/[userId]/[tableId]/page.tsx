@@ -1116,7 +1116,7 @@ export default function CustomerOrderPage(props: {
                             if (customizingProduct.category === "Kebab") {
                               if (sz === "REGULER" && (selectedFilling === "Chicken Katsu" || selectedFilling === "Special")) {
                                 setSelectedFilling("Beef");
-                              } else if (sz === "LARGE" && selectedFilling === "Beef Slice") {
+                              } else if (sz === "LARGE" && (selectedFilling === "Beef Slice" || selectedFilling === "Telur")) {
                                 setSelectedFilling("Beef");
                               }
                             }
@@ -1149,14 +1149,16 @@ export default function CustomerOrderPage(props: {
                   <div className="grid grid-cols-2 gap-2">
                     {[
                       { label: "Beef Slice", reqLarge: false, reqReguler: true },
+                      { label: "Telur", reqLarge: false, reqReguler: true },
                       { label: "Beef", reqLarge: false, reqReguler: false },
+                      { label: "Chicken", reqLarge: false, reqReguler: false },
                       { label: "Chicken Katsu", reqLarge: true, reqReguler: false },
                       { label: "Special", reqLarge: true, reqReguler: false },
                     ].map((filling) => {
                       const isSelected = selectedFilling === filling.label;
                       const isDisabled = (filling.reqLarge && selectedSize === "REGULER") || (filling.reqReguler && selectedSize === "LARGE");
                       let surcharge = 0;
-                      if (selectedSize === "REGULER" && filling.label === "Beef") surcharge = 2000;
+                      if (selectedSize === "REGULER" && (filling.label === "Beef" || filling.label === "Chicken")) surcharge = 2000;
                       if (selectedSize === "LARGE" && filling.label === "Special") surcharge = 5000;
 
                       if (isDisabled) return null;

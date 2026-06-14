@@ -114,3 +114,13 @@ export const customerPromoClaims = pgTable("customer_promo_claims", {
   tableName: text("table_name").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull(),
 });
+
+export const inboxMessages = pgTable("inbox_messages", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  branchCode: text("branch_code").notNull(),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  isRead: integer("is_read").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull(),
+});

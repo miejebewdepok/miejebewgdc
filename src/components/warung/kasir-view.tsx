@@ -779,7 +779,7 @@ export function KasirView() {
                           if (customizingProduct.category === 'Kebab') {
                             if (sizeObj.label === 'REGULER' && (selectedFilling === 'Chicken Katsu' || selectedFilling === 'Special')) {
                               setSelectedFilling('Beef');
-                            } else if (sizeObj.label === 'LARGE' && selectedFilling === 'Beef Slice') {
+                            } else if (sizeObj.label === 'LARGE' && (selectedFilling === 'Beef Slice' || selectedFilling === 'Telur')) {
                               setSelectedFilling('Beef');
                             }
                           }
@@ -816,14 +816,16 @@ export function KasirView() {
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { label: "Beef Slice", reqLarge: false, reqReguler: true },
+                    { label: "Telur", reqLarge: false, reqReguler: true },
                     { label: "Beef", reqLarge: false, reqReguler: false },
+                    { label: "Chicken", reqLarge: false, reqReguler: false },
                     { label: "Chicken Katsu", reqLarge: true, reqReguler: false },
                     { label: "Special", reqLarge: true, reqReguler: false },
                   ].map((filling) => {
                     const isSelected = selectedFilling === filling.label;
                     const isDisabled = (filling.reqLarge && selectedSize === 'REGULER') || (filling.reqReguler && selectedSize === 'LARGE');
                     let displaySurcharge = 0;
-                    if (selectedSize === 'REGULER' && filling.label === 'Beef') displaySurcharge = 2000;
+                    if (selectedSize === 'REGULER' && (filling.label === 'Beef' || filling.label === 'Chicken')) displaySurcharge = 2000;
                     if (selectedSize === 'LARGE' && filling.label === 'Special') displaySurcharge = 5000;
 
                     if (isDisabled) return null;

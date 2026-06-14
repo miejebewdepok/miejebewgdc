@@ -868,9 +868,9 @@ export function KasirView() {
                   {[
                     { label: "Beef Slice", surcharge: 0 },
                     { label: "Kornet", surcharge: 0 },
+                    { label: "Telur", surcharge: 2000 },
                     { label: "Beef Patty", surcharge: 4000 },
                     { label: "Chicken Katsu", surcharge: 5000 },
-                    { label: "Telur", surcharge: 2000 },
                     { label: "Special", surcharge: 10000 },
                   ].map((filling) => {
                     const isSelected = selectedFilling === filling.label;

@@ -1163,9 +1163,9 @@ export function KasirView() {
               {/* Filling Pricing (Kebab) */}
               {customizingProduct.category === 'Kebab' && (
                 <>
-                  {selectedSize === 'REGULER' && selectedFilling === 'Beef' && (
+                  {selectedSize === 'REGULER' && (selectedFilling === 'Beef' || selectedFilling === 'Chicken') && (
                     <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
-                      <span>Varian Isi Beef</span>
+                      <span>Varian Isi {selectedFilling}</span>
                       <span className="font-mono">+ Rp 2.000</span>
                     </div>
                   )}

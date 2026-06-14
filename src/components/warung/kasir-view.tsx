@@ -825,7 +825,7 @@ export function KasirView() {
                     const isSelected = selectedFilling === filling.label;
                     const isDisabled = (filling.reqLarge && selectedSize === 'REGULER') || (filling.reqReguler && selectedSize === 'LARGE');
                     let displaySurcharge = 0;
-                    if (selectedSize === 'REGULER' && (filling.label === 'Beef' || filling.label === 'Chicken')) displaySurcharge = 2000;
+                    if (selectedSize === 'REGULER' && (filling.label === 'Beef' || filling.label === 'Chicken' || filling.label === 'Telur')) displaySurcharge = 2000;
                     if (selectedSize === 'LARGE' && filling.label === 'Special') displaySurcharge = 5000;
 
                     if (isDisabled) return null;
@@ -1163,7 +1163,7 @@ export function KasirView() {
               {/* Filling Pricing (Kebab) */}
               {customizingProduct.category === 'Kebab' && (
                 <>
-                  {selectedSize === 'REGULER' && (selectedFilling === 'Beef' || selectedFilling === 'Chicken') && (
+                  {selectedSize === 'REGULER' && (selectedFilling === 'Beef' || selectedFilling === 'Chicken' || selectedFilling === 'Telur') && (
                     <div className="flex justify-between text-xs text-yellow-600 dark:text-yellow-400 font-sans">
                       <span>Varian Isi {selectedFilling}</span>
                       <span className="font-mono">+ Rp 2.000</span>

@@ -1158,7 +1158,7 @@ export default function CustomerOrderPage(props: {
                       const isSelected = selectedFilling === filling.label;
                       const isDisabled = (filling.reqLarge && selectedSize === "REGULER") || (filling.reqReguler && selectedSize === "LARGE");
                       let surcharge = 0;
-                      if (selectedSize === "REGULER" && (filling.label === "Beef" || filling.label === "Chicken")) surcharge = 2000;
+                      if (selectedSize === "REGULER" && (filling.label === "Beef" || filling.label === "Chicken" || filling.label === "Telur")) surcharge = 2000;
                       if (selectedSize === "LARGE" && filling.label === "Special") surcharge = 5000;
 
                       if (isDisabled) return null;

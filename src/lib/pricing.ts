@@ -64,7 +64,7 @@ export function calculateFillingSurcharge(category: string, size: string | undef
   const cleanCategory = category?.toLowerCase() || "";
   if (cleanCategory === 'kebab') {
     if (size === 'REGULER') {
-      if (filling === 'Beef' || filling === 'Chicken') return 2000;
+      if (filling === 'Beef' || filling === 'Chicken' || filling === 'Telur') return 2000;
     } else if (size === 'LARGE') {
       if (filling === 'Beef Slice' || filling === 'Beef' || filling === 'Chicken Katsu' || filling === 'Chicken') return 5000;
       if (filling === 'Special') return 10000;

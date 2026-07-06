@@ -5,6 +5,7 @@ import { X, CreditCard, Banknote, QrCode, FileText, Printer, CheckCircle, Loader
 import { isMobileOrWebView, saveReceiptImage, triggerPrint } from '@/lib/utils';
 import { toBlob, toPng } from 'html-to-image';
 import { toast } from 'sonner';
+import ClientPortal from '@/components/ClientPortal';
 
 export const angkaterbilang = (nilai: number): string => {
   const bilangan = [
@@ -888,27 +889,29 @@ export default function CheckoutModal({
       </div>
 
       {/* ── PRINT ONLY AREA (HIDDEN FROM SCREEN, VISIBLE ONLY ON PRINTING) ── */}
-      <div id="print-receipt" className="hidden print:block bg-white text-black font-sans">
-        <style dangerouslySetInnerHTML={{ __html: `
-          @media print {
-            @page {
-              margin: 0;
-              size: ${settings.printerPaperSize === '80mm' ? '80mm' : '58mm'} auto;
+      <ClientPortal>
+        <div id="print-receipt" className="hidden print:block bg-white text-black font-sans">
+          <style dangerouslySetInnerHTML={{ __html: `
+            @media print {
+              @page {
+                margin: 0;
+                size: ${settings.printerPaperSize === '80mm' ? '80mm' : '58mm'} auto;
+              }
+              #print-receipt {
+                width: ${settings.printerPaperSize === '80mm' ? '76mm' : '54mm'} !important;
+                font-size: ${settings.printerPaperSize === '80mm' ? '12px' : '9.5px'} !important;
+              }
+              #print-receipt table, #print-receipt td, #print-receipt th, #print-receipt div, #print-receipt p, #print-receipt span {
+                font-size: ${settings.printerPaperSize === '80mm' ? '12px' : '9.5px'} !important;
+              }
+              #print-receipt .text-\\[8\\.5px\\], #print-receipt .text-\\[8px\\], #print-receipt .text-\\[9px\\] {
+                font-size: ${settings.printerPaperSize === '80mm' ? '10px' : '8px'} !important;
+              }
             }
-            #print-receipt {
-              width: ${settings.printerPaperSize === '80mm' ? '76mm' : '54mm'} !important;
-              font-size: ${settings.printerPaperSize === '80mm' ? '12px' : '9.5px'} !important;
-            }
-            #print-receipt table, #print-receipt td, #print-receipt th, #print-receipt div, #print-receipt p, #print-receipt span {
-              font-size: ${settings.printerPaperSize === '80mm' ? '12px' : '9.5px'} !important;
-            }
-            #print-receipt .text-\\[8\\.5px\\], #print-receipt .text-\\[8px\\], #print-receipt .text-\\[9px\\] {
-              font-size: ${settings.printerPaperSize === '80mm' ? '10px' : '8px'} !important;
-            }
-          }
-        ` }} />
-        <ReceiptContent />
-      </div>
+          ` }} />
+          <ReceiptContent />
+        </div>
+      </ClientPortal>
 
       {/* ── CAPTURE ONLY AREA (OFFSCREEN WRAPPER) ── */}
       <div 

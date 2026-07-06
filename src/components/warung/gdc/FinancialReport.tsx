@@ -4,6 +4,7 @@ import { Transaction, Expense } from '@/lib/types';
 import { useAppState } from '@/components/providers/app-state-provider';
 import { isMobileOrWebView, triggerPrint } from '@/lib/utils';
 import { useSession } from '@/lib/auth-client';
+import ClientPortal from '@/components/ClientPortal';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -596,105 +597,99 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       `}} />
 
       {/* Printable Area (ONLY visible in printer) */}
-      <div id="financial-print-area" className="print-only font-sans">
-        <div className="text-center border-b pb-4 mb-6">
-          <h1 className="text-2xl font-black tracking-wider uppercase text-black">{settings.storeName || "MIE JEBEW GDC"}</h1>
-          <p className="text-xs text-gray-600 mt-1">{settings.storeAddress || "Gelar Depok City"}</p>
-          <p className="text-xs text-gray-500">Telp: {settings.ownerWhatsapp || "-"}</p>
-        </div>
+      <ClientPortal>
+        <div id="financial-print-area" className="print-only font-sans">
+          <div className="text-center border-b pb-4 mb-6">
+            <h1 className="text-2xl font-black tracking-wider uppercase text-black">{settings.storeName || "MIE JEBEW GDC"}</h1>
+            <p className="text-xs text-gray-600 mt-1">{settings.storeAddress || "Gelar Depok City"}</p>
+            <p className="text-xs text-gray-500">Telp: {settings.ownerWhatsapp || "-"}</p>
+          </div>
 
-        <div className="text-center mb-6">
-          <h2 className="text-lg font-bold tracking-wide uppercase text-black">LAPORAN RINGKASAN KEUANGAN & PENJUALAN</h2>
-          <p className="text-xs text-gray-600 mt-1">Periode: {timeRange === 'today' ? 'Hari Ini' : timeRange === 'week' ? '7 Hari Terakhir' : 'Bulan Ini'}</p>
-          <p className="text-[10px] text-gray-500">Dicetak Pada: {new Date().toLocaleString('id-ID')}</p>
-        </div>
+          <div className="text-center mb-6">
+            <h2 className="text-lg font-bold tracking-wide uppercase text-black">LAPORAN RINGKASAN KEUANGAN & PENJUALAN</h2>
+            <p className="text-xs text-gray-600 mt-1">Periode: {timeRange === 'today' ? 'Hari Ini' : timeRange === 'week' ? '7 Hari Terakhir' : 'Bulan Ini'}</p>
+            <p className="text-[10px] text-gray-500">Dicetak Pada: {new Date().toLocaleString('id-ID')}</p>
+          </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-6 border p-4 rounded-lg bg-gray-50">
-          <div>
-            <span className="text-[10px] text-gray-500 uppercase font-bold block">Omset Kotor (Revenue)</span>
-            <span className="text-sm font-black text-black font-mono">{formatRupiah(totalGrossRevenue)}</span>
+          <div className="grid grid-cols-2 gap-4 mb-6 border p-4 rounded-lg bg-gray-50">
+            <div>
+              <span className="text-[10px] text-gray-500 uppercase font-bold block">Omset Kotor (Revenue)</span>
+              <span className="text-sm font-black text-black font-mono">{formatRupiah(totalGrossRevenue)}</span>
+            </div>
+            <div>
+              <span className="text-[10px] text-gray-500 uppercase font-bold block">Total Pengeluaran (Expenses)</span>
+              <span className="text-sm font-black text-red-650 font-mono">{formatRupiah(totalExpenses)}</span>
+            </div>
+            <div>
+              <span className="text-[10px] text-gray-500 uppercase font-bold block">Transaksi Sukses</span>
+              <span className="text-sm font-black text-black font-mono">{filteredTransactions.length} Transaksi</span>
+            </div>
+            <div className="border-t pt-2 mt-2 col-span-2">
+              <span className="text-[10px] text-gray-500 uppercase font-bold block">Estimasi Omset Bersih</span>
+              <span className={`text-base font-black font-mono ${totalNetRevenue >= 0 ? 'text-emerald-700' : 'text-red-750'}`}>
+                {formatRupiah(totalNetRevenue)}
+              </span>
+            </div>
           </div>
-          <div>
-            <span className="text-[10px] text-gray-500 uppercase font-bold block">Beban Bahan Baku (HPP)</span>
-            <span className="text-sm font-black text-red-650 font-mono">{formatRupiah(totalHPP)}</span>
-          </div>
-          <div>
-            <span className="text-[10px] text-gray-500 uppercase font-bold block">Kas Keluar Operasional</span>
-            <span className="text-sm font-black text-red-650 font-mono">{formatRupiah(totalExpenses)}</span>
-          </div>
-          <div>
-            <span className="text-[10px] text-gray-500 uppercase font-bold block">Margin Keuntungan Bersih</span>
-            <span className={`text-sm font-black font-mono ${netProfitMargin >= 20 ? 'text-emerald-600' : 'text-amber-600'}`}>
-              {netProfitMargin}%
-            </span>
-          </div>
-          <div className="col-span-2 border-t pt-2 mt-2">
-            <span className="text-[10px] text-gray-500 uppercase font-bold block">Laba Bersih Riil (Net Profit)</span>
-            <span className="text-lg font-black text-emerald-600 font-mono">{formatRupiah(netProfit)}</span>
-          </div>
-        </div>
 
-        <div className="mb-6">
-          <h3 className="text-xs uppercase font-extrabold text-black mb-2 border-b pb-1">Distribusi Penjualan Menu</h3>
-          <table className="w-full text-xs text-left border-collapse">
-            <thead>
-              <tr className="border-b bg-gray-100">
-                <th className="py-2 px-2">Kategori Menu</th>
-                <th className="py-2 px-2 text-right">Total Penjualan</th>
-              </tr>
-            </thead>
-            <tbody>
-              {salesByCategory.map((category) => (
-                <tr key={category.name} className="border-b">
-                  <td className="py-2 px-2">{category.name}</td>
-                  <td className="py-2 px-2 text-right font-mono">{formatRupiah(category.value)}</td>
+          <div className="mb-6">
+            <h3 className="text-xs font-black uppercase tracking-wider text-black border-b pb-1 mb-2">Rincian Penjualan per Kategori</h3>
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b text-gray-550">
+                  <th className="text-left py-1">Kategori</th>
+                  <th className="text-center py-1">Qty Terjual</th>
+                  <th className="text-right py-1">Subtotal</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="mb-6">
-          <h3 className="text-xs uppercase font-extrabold text-black mb-2 border-b pb-1">Daftar Pengeluaran Operasional</h3>
-          <table className="w-full text-xs text-left border-collapse">
-            <thead>
-              <tr className="border-b bg-gray-100">
-                <th className="py-2 px-2">Keterangan</th>
-                <th className="py-2 px-2">Kategori</th>
-                <th className="py-2 px-2 text-right">Nominal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredExpenses.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="py-4 text-center text-gray-500">Tidak ada pengeluaran dicatat dalam periode ini</td>
-                </tr>
-              ) : (
-                filteredExpenses.map((exp) => (
-                  <tr key={exp.id} className="border-b">
-                    <td className="py-2 px-2">{exp.title}</td>
-                    <td className="py-2 px-2">{exp.category}</td>
-                    <td className="py-2 px-2 text-right font-mono">{formatRupiah(exp.amount)}</td>
+              </thead>
+              <tbody>
+                {Object.entries(salesByCategory).map(([cat, info]: [string, any]) => (
+                  <tr key={cat} className="border-b">
+                    <td className="py-1.5 text-black font-bold">{cat}</td>
+                    <td className="text-center py-1.5 text-black">{info.quantity} pcs</td>
+                    <td className="text-right py-1.5 text-black font-mono font-bold">{formatRupiah(info.revenue)}</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-        <div className="mt-12 flex justify-between">
-          <div className="text-center w-48">
-            <p className="text-xs text-gray-500">Petugas Kasir</p>
-            <div className="h-16"></div>
-            <p className="text-xs font-bold border-t pt-1 border-gray-400 text-black">Rania</p>
+          <div className="mb-6">
+            <h3 className="text-xs font-black uppercase tracking-wider text-black border-b pb-1 mb-2">Metode Pembayaran</h3>
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b text-gray-550">
+                  <th className="text-left py-1">Metode</th>
+                  <th className="text-center py-1">Jumlah Transaksi</th>
+                  <th className="text-right py-1">Total Dana</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(salesByMethod).map(([method, info]: [string, any]) => (
+                  <tr key={method} className="border-b">
+                    <td className="py-1.5 text-black font-extrabold uppercase">{method}</td>
+                    <td className="text-center py-1.5 text-black">{info.count} kali</td>
+                    <td className="text-right py-1.5 text-black font-mono font-bold">{formatRupiah(info.total)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          <div className="text-center w-48">
-            <p className="text-xs text-gray-500">Pemilik Warung</p>
-            <div className="h-16"></div>
-            <p className="text-xs font-bold border-t pt-1 border-gray-400 text-black">{settings.ownerName || "Rania"}</p>
+
+          <div className="flex justify-between items-end mt-12 px-6">
+            <div className="text-center w-48">
+              <p className="text-xs text-gray-500">Petugas Shift/Kasir</p>
+              <div className="h-16"></div>
+              <p className="text-xs font-bold border-t pt-1 border-gray-400 text-black">{settings.userProfileName || "Kasir Utama"}</p>
+            </div>
+            <div className="text-center w-48">
+              <p className="text-xs text-gray-500">Pemilik Warung</p>
+              <div className="h-16"></div>
+              <p className="text-xs font-bold border-t pt-1 border-gray-400 text-black">{settings.ownerName || "Rania"}</p>
+            </div>
           </div>
         </div>
-      </div>
+      </ClientPortal>
 
       {/* Top Header & Toggles */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">

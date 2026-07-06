@@ -308,49 +308,48 @@ html:not(.dark) {
    Print Styles specifically for 58mm Thermal Printer
    ========================================================================= */
 @media print {
-  body * {
-    visibility: hidden;
+  /* Hide the entire Next.js wrapper and other components to prevent blank pages and overlays */
+  body > *:not(#print-receipt):not(#financial-print-area) {
+    display: none !important;
   }
   
-  #print-receipt, #print-receipt * {
-    visibility: visible;
-  }
-  
-  #print-receipt {
-    position: absolute;
-    left: 0;
-    top: 0;
+  #print-receipt, #financial-print-area {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
     margin: 0 !important;
     padding: 0 2mm !important; /* tiny margin for thermal paper */
     color: #000 !important;
-    background: transparent !important;
+    background: white !important;
     line-height: 1.2 !important;
+    width: 100% !important;
   }
   
   /* Reset some basic styles for the receipt */
-  #print-receipt table {
+  #print-receipt table, #financial-print-area table {
     width: 100% !important;
     border-collapse: collapse !important;
   }
-  #print-receipt td, #print-receipt th {
+  #print-receipt td, #print-receipt th, #financial-print-area td, #financial-print-area th {
     padding: 1px 0 !important;
     border-bottom: none !important;
   }
-  #print-receipt .border-dashed {
+  #print-receipt .border-dashed, #financial-print-area .border-dashed {
     border-color: #000 !important;
     border-style: dashed !important;
     border-left: none !important;
     border-right: none !important;
   }
-  #print-receipt .border-dashed[class*="border-t"] {
+  #print-receipt .border-dashed[class*="border-t"], #financial-print-area .border-dashed[class*="border-t"] {
     border-top-width: 1.5px !important;
   }
-  #print-receipt .border-dashed[class*="border-b"] {
+  #print-receipt .border-dashed[class*="border-b"], #financial-print-area .border-dashed[class*="border-b"] {
     border-bottom-width: 1.5px !important;
   }
   
   /* Ensure colors print black/white on thermal */
-  #print-receipt * {
+  #print-receipt *, #financial-print-area * {
     color: #000 !important;
     text-shadow: none !important;
     box-shadow: none !important;
@@ -358,7 +357,7 @@ html:not(.dark) {
   
   /* Make sure background is totally clear so no gray patches */
   body {
-    background: transparent !important;
+    background: white !important;
   }
 }
 

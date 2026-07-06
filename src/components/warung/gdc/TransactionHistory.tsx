@@ -6,6 +6,7 @@ import { Transaction } from '@/lib/types';
 import { Search, Calendar, DollarSign, FileText, ShoppingBag, ArrowRight, Printer, FlameIcon, X, Trash2, Edit2, Save, Loader2, Share2, Download, CheckCircle, MapPin, Phone } from 'lucide-react';
 import { useAppState } from '@/components/providers/app-state-provider';
 import { isMobileOrWebView, saveReceiptImage, triggerPrint } from '@/lib/utils';
+import ClientPortal from '@/components/ClientPortal';
 
 interface TransactionHistoryProps {
   transactions: Transaction[];
@@ -738,158 +739,159 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
 
       {/* ── PRINT ONLY AREA (HIDDEN FROM SCREEN, VISIBLE ONLY ON PRINTING) ── */}
       {selectedTx && (
-        <div id="print-receipt" className="hidden print:block bg-white text-black font-sans">
-          <style dangerouslySetInnerHTML={{ __html: `
-            @media print {
-              @page {
-                margin: 0;
-                size: ${settings?.printerPaperSize === '80mm' ? '80mm' : '58mm'} auto;
+        <ClientPortal>
+          <div id="print-receipt" className="hidden print:block bg-white text-black font-sans">
+            <style dangerouslySetInnerHTML={{ __html: `
+              @media print {
+                @page {
+                  margin: 0;
+                  size: ${settings?.printerPaperSize === '80mm' ? '80mm' : '58mm'} auto;
+                }
+                #print-receipt {
+                  width: ${settings?.printerPaperSize === '80mm' ? '76mm' : '54mm'} !important;
+                  font-size: ${settings?.printerPaperSize === '80mm' ? '12px' : '9.5px'} !important;
+                }
+                #print-receipt table, #print-receipt td, #print-receipt th, #print-receipt div, #print-receipt p, #print-receipt span {
+                  font-size: ${settings?.printerPaperSize === '80mm' ? '12px' : '9.5px'} !important;
+                }
+                #print-receipt .text-\\[8\\.5px\\], #print-receipt .text-\\[8px\\], #print-receipt .text-\\[9px\\] {
+                  font-size: ${settings?.printerPaperSize === '80mm' ? '10px' : '8px'} !important;
+                }
               }
-              #print-receipt {
-                width: ${settings?.printerPaperSize === '80mm' ? '76mm' : '54mm'} !important;
-                font-size: ${settings?.printerPaperSize === '80mm' ? '12px' : '9.5px'} !important;
-              }
-              #print-receipt table, #print-receipt td, #print-receipt th, #print-receipt div, #print-receipt p, #print-receipt span {
-                font-size: ${settings?.printerPaperSize === '80mm' ? '12px' : '9.5px'} !important;
-              }
-              #print-receipt .text-\\[8\\.5px\\], #print-receipt .text-\\[8px\\], #print-receipt .text-\\[9px\\] {
-                font-size: ${settings?.printerPaperSize === '80mm' ? '10px' : '8px'} !important;
-              }
-            }
-          ` }} />
-          <div className="flex-1 overflow-y-auto pr-1 no-scrollbar">
-            <div className="border-b-2 border-dashed border-slate-300 pb-4 text-center">
-              <h4 className="text-lg font-black tracking-tight uppercase">{settings?.merchantName || "MIE JEBEW GDC"}</h4>
-              <p className="text-[10px] text-slate-500 font-medium">{settings?.merchantAddress || "Jl. Boulevard Grand Depok City, Depok"}</p>
-              <p className="text-[10px] text-slate-500 font-medium">Telp / WA: {settings?.merchantPhone || "0812-xxxx-xxxx"}</p>
-            </div>
+            ` }} />
+            <div className="flex-1 overflow-y-auto pr-1 no-scrollbar">
+              <div className="border-b-2 border-dashed border-slate-300 pb-4 text-center">
+                <h4 className="text-lg font-black tracking-tight uppercase">{settings?.merchantName || "MIE JEBEW GDC"}</h4>
+                <p className="text-[10px] text-slate-500 font-medium">{settings?.merchantAddress || "Jl. Boulevard Grand Depok City, Depok"}</p>
+                <p className="text-[10px] text-slate-500 font-medium">Telp / WA: {settings?.merchantPhone || "0812-xxxx-xxxx"}</p>
+              </div>
 
-            <div className="text-[10px]" style={{ fontFamily: 'monospace' }}>
-              <table className="w-full mt-3">
-                <tbody>
-                  <tr>
-                    <td className="text-slate-500">Invoice:</td>
-                    <td className="text-right font-bold text-slate-800">{selectedTx.id}</td>
-                  </tr>
-                  <tr>
-                    <td className="text-slate-500">Tanggal:</td>
-                    <td className="text-right">
-                      {new Date(selectedTx.createdAt).toLocaleDateString('id-ID')} {new Date(selectedTx.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-slate-500">Kasir:</td>
-                    <td className="text-right">{settings?.userProfileName || settings?.ownerName || 'Kasir'}</td>
-                  </tr>
-                  <tr>
-                    <td className="text-slate-500">Pelanggan:</td>
-                    <td className="text-right font-bold text-slate-800">{(selectedTx.customerName || 'Umum').replace(/meja/gi, 'Order').replace(/self\s*order/gi, 'Order')}</td>
-                  </tr>
-                  <tr>
-                    <td className="text-slate-500">Metode:</td>
-                    <td className="text-right font-extrabold uppercase text-red-600">{selectedTx.paymentMethod}</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <div className="border-t-2 border-b-2 border-dashed border-slate-300 my-3 py-2">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="text-slate-500 font-normal">
-                      <th>Menu</th>
-                      <th className="text-center">Qty</th>
-                      <th className="text-right">Sum</th>
-                    </tr>
-                  </thead>
+              <div className="text-[10px]" style={{ fontFamily: 'monospace' }}>
+                <table className="w-full mt-3">
                   <tbody>
-                    {selectedTx.items.map((item, idx) => {
-                      const finalSellPrice = item.sellPrice || item.unitPrice || 0;
-                      const productName = item.productName || item.product?.name || 'Menu';
-                      return (
-                        <tr key={idx} className="align-top">
-                          <td className="py-1">
-                            {productName.split('\n').map((line, idx) => {
-                              if (idx === 0) {
+                    <tr>
+                      <td className="text-slate-500">Invoice:</td>
+                      <td className="text-right font-bold text-slate-800">{selectedTx.id}</td>
+                    </tr>
+                    <tr>
+                      <td className="text-slate-500">Tanggal:</td>
+                      <td className="text-right">
+                        {new Date(selectedTx.createdAt).toLocaleDateString('id-ID')} {new Date(selectedTx.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="text-slate-500">Kasir:</td>
+                      <td className="text-right">{settings?.userProfileName || settings?.ownerName || 'Kasir'}</td>
+                    </tr>
+                    <tr>
+                      <td className="text-slate-500">Pelanggan:</td>
+                      <td className="text-right font-bold text-slate-800">{(selectedTx.customerName || 'Umum').replace(/meja/gi, 'Order').replace(/self\s*order/gi, 'Order')}</td>
+                    </tr>
+                    <tr>
+                      <td className="text-slate-500">Metode:</td>
+                      <td className="text-right font-extrabold uppercase text-red-600">{selectedTx.paymentMethod}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <div className="border-t-2 border-b-2 border-dashed border-slate-300 my-3 py-2">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="text-slate-500 font-normal">
+                        <th>Menu</th>
+                        <th className="text-center">Qty</th>
+                        <th className="text-right">Sum</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedTx.items.map((item, idx) => {
+                        const finalSellPrice = item.sellPrice || item.unitPrice || 0;
+                        const productName = item.productName || item.product?.name || 'Menu';
+                        return (
+                          <tr key={idx} className="align-top">
+                            <td className="py-1">
+                              {productName.split('\n').map((line, idx) => {
+                                if (idx === 0) {
+                                  return (
+                                    <span key={idx} className="block font-bold text-slate-700 break-words whitespace-normal pr-1 leading-tight">
+                                      {line}
+                                    </span>
+                                  );
+                                }
+                                const isNote = line.toLowerCase().startsWith("catatan:");
                                 return (
-                                  <span key={idx} className="block font-bold text-slate-700 break-words whitespace-normal pr-1 leading-tight">
-                                    {line}
+                                  <span key={idx} className={`block text-[8.5px] font-extrabold uppercase tracking-tight mt-0.5 ${isNote ? "text-[#ea580c] mt-1 border-t border-slate-100 pt-0.5" : "text-red-600"}`}>
+                                    » {line}
                                   </span>
                                 );
-                              }
-                              const isNote = line.toLowerCase().startsWith("catatan:");
-                              return (
-                                <span key={idx} className={`block text-[8.5px] font-extrabold uppercase tracking-tight mt-0.5 ${isNote ? "text-[#ea580c] mt-1 border-t border-slate-100 pt-0.5" : "text-red-600"}`}>
-                                  » {line}
+                              })}
+                              {item.notes && !(
+                                productName.toLowerCase().includes(item.notes.toLowerCase()) ||
+                                (item.notes.toLowerCase().startsWith("catatan:") && productName.toLowerCase().includes(item.notes.toLowerCase().replace("catatan:", "").trim()))
+                              ) && (
+                                <span className="block text-[8.5px] text-[#ea580c] font-extrabold uppercase tracking-tight mt-1 border-t border-slate-100 pt-0.5">
+                                  » {item.notes}
                                 </span>
-                              );
-                            })}
-                            {item.notes && !(
-                              productName.toLowerCase().includes(item.notes.toLowerCase()) ||
-                              (item.notes.toLowerCase().startsWith("catatan:") && productName.toLowerCase().includes(item.notes.toLowerCase().replace("catatan:", "").trim()))
-                            ) && (
-                              <span className="block text-[8.5px] text-[#ea580c] font-extrabold uppercase tracking-tight mt-1 border-t border-slate-100 pt-0.5">
-                                » {item.notes}
-                              </span>
-                            )}
-                          </td>
-                          <td className="text-center py-1 text-slate-800 font-bold">{item.quantity}</td>
-                          <td className="text-right py-1 font-bold text-slate-800">
-                            {(finalSellPrice * item.quantity).toLocaleString('id-ID')}
-                          </td>
-                        </tr>
-                      );
-                    })}
+                              )}
+                            </td>
+                            <td className="text-center py-1 text-slate-800 font-bold">{item.quantity}</td>
+                            <td className="text-right py-1 font-bold text-slate-800">
+                              {(finalSellPrice * item.quantity).toLocaleString('id-ID')}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <table className="w-full mt-1">
+                  <tbody>
+                    <tr>
+                      <td className="text-slate-500">Subtotal:</td>
+                      <td className="text-right">Rp {calculatedSubtotal.toLocaleString('id-ID')}</td>
+                    </tr>
+                    {serviceChargeVal > 0 && (
+                      <tr>
+                        <td className="text-slate-500">Biaya Layanan:</td>
+                        <td className="text-right">Rp {serviceChargeVal.toLocaleString('id-ID')}</td>
+                      </tr>
+                    )}
+                    <tr className="border-t border-slate-200 font-black">
+                      <td className="text-slate-900 pt-1">Total Akhir:</td>
+                      <td className="text-right text-red-600 pt-1">Rp {selectedTx.total.toLocaleString('id-ID')}</td>
+                    </tr>
+                    <tr>
+                      <td className="text-slate-500">Bayar:</td>
+                      <td className="text-right">
+                        Rp {amountPaidVal.toLocaleString('id-ID')}
+                      </td>
+                    </tr>
+                    <tr className="font-bold">
+                      <td className="text-slate-500">Kembalian:</td>
+                      <td className="text-right text-emerald-600">
+                        Rp {selectedTx.paymentMethod === 'Tunai' ? changeVal.toLocaleString('id-ID') : '0'}
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
 
-              <table className="w-full mt-1">
-                <tbody>
-                  <tr>
-                    <td className="text-slate-500">Subtotal:</td>
-                    <td className="text-right">Rp {calculatedSubtotal.toLocaleString('id-ID')}</td>
-                  </tr>
-                  {serviceChargeVal > 0 && (
-                    <tr>
-                      <td className="text-slate-500">Biaya Layanan:</td>
-                      <td className="text-right">Rp {serviceChargeVal.toLocaleString('id-ID')}</td>
-                    </tr>
-                  )}
-                  <tr className="border-t border-slate-200 font-black">
-                    <td className="text-slate-900 pt-1">Total Akhir:</td>
-                    <td className="text-right text-red-600 pt-1">Rp {selectedTx.total.toLocaleString('id-ID')}</td>
-                  </tr>
-                  <tr>
-                    <td className="text-slate-500">Bayar:</td>
-                    <td className="text-right">
-                      Rp {amountPaidVal.toLocaleString('id-ID')}
-                    </td>
-                  </tr>
-                  <tr className="font-bold">
-                    <td className="text-slate-500">Kembalian:</td>
-                    <td className="text-right text-emerald-600">
-                      Rp {selectedTx.paymentMethod === 'Tunai' ? changeVal.toLocaleString('id-ID') : '0'}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div className="border-t-2 border-dashed border-slate-300 pt-3 text-center mt-3">
-              <span className="text-[8px] text-slate-500 font-bold uppercase tracking-tight block mb-0.5 font-sans">
-                {settings?.receiptHeader || "TERIMA KASIH"}
-              </span>
-              <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-widest block mb-0.5">
-                {settings?.receiptFooter || "ATAS KUNJUNGAN ANDA"}
-              </span>
-              <span className="text-[9px] text-slate-400 block font-mono mt-1">
-                *** LAYANAN WA: {settings?.merchantPhone || "0812-xxxx-xxxx"} ***
-              </span>
+              <div className="border-t-2 border-dashed border-slate-300 pt-3 text-center mt-3">
+                <span className="text-[8px] text-slate-500 font-bold uppercase tracking-tight block mb-0.5 font-sans">
+                  {settings?.receiptHeader || "TERIMA KASIH"}
+                </span>
+                <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-widest block mb-0.5">
+                  {settings?.receiptFooter || "ATAS KUNJUNGAN ANDA"}
+                </span>
+                <span className="text-[9px] text-slate-400 block font-mono mt-1">
+                  *** LAYANAN WA: {settings?.merchantPhone || "0812-xxxx-xxxx"} ***
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        </ClientPortal>
       )}
     </>
   );
 }
-

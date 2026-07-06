@@ -207,7 +207,12 @@ export async function printReceiptBluetooth(tx: any, settings: any): Promise<voi
     const date = new Date(tx.createdAt);
     const formattedDate = date.toLocaleDateString('id-ID') + " " + date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
     builder.line(`Tanggal: ${formattedDate}`);
-    builder.line(`Kasir  : ${settings?.userProfileName || settings?.ownerName || 'Kasir'}`);
+    
+    let cashierName = settings?.userProfileName || settings?.ownerName || 'Rania';
+    if (cashierName.toLowerCase().includes("mie jebew")) {
+      cashierName = "Rania";
+    }
+    builder.line(`Kasir  : ${cashierName}`);
     
     let custName = tx.customerName || 'Umum';
     custName = custName.replace(/meja/gi, 'Order').replace(/self\s*order/gi, 'Order');
@@ -286,7 +291,7 @@ export async function printReceiptBluetooth(tx: any, settings: any): Promise<voi
     builder.alignCenter();
     builder.line(settings?.receiptHeader || "TERIMA KASIH");
     builder.line(settings?.receiptFooter || "ATAS KUNJUNGAN ANDA");
-    builder.line(`*** LAYANAN WA: ${settings?.merchantPhone || "0812-xxxx-xxxx"} ***`);
+    builder.line(`*** INSTAGRAM: miejebew.gdc ***`);
     builder.feed(4);
     builder.cut();
 

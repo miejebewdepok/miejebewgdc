@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { CartItem, Transaction, Settings } from '@/lib/types';
 import { X, CreditCard, Banknote, QrCode, FileText, Printer, CheckCircle, Loader2, Copy, Download, MapPin, Phone, ShoppingBag } from 'lucide-react';
-import { isMobileOrWebView, saveReceiptImage } from '@/lib/utils';
+import { isMobileOrWebView, saveReceiptImage, triggerPrint } from '@/lib/utils';
 import { toBlob, toPng } from 'html-to-image';
 import { toast } from 'sonner';
 
@@ -861,13 +861,7 @@ export default function CheckoutModal({
                     >
                       <Download className="w-3.5 h-3.5" /> UNDUH GAMBAR
                     </button>
-                    <button type="button" onClick={() => {
-                      if (isMobileOrWebView()) {
-                        alert("Pencetakan langsung tidak didukung di HP/Tablet/APK. Silakan buka aplikasi kasir melalui Google Chrome di Laptop/PC untuk mencetak struk.");
-                      } else {
-                        try { window.print(); } catch(e) {}
-                      }
-                    }}
+                    <button type="button" onClick={triggerPrint}
                       className="w-full bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-foreground dark:text-white rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer">
                       <Printer className="w-4 h-4 text-red-500" /> CETAK STRUK
                     </button>

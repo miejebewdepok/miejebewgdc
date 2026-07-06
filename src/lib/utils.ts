@@ -59,3 +59,26 @@ export async function saveReceiptImage(dataUrl: string, filename: string): Promi
     return false;
   }
 }
+
+export async function triggerPrint(): Promise<void> {
+  if (typeof window === "undefined") return;
+
+  const cap = (window as any).Capacitor;
+  if (cap?.isNativePlatform?.()) {
+    if (cap?.Plugins?.ImageSaver?.printPage) {
+      try {
+        await cap.Plugins.ImageSaver.printPage();
+      } catch (err: any) {
+        toast.error("Gagal cetak native: " + (err?.message || err));
+      }
+    } else {
+      toast.error("Fitur cetak native tidak didukung pada aplikasi versi ini.");
+    }
+  } else {
+    try {
+      window.print();
+    } catch (e: any) {
+      toast.error("Gagal membuka jendela cetak.");
+    }
+  }
+}

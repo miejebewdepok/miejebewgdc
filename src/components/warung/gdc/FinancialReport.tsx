@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Transaction, Expense } from '@/lib/types';
 import { useAppState } from '@/components/providers/app-state-provider';
-import { isMobileOrWebView } from '@/lib/utils';
+import { isMobileOrWebView, triggerPrint } from '@/lib/utils';
 import { useSession } from '@/lib/auth-client';
 import { 
   TrendingUp, 
@@ -559,11 +559,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
 
   // Print Summary PDF handler
   const printReport = () => {
-    if (isMobileOrWebView()) {
-      alert("Pencetakan laporan tidak didukung di HP/Tablet/APK. Silakan buka aplikasi kasir melalui Google Chrome di Laptop/PC untuk mencetak laporan.");
-    } else {
-      try { window.print(); } catch(e) {}
-    }
+    triggerPrint();
   };
 
   return (

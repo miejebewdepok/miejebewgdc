@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { Transaction } from '@/lib/types';
 import { Search, Calendar, DollarSign, FileText, ShoppingBag, ArrowRight, Printer, FlameIcon, X, Trash2, Edit2, Save, Loader2, Share2, Download, CheckCircle, MapPin, Phone } from 'lucide-react';
 import { useAppState } from '@/components/providers/app-state-provider';
-import { isMobileOrWebView, saveReceiptImage } from '@/lib/utils';
+import { isMobileOrWebView, saveReceiptImage, triggerPrint } from '@/lib/utils';
 
 interface TransactionHistoryProps {
   transactions: Transaction[];
@@ -725,13 +725,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
 
                 <button
                   type="button"
-                  onClick={() => {
-                    if (isMobileOrWebView()) {
-                      alert("Pencetakan langsung tidak didukung di HP/Tablet/APK. Silakan buka aplikasi kasir melalui Google Chrome di Laptop/PC untuk mencetak struk.");
-                    } else {
-                      try { window.print(); } catch(e) {}
-                    }
-                  }}
+                  onClick={triggerPrint}
                   className="w-full bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-foreground dark:text-white rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Printer className="w-4 h-4 text-red-500" /> CETAK STRUK

@@ -64,4 +64,38 @@ public class ImageSaver extends Plugin {
             call.reject("Error saat menyimpan: " + e.getMessage());
         }
     }
+
+    @PluginMethod
+    public void printPage(PluginCall call) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    android.webkit.WebView webView = getBridge().getWebView();
+                    if (webView != null) {
+                        android.print.PrintManager printManager = (android.print.PrintManager) getActivity().getSystemService(android.content.Context.PRINT_SERVICE);
+                        if (printManager != null) {
+                            String jobName = "Struk Mie Jebew " + System.currentTimeMillis();
+                            android.print.PrintDocumentAdapter printAdapter;
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                                printAdapter = webView.createPrintDocumentAdapter(jobName);
+                            } else {
+                                printAdapter = webView.createPrintDocumentAdapter();
+                            }
+                            printManager.print(jobName, printAdapter, new android.print.PrintAttributes.Builder().build());
+                            JSObject ret = new JSObject();
+                            ret.put("success", true);
+                            call.resolve(ret);
+                        } else {
+                            call.reject("PrintManager tidak tersedia di perangkat ini.");
+                        }
+                    } else {
+                        call.reject("WebView tidak ditemukan.");
+                    }
+                } catch (Exception e) {
+                    call.reject("Gagal mencetak: " + e.getMessage());
+                }
+            }
+        });
+    }
 }

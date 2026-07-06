@@ -308,6 +308,13 @@ html:not(.dark) {
    Print Styles specifically for 58mm Thermal Printer
    ========================================================================= */
 @media print {
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
   /* Hide the entire Next.js wrapper and other components to prevent blank pages and overlays */
   body > *:not(#print-receipt):not(#financial-print-area) {
     display: none !important;
@@ -324,6 +331,8 @@ html:not(.dark) {
     background: white !important;
     line-height: 1.2 !important;
     width: 100% !important;
+    page-break-inside: avoid !important;
+    overflow: visible !important;
   }
   
   /* Reset some basic styles for the receipt */

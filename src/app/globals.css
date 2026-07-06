@@ -330,9 +330,12 @@ html:not(.dark) {
     color: #000 !important;
     background: white !important;
     line-height: 1.2 !important;
-    width: 100% !important;
     page-break-inside: avoid !important;
     overflow: visible !important;
+  }
+  
+  #financial-print-area {
+    width: 100% !important;
   }
   
   /* Reset some basic styles for the receipt */

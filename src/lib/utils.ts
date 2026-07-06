@@ -232,7 +232,7 @@ export async function printReceiptBluetooth(tx: any, settings: any): Promise<voi
 
       // Print variant details
       for (let i = 1; i < nameLines.length; i++) {
-        builder.line(`  » ${nameLines[i]}`);
+        builder.line(`  >> ${nameLines[i]}`);
       }
 
       // Print notes if any

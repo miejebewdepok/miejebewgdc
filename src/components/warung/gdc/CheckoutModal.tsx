@@ -442,6 +442,53 @@ export default function CheckoutModal({
     }
   };
 
+  const handleCetakStruk = async () => {
+    const cap = (window as any).Capacitor;
+    if (cap?.isNativePlatform?.()) {
+      // Create a formatted transaction object for printReceiptBluetooth
+      const formattedTx = {
+        id: transactionId || 'TRX-TEMP',
+        customerName: customerName,
+        paymentMethod: paymentMethod,
+        amountPaid: Number(cashAmount) || 0,
+        change: changeAmount || 0,
+        total: total,
+        discountAmount: discountVal || 0,
+        createdAt: new Date().toISOString(),
+        items: lines.map(line => {
+          let productName = line.product.name;
+          const notesArr: string[] = [];
+          if (line.spicyLevel !== undefined && line.spicyLevel !== null) {
+            notesArr.push(`Level ${line.spicyLevel}`);
+          }
+          if (line.filling) {
+            notesArr.push(`Isi: ${line.filling}`);
+          }
+          if (line.size) {
+            notesArr.push(`Ukuran: ${line.size}`);
+          }
+          if (line.toppings && line.toppings.length > 0) {
+            notesArr.push(`Top: ${line.toppings.join(', ')}`);
+          }
+          if (line.notes && line.notes.trim()) {
+            notesArr.push(`Catatan: ${line.notes.trim()}`);
+          }
+          if (notesArr.length > 0) {
+            productName += '\n' + notesArr.join('\n');
+          }
+          return {
+            productName,
+            quantity: line.quantity,
+            sellPrice: line.product.sellPrice
+          };
+        })
+      };
+      await printReceiptBluetooth(formattedTx, settings);
+    } else {
+      await triggerPrint();
+    }
+  };
+
   // Premium dark receipt content for capture & sharing (replicates the public digital receipt page layout)
   const PremiumReceiptContent = () => (
     <div className="w-full bg-[#09090b] text-[#fef2f2] font-sans p-6 rounded-3xl border border-white/10 shadow-2xl relative select-none">
@@ -862,7 +909,7 @@ export default function CheckoutModal({
                     >
                       <Download className="w-3.5 h-3.5" /> UNDUH GAMBAR
                     </button>
-                    <button type="button" onClick={triggerPrint}
+                    <button type="button" onClick={handleCetakStruk}
                       className="w-full bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-foreground dark:text-white rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer">
                       <Printer className="w-4 h-4 text-red-500" /> CETAK STRUK
                     </button>

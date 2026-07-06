@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { Transaction } from '@/lib/types';
 import { Search, Calendar, DollarSign, FileText, ShoppingBag, ArrowRight, Printer, FlameIcon, X, Trash2, Edit2, Save, Loader2, Share2, Download, CheckCircle, MapPin, Phone } from 'lucide-react';
 import { useAppState } from '@/components/providers/app-state-provider';
-import { isMobileOrWebView, saveReceiptImage, triggerPrint } from '@/lib/utils';
+import { isMobileOrWebView, saveReceiptImage, triggerPrint, printReceiptBluetooth } from '@/lib/utils';
 import ClientPortal from '@/components/ClientPortal';
 
 interface TransactionHistoryProps {
@@ -149,6 +149,17 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
       currency: 'IDR',
       maximumFractionDigits: 0
     }).format(val);
+  };
+
+  const handleCetakStrukHistory = async () => {
+    if (!selectedTx) return;
+    const cap = (window as any).Capacitor;
+    if (cap?.isNativePlatform?.()) {
+      // Direct bluetooth print
+      await printReceiptBluetooth(selectedTx, settings);
+    } else {
+      await triggerPrint();
+    }
   };
 
 
@@ -726,7 +737,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
 
                 <button
                   type="button"
-                  onClick={triggerPrint}
+                  onClick={handleCetakStrukHistory}
                   className="w-full bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 text-foreground dark:text-white rounded-xl py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Printer className="w-4 h-4 text-red-500" /> CETAK STRUK

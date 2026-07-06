@@ -895,7 +895,7 @@ export default function CheckoutModal({
             @media print {
               @page {
                 margin: 0;
-                size: ${settings.printerPaperSize === '80mm' ? '80mm' : '58mm'} auto;
+                size: ${settings.printerPaperSize === '80mm' ? '80mm' : '58mm'};
               }
               #print-receipt {
                 width: ${settings.printerPaperSize === '80mm' ? '76mm' : '54mm'} !important;

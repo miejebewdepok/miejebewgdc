@@ -22,8 +22,12 @@ export default function UnduhPage() {
       <div className="max-w-4xl mx-auto px-4 py-8 md:py-16 w-full z-10 flex-1 flex flex-col justify-center">
         {/* Header Branding */}
         <div className="text-center mb-8 md:mb-12">
-          <div className="inline-flex items-center justify-center p-3 bg-red-500/10 border border-red-500/20 rounded-2xl md:rounded-3xl mb-3 shadow-lg shadow-red-500/5 animate-pulse">
-            <Smartphone className="w-6 h-6 md:w-8 md:h-8 text-red-500" />
+          <div className="inline-flex items-center justify-center p-0.5 bg-gradient-to-br from-red-500 to-amber-500 rounded-full mb-4 shadow-lg shadow-red-500/20">
+            <img
+              src="/logo.png"
+              alt="Mie Jebew Logo"
+              className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-slate-950"
+            />
           </div>
           <h1 className="text-2xl md:text-4xl font-black tracking-tight text-white uppercase px-2">
             MIE JEBEW GDC <span className="text-red-500">KASIR APP</span>

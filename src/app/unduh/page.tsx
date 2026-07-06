@@ -13,16 +13,16 @@ export default function UnduhPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans relative overflow-hidden flex flex-col justify-between selection:bg-red-500/30 selection:text-red-200">
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans relative overflow-hidden flex flex-col justify-between selection:bg-amber-500/30 selection:text-amber-200">
       {/* Background Mesh Gradients */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-red-650/15 rounded-full blur-[130px] pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[40%] bg-amber-600/10 rounded-full blur-[130px] pointer-events-none"></div>
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-600/10 rounded-full blur-[130px] pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[40%] bg-amber-650/10 rounded-full blur-[130px] pointer-events-none"></div>
 
       {/* Main Container */}
       <div className="max-w-4xl mx-auto px-4 py-8 md:py-16 w-full z-10 flex-1 flex flex-col justify-center">
         {/* Header Branding */}
         <div className="text-center mb-8 md:mb-12">
-          <div className="inline-flex items-center justify-center p-0.5 bg-gradient-to-br from-red-500 to-amber-500 rounded-full mb-4 shadow-lg shadow-red-500/20">
+          <div className="inline-flex items-center justify-center p-0.5 bg-gradient-to-br from-amber-500 to-red-650 rounded-full mb-4 shadow-lg shadow-amber-500/20">
             <img
               src="/logo.png"
               alt="Mie Jebew Logo"
@@ -30,9 +30,12 @@ export default function UnduhPage() {
             />
           </div>
           <h1 className="text-2xl md:text-4xl font-black tracking-tight text-white uppercase px-2">
-            MIE JEBEW GDC <span className="text-red-500">KASIR APP</span>
+            MIE JEBEW GDC
           </h1>
-          <p className="text-slate-400 text-xs md:text-base mt-2 max-w-md mx-auto px-4">
+          <p className="text-[10px] md:text-xs font-black tracking-[0.25em] uppercase mt-1.5 bg-gradient-to-r from-amber-400 via-orange-450 to-red-500 bg-clip-text text-transparent">
+            KASIR APP
+          </p>
+          <p className="text-slate-400 text-xs md:text-base mt-3.5 max-w-md mx-auto px-4">
             Unduh aplikasi kasir native Android untuk Tablet & HP Android Anda. Mendukung cetak struk langsung via Bluetooth.
           </p>
         </div>
@@ -57,19 +60,19 @@ export default function UnduhPage() {
             <div>
               <div className="space-y-3">
                 <div className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                   <span className="text-xs md:text-sm text-slate-300">
                     Cetak struk thermal langsung via Bluetooth (Opsi 2)
                   </span>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                   <span className="text-xs md:text-sm text-slate-300">
                     Performa lebih cepat dibanding web browser
                   </span>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                   <span className="text-xs md:text-sm text-slate-300">
                     Optimasi tampilan layar penuh untuk tablet & HP
                   </span>
@@ -80,7 +83,7 @@ export default function UnduhPage() {
             <div className="mt-6 pt-5 border-t border-white/5">
               <a
                 href="/app-release.apk"
-                className="w-full bg-gradient-to-r from-red-650 to-red-550 hover:from-red-600 hover:to-red-500 text-white rounded-xl md:rounded-2xl py-3.5 md:py-4 font-black text-xs md:text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-red-600/20 active:scale-[0.98] cursor-pointer"
+                className="w-full bg-gradient-to-r from-amber-550 via-orange-500 to-red-600 hover:from-amber-500 hover:via-orange-450 hover:to-red-550 text-white rounded-xl md:rounded-2xl py-3.5 md:py-4 font-black text-xs md:text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-amber-500/20 active:scale-[0.98] cursor-pointer"
               >
                 <Download className="w-4 h-4" /> UNDUH APK SEKARANG
               </a>
@@ -94,7 +97,7 @@ export default function UnduhPage() {
           {/* Right Side: Setup Guide Card */}
           <div className="md:col-span-2 bg-slate-900/30 backdrop-blur-md border border-white/5 rounded-2xl md:rounded-3xl p-5 md:p-6 flex flex-col justify-between shadow-xl">
             <div>
-              <div className="flex items-center gap-2 mb-4 text-red-400">
+              <div className="flex items-center gap-2 mb-4 text-amber-400">
                 <HelpCircle className="w-4 h-4 md:w-5 md:h-5" />
                 <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider">Petunjuk Instal</h3>
               </div>
@@ -104,7 +107,7 @@ export default function UnduhPage() {
                   <span className="w-5 h-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-bold text-slate-350 shrink-0 mt-0.5">1</span>
                   <div>
                     <h4 className="text-xs font-bold text-white">Unduh File</h4>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Tekan tombol unduh merah di sebelah kiri.</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Tekan tombol unduh di sebelah kiri.</p>
                   </div>
                 </div>
 
@@ -130,7 +133,7 @@ export default function UnduhPage() {
               <span className="text-[10px] md:text-[11px] text-slate-400 flex items-center gap-1 shrink-0">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Bebas Virus & Malware
               </span>
-              <Link href="/kasir" className="text-[10px] md:text-[11px] text-red-400 hover:text-red-300 font-bold flex items-center gap-0.5 transition-colors">
+              <Link href="/kasir" className="text-[10px] md:text-[11px] text-amber-400 hover:text-amber-300 font-bold flex items-center gap-0.5 transition-colors">
                 Kembali <ChevronRight className="w-3 h-3" />
               </Link>
             </div>

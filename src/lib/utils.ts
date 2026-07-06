@@ -291,7 +291,7 @@ export async function printReceiptBluetooth(tx: any, settings: any): Promise<voi
     builder.alignCenter();
     builder.line(settings?.receiptHeader || "TERIMA KASIH");
     builder.line(settings?.receiptFooter || "ATAS KUNJUNGAN ANDA");
-    builder.line(`*** INSTAGRAM: miejebew.gdc ***`);
+    builder.line(`*** IG: @miejebew.gdc ***`);
     builder.feed(4);
     builder.cut();
 

@@ -766,7 +766,8 @@ export async function createTransaction(
     // Construct a beautiful name incorporating spicy level and toppings
     const extras: string[] = [];
     const isSpaghetti = product.name.toLowerCase().includes("spaghetti");
-    if (item.productId !== "promo_jasmine_tea" && item.spicyLevel !== undefined) {
+    const supportsSpicy = ['Mie Pedas', 'Mie Tek Tek', 'Kebab', 'Lumpia Beef'].includes(product.category || '');
+    if (item.productId !== "promo_jasmine_tea" && item.spicyLevel !== undefined && supportsSpicy) {
       if (product.category === 'Kebab' || product.category === 'Lumpia Beef') {
          if (item.spicyLevel === 0) extras.push("Tidak Pedas");
          else if (item.spicyLevel === 1) extras.push("Sedang");

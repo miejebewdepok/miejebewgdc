@@ -539,6 +539,9 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                               </span>
                               {lines.slice(1).map((line, i) => {
                                 const isNote = line.toLowerCase().startsWith("catatan:");
+                                const isSpicyProduct = /mie|kebab|lumpia/i.test(lines[0]);
+                                const isSpicyDetail = /^(level|tidak pedas|sedang|pedas)/i.test(line.trim());
+                                if (!isSpicyProduct && isSpicyDetail) return null;
                                 return (
                                   <span key={i} className={`text-[9px] font-extrabold uppercase block tracking-tight mt-0.5 ${isNote ? "text-[#f97316] mt-1.5 border-t border-white/5 pt-1" : "text-[#f87171]"}`}>
                                     » {line}
@@ -551,6 +554,9 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                 const isAlreadyInName = cleanProductName.includes(cleanNote) || 
                                                         (cleanNote.startsWith("catatan:") && cleanProductName.includes(cleanNote.replace("catatan:", "").trim()));
                                 if (isAlreadyInName) return null;
+                                const isSpicyProduct = /mie|kebab|lumpia/i.test(lines[0]);
+                                const isSpicyDetail = /^(level|tidak pedas|sedang|pedas)/i.test(note.trim());
+                                if (!isSpicyProduct && isSpicyDetail) return null;
                                 const isNote = note.toLowerCase().startsWith("catatan:");
                                 return (
                                   <span key={i} className={`text-[9px] font-extrabold uppercase block tracking-tight mt-0.5 ${isNote ? "text-[#f97316] mt-1.5 border-t border-white/5 pt-1" : "text-[#f87171]"}`}>
@@ -830,6 +836,9 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
                                   );
                                 }
                                 const isNote = line.toLowerCase().startsWith("catatan:");
+                                const isSpicyProduct = /mie|kebab|lumpia/i.test(productName.split('\n')[0]);
+                                const isSpicyDetail = /^(level|tidak pedas|sedang|pedas)/i.test(line.trim());
+                                if (!isSpicyProduct && isSpicyDetail) return null;
                                 return (
                                   <span key={idx} className={`block text-[8.5px] font-extrabold uppercase tracking-tight mt-0.5 ${isNote ? "text-[#ea580c] mt-1 border-t border-slate-100 pt-0.5" : "text-red-600"}`}>
                                     » {line}

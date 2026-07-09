@@ -458,8 +458,15 @@ export default function CheckoutModal({
         items: lines.map(line => {
           let productName = line.product.name;
           const notesArr: string[] = [];
-          if (line.spicyLevel !== undefined && line.spicyLevel !== null) {
-            notesArr.push(`Level ${line.spicyLevel}`);
+          const supportsSpicy = ['Mie Pedas', 'Mie Tek Tek', 'Kebab', 'Lumpia Beef'].includes(line.product.category || '');
+          if (supportsSpicy && line.spicyLevel !== undefined && line.spicyLevel !== null) {
+            if (line.product.category === 'Kebab' || line.product.category === 'Lumpia Beef') {
+              if (line.spicyLevel === 0) notesArr.push("Tidak Pedas");
+              else if (line.spicyLevel === 1) notesArr.push("Sedang");
+              else if (line.spicyLevel === 2) notesArr.push("Pedas");
+            } else {
+              notesArr.push(`Level ${line.spicyLevel}`);
+            }
           }
           if (line.filling) {
             notesArr.push(`Isi: ${line.filling}`);
@@ -574,6 +581,10 @@ export default function CheckoutModal({
                   </span>
                   {lines.slice(1).map((line, i) => {
                     const isNote = line.toLowerCase().startsWith("catatan:");
+                    const isSpicyProduct = /mie|kebab|lumpia/i.test(lines[0]);
+                    const isSpicyDetail = /^(level|tidak pedas|sedang|pedas)/i.test(line.trim());
+                    if (!isSpicyProduct && isSpicyDetail) return null;
+
                     return (
                       <span key={i} className={`text-[9px] font-extrabold uppercase block tracking-tight mt-0.5 ${isNote ? "text-[#f97316] mt-1.5 border-t border-white/5 pt-1" : "text-[#f87171]"}`}>
                         » {line}
@@ -586,6 +597,10 @@ export default function CheckoutModal({
                     const isAlreadyInName = cleanProductName.includes(cleanNote) || 
                                             (cleanNote.startsWith("catatan:") && cleanProductName.includes(cleanNote.replace("catatan:", "").trim()));
                     if (isAlreadyInName) return null;
+                    const isSpicyProduct = /mie|kebab|lumpia/i.test(lines[0]);
+                    const isSpicyDetail = /^(level|tidak pedas|sedang|pedas)/i.test(note.trim());
+                    if (!isSpicyProduct && isSpicyDetail) return null;
+
                     const isNote = note.toLowerCase().startsWith("catatan:");
                     return (
                       <span key={i} className={`text-[9px] font-extrabold uppercase block tracking-tight mt-0.5 ${isNote ? "text-[#f97316] mt-1.5 border-t border-white/5 pt-1" : "text-[#f87171]"}`}>

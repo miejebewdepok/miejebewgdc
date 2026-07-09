@@ -364,9 +364,10 @@ export function KasirView() {
     const isBypassed = isCabang2 
       ? (line.product.category === 'Tea Series' || line.product.category === 'Delight Series' || line.product.category?.toLowerCase() === 'chocolatte')
       : ['Snack', 'Qalla Coffee', 'Qalla Tea', 'Qalla Juice'].includes(line.product.category);
+    const supportsSpicy = ['Mie Pedas', 'Mie Tek Tek', 'Kebab', 'Lumpia Beef'].includes(line.product.category);
     let notesArr: string[] = [];
     
-    if (line.spicyLevel !== undefined && !isBypassed) {
+    if (supportsSpicy && line.spicyLevel !== undefined) {
       if (isSpecialCategory) {
         if (line.spicyLevel === 0) notesArr.push("Tidak Pedas");
         else if (line.spicyLevel === 1) notesArr.push("Sedang");

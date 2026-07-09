@@ -36,7 +36,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
   const userEmail = session?.user?.email;
   const isCabang2 = settings?.branchCode === 'CABANG_2';
 
-  const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month'>('today');
+  const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month' | 'sixMonths' | 'year'>('today');
   const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'sales' | 'expenses' | 'shift'>('sales');
 
@@ -115,9 +115,15 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       } else if (timeRange === 'week') {
         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         return txDate >= oneWeekAgo;
-      } else {
+      } else if (timeRange === 'month') {
         const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
         return txDate >= oneMonthAgo;
+      } else if (timeRange === 'sixMonths') {
+        const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
+        return txDate >= sixMonthsAgo;
+      } else {
+        const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        return txDate >= oneYearAgo;
       }
     });
   }, [transactions, timeRange]);
@@ -132,9 +138,15 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       } else if (timeRange === 'week') {
         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         return expDate >= oneWeekAgo;
-      } else {
+      } else if (timeRange === 'month') {
         const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
         return expDate >= oneMonthAgo;
+      } else if (timeRange === 'sixMonths') {
+        const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
+        return expDate >= sixMonthsAgo;
+      } else {
+        const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        return expDate >= oneYearAgo;
       }
     });
   }, [expenses, timeRange]);
@@ -302,7 +314,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
     return stats;
   }, [filteredTransactions]);
 
-  // Sales Trend chart data (Hourly for 'today', daily for others)
+  // Sales Trend chart data (Hourly for 'today', monthly for 6m/1y, daily for others)
   const salesChartData = useMemo(() => {
     if (timeRange === 'today') {
       const hours = [
@@ -323,6 +335,35 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       });
 
       return hours;
+    } else if (timeRange === 'sixMonths' || timeRange === 'year') {
+      const numMonths = timeRange === 'sixMonths' ? 6 : 12;
+      const months = [];
+      const now = new Date();
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      
+      for (let i = numMonths - 1; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthLabel = monthNames[d.getMonth()] + ' ' + String(d.getFullYear()).slice(-2);
+        months.push({ 
+          label: monthLabel, 
+          sum: 0,
+          monthVal: d.getMonth(),
+          yearVal: d.getFullYear()
+        });
+      }
+
+      filteredTransactions.forEach(tx => {
+        const txDate = new Date(tx.createdAt);
+        const txMonth = txDate.getMonth();
+        const txYear = txDate.getFullYear();
+        
+        const target = months.find(m => m.monthVal === txMonth && m.yearVal === txYear);
+        if (target) {
+          target.sum += tx.total || 0;
+        }
+      });
+
+      return months.map(m => ({ label: m.label, sum: m.sum }));
     } else {
       const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
       const days = dayNames.map(name => ({ label: name, sum: 0 }));
@@ -625,7 +666,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
 
           <div className="text-center mb-6">
             <h2 className="text-lg font-bold tracking-wide uppercase text-black">LAPORAN RINGKASAN KEUANGAN & PENJUALAN</h2>
-            <p className="text-xs text-gray-600 mt-1">Periode: {timeRange === 'today' ? 'Hari Ini' : timeRange === 'week' ? '7 Hari Terakhir' : 'Bulan Ini'}</p>
+            <p className="text-xs text-gray-600 mt-1">Periode: {timeRange === 'today' ? 'Hari Ini' : timeRange === 'week' ? '7 Hari Terakhir' : timeRange === 'month' ? 'Bulan Ini' : timeRange === 'sixMonths' ? '6 Bulan Terakhir' : '1 Tahun Terakhir'}</p>
             <p className="text-[10px] text-gray-500">Dicetak Pada: {new Date().toLocaleString('id-ID')}</p>
           </div>
 
@@ -740,7 +781,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
 
           {/* Timeframe selector */}
           <div className="flex bg-black/5 dark:bg-slate-800/50 p-1 rounded-2xl overflow-x-auto no-scrollbar shadow-inner">
-            {(['today', 'week', 'month'] as const).map((range) => (
+            {(['today', 'week', 'month', 'sixMonths', 'year'] as const).map((range) => (
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
@@ -750,7 +791,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5'
                 }`}
               >
-                {range === 'today' ? 'Hari Ini' : range === 'week' ? '7 Hari' : 'Bulan Ini'}
+                {range === 'today' ? 'Hari Ini' : range === 'week' ? '7 Hari' : range === 'month' ? 'Bulan Ini' : range === 'sixMonths' ? '6 Bulan' : '1 Tahun'}
               </button>
             ))}
           </div>

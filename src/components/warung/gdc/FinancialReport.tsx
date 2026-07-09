@@ -116,8 +116,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         return txDate >= oneWeekAgo;
       } else if (timeRange === 'month') {
-        const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-        return txDate >= oneMonthAgo;
+        return txDate.getMonth() === now.getMonth() && txDate.getFullYear() === now.getFullYear();
       } else if (timeRange === 'sixMonths') {
         const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
         return txDate >= sixMonthsAgo;
@@ -139,8 +138,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         return expDate >= oneWeekAgo;
       } else if (timeRange === 'month') {
-        const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-        return expDate >= oneMonthAgo;
+        return expDate.getMonth() === now.getMonth() && expDate.getFullYear() === now.getFullYear();
       } else if (timeRange === 'sixMonths') {
         const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
         return expDate >= sixMonthsAgo;

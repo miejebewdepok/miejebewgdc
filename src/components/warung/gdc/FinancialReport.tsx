@@ -626,8 +626,8 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
             </div>
             <div className="border-t pt-2 mt-2 col-span-2">
               <span className="text-[10px] text-gray-500 uppercase font-bold block">Estimasi Omset Bersih</span>
-              <span className={`text-base font-black font-mono ${totalNetRevenue >= 0 ? 'text-emerald-700' : 'text-red-750'}`}>
-                {formatRupiah(totalNetRevenue)}
+              <span className={`text-base font-black font-mono ${netProfit >= 0 ? 'text-emerald-700' : 'text-red-750'}`}>
+                {formatRupiah(netProfit)}
               </span>
             </div>
           </div>

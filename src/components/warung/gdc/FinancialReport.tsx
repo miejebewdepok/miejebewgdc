@@ -284,6 +284,24 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
     }));
   }, [filteredTransactions]);
 
+  const salesByMethod = useMemo(() => {
+    const stats: Record<string, { count: number; total: number }> = {
+      'Tunai': { count: 0, total: 0 },
+      'QRIS': { count: 0, total: 0 },
+      'Transfer': { count: 0, total: 0 }
+    };
+
+    filteredTransactions.forEach(tx => {
+      const pm = tx.paymentMethod;
+      if (pm in stats) {
+        stats[pm].count += 1;
+        stats[pm].total += tx.total || 0;
+      }
+    });
+
+    return stats;
+  }, [filteredTransactions]);
+
   // Sales Trend chart data (Hourly for 'today', daily for others)
   const salesChartData = useMemo(() => {
     if (timeRange === 'today') {

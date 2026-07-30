@@ -325,7 +325,7 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
   await ensureAppReady();
 
   const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - 14); // Sesuaikan perioda soft limit default untuk history yang dimuat kecuali halaman khusus yang override sendiri
+  cutoffDate.setDate(cutoffDate.getDate() - 90); // Muat transaksi & pengeluaran hingga 90 hari (3 bulan) terakhir
   const cutoffIso = cutoffDate.toISOString();
 
   // Execute all queries in parallel to eliminate network latency/database roundtrips sequentially

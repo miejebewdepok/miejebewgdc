@@ -164,7 +164,7 @@ export default function TransactionHistory({ transactions }: TransactionHistoryP
 
 
   // Compute overall stats
-  const totalIncome = transactions.reduce((sum, tx) => sum + tx.total, 0);
+  const totalIncome = transactions.reduce((sum, tx) => sum + (tx.total || 0), 0);
   const totalTxCount = transactions.length;
   const averageTxValue = totalTxCount > 0 ? Math.round(totalIncome / totalTxCount) : 0;
 

@@ -36,7 +36,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
   const userEmail = session?.user?.email;
   const isCabang2 = settings?.branchCode === 'CABANG_2';
 
-  const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month' | 'sixMonths' | 'year'>('today');
+  const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month' | 'sixMonths' | 'year' | 'all'>('month');
   const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'sales' | 'expenses' | 'shift'>('sales');
 
@@ -109,6 +109,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
   const filteredTransactions = useMemo(() => {
     const now = new Date();
     return transactions.filter(tx => {
+      if (timeRange === 'all') return true;
       const txDate = new Date(tx.createdAt);
       if (timeRange === 'today') {
         return txDate.toDateString() === now.toDateString();
@@ -131,6 +132,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
   const filteredExpenses = useMemo(() => {
     const now = new Date();
     return (expenses || []).filter(exp => {
+      if (timeRange === 'all') return true;
       const expDate = new Date(exp.createdAt);
       if (timeRange === 'today') {
         return expDate.toDateString() === now.toDateString();
@@ -779,7 +781,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
 
           {/* Timeframe selector */}
           <div className="flex bg-black/5 dark:bg-slate-800/50 p-1 rounded-2xl overflow-x-auto no-scrollbar shadow-inner">
-            {(['today', 'week', 'month', 'sixMonths', 'year'] as const).map((range) => (
+            {(['today', 'week', 'month', 'sixMonths', 'year', 'all'] as const).map((range) => (
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
@@ -789,7 +791,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5'
                 }`}
               >
-                {range === 'today' ? 'Hari Ini' : range === 'week' ? '7 Hari' : range === 'month' ? 'Bulan Ini' : range === 'sixMonths' ? '6 Bulan' : '1 Tahun'}
+                {range === 'today' ? 'Hari Ini' : range === 'week' ? '7 Hari' : range === 'month' ? 'Bulan Ini' : range === 'sixMonths' ? '6 Bulan' : range === 'year' ? '1 Tahun' : 'Semua'}
               </button>
             ))}
           </div>

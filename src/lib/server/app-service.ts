@@ -325,7 +325,7 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
   await ensureAppReady();
 
   const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - 90); // Muat transaksi & pengeluaran hingga 90 hari (3 bulan) terakhir
+  cutoffDate.setDate(cutoffDate.getDate() - 365); // Muat transaksi & pengeluaran hingga 365 hari (1 tahun) terakhir
   const cutoffIso = cutoffDate.toISOString();
 
   // Execute all queries in parallel to eliminate network latency/database roundtrips sequentially

@@ -111,19 +111,21 @@ export async function POST(
 
     const authResponse = await auth.handler(authRequest);
 
-    const authResult = (await authResponse.json().catch(() => null)) as
-      | { message?: string; url?: string | null }
-      | null;
+    const authResult = (await authResponse.json().catch(() => null)) as any;
 
     if (!authResponse.ok) {
       console.error("Auth response not OK:", {
         status: authResponse.status,
         result: authResult,
       });
-      return returnError(
-        config.mode,
-        authResult?.message ?? config.defaultError
-      );
+      const errorMessage =
+        authResult?.message ||
+        authResult?.body?.message ||
+        authResult?.error?.message ||
+        (authResponse.status === 500
+          ? "Gagal terhubung ke database server. Pastikan database aktif dan variabel DATABASE_URL di Vercel sudah terpasang."
+          : config.defaultError);
+      return returnError(config.mode, errorMessage);
     }
 
     if (intent === "sign-up") {

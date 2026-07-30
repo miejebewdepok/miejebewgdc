@@ -150,7 +150,7 @@ export const auth = betterAuth({
               // Block sign-in if the user is explicitly set to not approved
               if (user.isApproved === false) {
                 throw new APIError("FORBIDDEN", {
-                  message: "Your account is pending approval by RP Group. Please contact RP Group to activate your access.",
+                  message: "Akun Anda sedang menunggu persetujuan admin. Silakan hubungi admin RP Group untuk mengaktifkan akses.",
                 });
               }
             }
@@ -158,7 +158,7 @@ export const auth = betterAuth({
             if (err instanceof APIError) {
               throw err;
             }
-            console.error("Error in before sign-in hook:", err);
+            console.error("Error in before sign-in hook (non-fatal):", err);
           }
         }
       }

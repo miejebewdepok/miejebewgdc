@@ -314,8 +314,11 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
     return stats;
   }, [filteredTransactions]);
 
-  // Sales Trend chart data (Hourly for 'today', monthly for 6m/1y, daily for others)
+  // Sales Trend chart data (Hourly for 'today', daily for 'week'/'month', monthly for 6m/1y/'all')
   const salesChartData = useMemo(() => {
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const now = new Date();
+
     if (timeRange === 'today') {
       const hours = [
         { label: 'Pagi (08-11)', sum: 0 },
@@ -335,11 +338,58 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       });
 
       return hours;
-    } else if (timeRange === 'sixMonths' || timeRange === 'year') {
+    } else if (timeRange === 'week') {
+      // Last 7 days by exact calendar date
+      const days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+        const label = `${d.getDate()} ${monthNames[d.getMonth()]}`;
+        days.push({
+          label,
+          dateStr: d.toDateString(),
+          sum: 0,
+        });
+      }
+
+      filteredTransactions.forEach(tx => {
+        const txDateStr = new Date(tx.createdAt).toDateString();
+        const target = days.find(d => d.dateStr === txDateStr);
+        if (target) {
+          target.sum += tx.total || 0;
+        }
+      });
+
+      return days.map(d => ({ label: d.label, sum: d.sum }));
+    } else if (timeRange === 'month') {
+      // Days of current month by exact date
+      const days = [];
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      for (let day = 1; day <= daysInMonth; day++) {
+        const d = new Date(now.getFullYear(), now.getMonth(), day);
+        if (d > now) break;
+        const label = `${day} ${monthNames[d.getMonth()]}`;
+        days.push({
+          label,
+          day,
+          month: d.getMonth(),
+          year: d.getFullYear(),
+          sum: 0,
+        });
+      }
+
+      filteredTransactions.forEach(tx => {
+        const txDate = new Date(tx.createdAt);
+        const target = days.find(d => d.day === txDate.getDate() && d.month === txDate.getMonth() && d.year === txDate.getFullYear());
+        if (target) {
+          target.sum += tx.total || 0;
+        }
+      });
+
+      return days.map(d => ({ label: d.label, sum: d.sum }));
+    } else {
+      // 'sixMonths', 'year', 'all': Monthly breakdown
       const numMonths = timeRange === 'sixMonths' ? 6 : 12;
       const months = [];
-      const now = new Date();
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
       
       for (let i = numMonths - 1; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -364,23 +414,6 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       });
 
       return months.map(m => ({ label: m.label, sum: m.sum }));
-    } else {
-      const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-      const days = dayNames.map(name => ({ label: name, sum: 0 }));
-
-      filteredTransactions.forEach(tx => {
-        const dayIdx = new Date(tx.createdAt).getDay();
-        days[dayIdx].sum += tx.total || 0;
-      });
-
-      const currentDay = new Date().getDay();
-      const orderedDays = [];
-      for (let i = 6; i >= 0; i--) {
-        const idx = (currentDay - i + 7) % 7;
-        orderedDays.push(days[idx]);
-      }
-
-      return orderedDays;
     }
   }, [filteredTransactions, timeRange]);
 

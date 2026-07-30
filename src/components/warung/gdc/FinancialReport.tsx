@@ -314,7 +314,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
     return stats;
   }, [filteredTransactions]);
 
-  // Sales Trend chart data (Hourly for 'today', daily for 'week'/'month', monthly for 6m/1y/'all')
+  // Sales Trend chart data (Hourly for 'today', daily for 'week', weekly for 'month', monthly for 6m/1y/'all')
   const salesChartData = useMemo(() => {
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
     const now = new Date();
@@ -361,31 +361,25 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
 
       return days.map(d => ({ label: d.label, sum: d.sum }));
     } else if (timeRange === 'month') {
-      // Days of current month by exact date
-      const days = [];
-      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-      for (let day = 1; day <= daysInMonth; day++) {
-        const d = new Date(now.getFullYear(), now.getMonth(), day);
-        if (d > now) break;
-        const label = `${day} ${monthNames[d.getMonth()]}`;
-        days.push({
-          label,
-          day,
-          month: d.getMonth(),
-          year: d.getFullYear(),
-          sum: 0,
-        });
-      }
+      // 5 Weekly buckets for current month to keep chart ultra clean & readable
+      const weeks = [
+        { label: 'Mgg 1 (1-7)', minDay: 1, maxDay: 7, sum: 0 },
+        { label: 'Mgg 2 (8-14)', minDay: 8, maxDay: 14, sum: 0 },
+        { label: 'Mgg 3 (15-21)', minDay: 15, maxDay: 21, sum: 0 },
+        { label: 'Mgg 4 (22-28)', minDay: 22, maxDay: 28, sum: 0 },
+        { label: 'Mgg 5 (29-31)', minDay: 29, maxDay: 31, sum: 0 },
+      ];
 
       filteredTransactions.forEach(tx => {
         const txDate = new Date(tx.createdAt);
-        const target = days.find(d => d.day === txDate.getDate() && d.month === txDate.getMonth() && d.year === txDate.getFullYear());
+        const day = txDate.getDate();
+        const target = weeks.find(w => day >= w.minDay && day <= w.maxDay);
         if (target) {
           target.sum += tx.total || 0;
         }
       });
 
-      return days.map(d => ({ label: d.label, sum: d.sum }));
+      return weeks.map(w => ({ label: w.label, sum: w.sum }));
     } else {
       // 'sixMonths', 'year', 'all': Monthly breakdown
       const numMonths = timeRange === 'sixMonths' ? 6 : 12;
@@ -412,6 +406,14 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
           target.sum += tx.total || 0;
         }
       });
+
+      // Filter out leading empty months if viewing 'all' so only months with sales or recent 6 months are shown
+      if (timeRange === 'all') {
+        const firstNonZero = months.findIndex(m => m.sum > 0);
+        if (firstNonZero !== -1) {
+          return months.slice(firstNonZero).map(m => ({ label: m.label, sum: m.sum }));
+        }
+      }
 
       return months.map(m => ({ label: m.label, sum: m.sum }));
     }
@@ -989,8 +991,9 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
               </div>
 
               {salesChartData.map((data, index) => {
-                const heightPercent = maxChartValue > 0 ? (data.sum / maxChartValue) * 85 : 5;
+                const heightPercent = maxChartValue > 0 ? (data.sum / maxChartValue) * 85 : 0;
                 const isHovered = hoveredBarIndex === index;
+                const barHeightStyle = data.sum > 0 ? `${Math.max(8, heightPercent)}%` : '0%';
 
                 return (
                   <div 
@@ -1009,12 +1012,16 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
                     <div 
                       className="w-full max-w-[32px] sm:max-w-[48px] rounded-t-2xl transition-all duration-300 relative cursor-pointer overflow-hidden"
                       style={{ 
-                        height: `${Math.max(4, heightPercent)}%`,
+                        height: barHeightStyle,
                         opacity: isHovered || hoveredBarIndex === null ? 1 : 0.6
                       }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-t from-red-600/90 to-amber-400/90 dark:from-red-600 dark:to-amber-50"></div>
-                      <div className="absolute inset-x-1 top-1 bg-white/20 h-1/3 rounded-t-xl backdrop-blur-sm"></div>
+                      {data.sum > 0 && (
+                        <>
+                          <div className="absolute inset-0 bg-gradient-to-t from-red-600/90 to-amber-400/90 dark:from-red-600 dark:to-amber-50"></div>
+                          <div className="absolute inset-x-1 top-1 bg-white/20 h-1/3 rounded-t-xl backdrop-blur-sm"></div>
+                        </>
+                      )}
                     </div>
                   </div>
                 );

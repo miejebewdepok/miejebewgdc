@@ -815,18 +815,18 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
           </div>
 
           {/* Timeframe selector */}
-          <div className="flex bg-black/5 dark:bg-slate-800/50 p-1 rounded-2xl overflow-x-auto no-scrollbar shadow-inner">
+          <div className="flex bg-slate-200/70 dark:bg-slate-900/80 p-1.5 rounded-2xl overflow-x-auto no-scrollbar border border-slate-300/50 dark:border-white/10 shadow-inner">
             {(['today', 'week', 'month', 'sixMonths', 'year', 'all'] as const).map((range) => (
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
-                className={`px-3 py-1.5 text-[10px] sm:text-xs font-bold rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer ${
+                className={`px-3.5 py-1.5 text-[10px] sm:text-xs font-extrabold rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer ${
                   timeRange === range
-                    ? 'bg-white dark:bg-slate-700 text-red-600 dark:text-white shadow-sm'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5'
+                    ? 'bg-gradient-to-r from-red-600 to-amber-500 text-white shadow-md shadow-red-500/25 scale-[1.02]'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-white/5'
                 }`}
               >
-                {range === 'today' ? 'Hari Ini' : range === 'week' ? '7 Hari' : range === 'month' ? 'Bulan Ini' : range === 'sixMonths' ? '6 Bulan' : range === 'year' ? '1 Tahun' : 'Semua'}
+                {range === 'today' ? 'Hari Ini' : range === 'week' ? '7 Hari' : range === 'month' ? 'Bulan Ini' : range === 'sixMonths' ? '6 Bulan' : range === 'year' ? '1 Tahun' : 'Semua Waktu'}
               </button>
             ))}
           </div>
@@ -844,7 +844,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
           }`}
         >
           <TrendingUp className="w-3.5 h-3.5" />
-          <span>Sales</span>
+          <span>Sales & Analytics</span>
         </button>
         <button 
           onClick={() => setActiveTab('expenses')}
@@ -871,7 +871,7 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
           }`}
         >
           <Wallet className="w-3.5 h-3.5" />
-          <span>Shifts</span>
+          <span>Shifts Kasir</span>
           {shiftActive && (
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
           )}
@@ -975,51 +975,76 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
       {activeTab === 'sales' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-2 no-print animate-in fade-in slide-in-from-bottom-3 duration-300">
           {/* Sales Trend Chart */}
-          <div className="lg:col-span-8 bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200/50 dark:border-white/5 rounded-[32px] p-5 sm:p-6 flex flex-col justify-between min-h-[340px] shadow-sm">
-            <div className="mb-6">
-              <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">Grafik Volume Omset</h3>
-              <p className="text-slate-550 dark:text-slate-400 text-xs mt-1">Aktivitas penjualan di berbagai waktu</p>
+          <div className="lg:col-span-8 bg-white/70 dark:bg-slate-950/70 backdrop-blur-2xl border border-slate-200/80 dark:border-white/10 rounded-[32px] p-6 flex flex-col justify-between min-h-[360px] shadow-xl dark:shadow-[0_15px_40px_rgba(0,0,0,0.4)] relative overflow-hidden group">
+            {/* Background glowing mesh */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-red-500/10 to-amber-500/10 rounded-full blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700" />
+            
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 relative z-10">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="size-2.5 rounded-full bg-gradient-to-r from-red-500 to-amber-400 animate-pulse" />
+                  <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Grafik Volume Omset</h3>
+                </div>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">Tren omset penjualan berdasarkan periode aktif</p>
+              </div>
+
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-mono">
+                  Peak: {formatRupiah(maxChartValue)}
+                </span>
+              </div>
             </div>
 
-            <div className="flex items-end justify-between h-52 sm:h-64 pt-6 pb-2 px-1 sm:px-4 border-b border-slate-200 dark:border-white/10 relative">
+            <div className="flex items-end justify-between h-56 sm:h-64 pt-8 pb-2 px-1 sm:px-4 border-b border-slate-200/80 dark:border-white/10 relative z-10">
               {/* Guide gridlines */}
-              <div className="absolute inset-x-0 top-0 border-b border-dashed border-slate-200 dark:border-white/5 text-[9px] text-slate-400 font-mono pt-1 pl-1">
-                {formatRupiah(maxChartValue)}
+              <div className="absolute inset-x-0 top-0 border-b border-dashed border-slate-300/40 dark:border-white/10 text-[9px] text-slate-400 font-mono pt-1 pl-1 flex items-center justify-between">
+                <span>{formatRupiah(maxChartValue)}</span>
+                <span className="text-[8px] uppercase tracking-wider opacity-60">Maksimum</span>
               </div>
-              <div className="absolute inset-x-0 top-1/2 border-b border-dashed border-slate-200 dark:border-white/5 text-[9px] text-slate-400 font-mono pt-1 pl-1">
-                {formatRupiah(maxChartValue / 2)}
+              <div className="absolute inset-x-0 top-1/2 border-b border-dashed border-slate-300/30 dark:border-white/5 text-[9px] text-slate-400 font-mono pt-1 pl-1 flex items-center justify-between">
+                <span>{formatRupiah(maxChartValue / 2)}</span>
+                <span className="text-[8px] uppercase tracking-wider opacity-40">50%</span>
               </div>
 
               {salesChartData.map((data, index) => {
-                const heightPercent = maxChartValue > 0 ? (data.sum / maxChartValue) * 85 : 0;
+                const heightPercent = maxChartValue > 0 ? (data.sum / maxChartValue) * 80 : 0;
                 const isHovered = hoveredBarIndex === index;
-                const barHeightStyle = data.sum > 0 ? `${Math.max(8, heightPercent)}%` : '0%';
+                const barHeightStyle = data.sum > 0 ? `${Math.max(10, heightPercent)}%` : '0%';
 
                 return (
                   <div 
                     key={index}
-                    className="flex flex-col items-center flex-1 gap-2 group relative h-full justify-end px-0.5 sm:px-1"
+                    className="flex flex-col items-center flex-1 gap-1.5 group relative h-full justify-end px-0.5 sm:px-1 z-10"
                     onMouseEnter={() => setHoveredBarIndex(index)}
                     onMouseLeave={() => setHoveredBarIndex(null)}
                   >
+                    {/* Always visible or hover value badge on top of bar */}
+                    {data.sum > 0 && (
+                      <span className={`text-[9px] sm:text-[10px] font-black font-mono tracking-tight transition-all duration-300 text-slate-700 dark:text-amber-300 mb-1 ${isHovered ? 'scale-110 text-red-600 dark:text-white' : 'opacity-80'}`}>
+                        {data.sum >= 1000000 ? `${(data.sum / 1000000).toFixed(1)}jt` : data.sum >= 1000 ? `${Math.round(data.sum / 1000)}k` : data.sum}
+                      </span>
+                    )}
+
                     {/* Tooltip on Hover */}
-                    <div className={`absolute bottom-[calc(100%+8px)] z-30 bg-slate-800 dark:bg-slate-700 text-white text-[10px] font-bold py-1.5 px-2 rounded-xl text-center shadow-lg pointer-events-none transform font-mono whitespace-nowrap transition-all duration-200 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-                      {formatRupiah(data.sum)}
-                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 border-[3px] border-transparent border-t-slate-800 dark:border-t-slate-700"></div>
+                    <div className={`absolute bottom-[calc(100%+12px)] z-30 bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-md text-white text-[11px] font-extrabold py-1.5 px-3 rounded-2xl text-center shadow-xl border border-white/10 pointer-events-none transform font-mono whitespace-nowrap transition-all duration-200 ${isHovered ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-2 scale-95'}`}>
+                      <div className="text-[9px] text-amber-400 uppercase tracking-wider font-sans mb-0.5">{data.label}</div>
+                      <span>{formatRupiah(data.sum)}</span>
+                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 border-[4px] border-transparent border-t-slate-900/95 dark:border-t-slate-800/95"></div>
                     </div>
 
-                    {/* Visual Bar with Modern Gradient */}
+                    {/* Visual Bar with Glowing Gradient & Cap */}
                     <div 
-                      className="w-full max-w-[32px] sm:max-w-[48px] rounded-t-2xl transition-all duration-300 relative cursor-pointer overflow-hidden"
+                      className="w-full max-w-[32px] sm:max-w-[48px] rounded-t-2xl transition-all duration-300 relative cursor-pointer overflow-hidden group-hover:shadow-[0_0_20px_rgba(239,68,68,0.4)]"
                       style={{ 
                         height: barHeightStyle,
-                        opacity: isHovered || hoveredBarIndex === null ? 1 : 0.6
+                        opacity: isHovered || hoveredBarIndex === null ? 1 : 0.45
                       }}
                     >
                       {data.sum > 0 && (
                         <>
-                          <div className="absolute inset-0 bg-gradient-to-t from-red-600/90 to-amber-400/90 dark:from-red-600 dark:to-amber-50"></div>
-                          <div className="absolute inset-x-1 top-1 bg-white/20 h-1/3 rounded-t-xl backdrop-blur-sm"></div>
+                          <div className="absolute inset-0 bg-gradient-to-t from-red-600 via-rose-500 to-amber-400 dark:from-red-600 dark:via-red-500 dark:to-amber-400"></div>
+                          <div className="absolute inset-x-0 top-0 h-1.5 bg-amber-200/80 dark:bg-white/80 rounded-t-2xl shadow-[0_2px_8px_rgba(251,191,36,0.8)]"></div>
+                          <div className="absolute inset-x-1 top-2 bg-white/20 h-1/3 rounded-t-xl backdrop-blur-sm pointer-events-none"></div>
                         </>
                       )}
                     </div>
@@ -1028,10 +1053,10 @@ export default function FinancialReport({ transactions }: FinancialReportProps) 
               })}
             </div>
 
-            <div className="flex justify-between px-1 sm:px-4 text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-mono pt-3">
+            <div className="flex justify-between px-1 sm:px-4 text-[9px] sm:text-[11px] font-extrabold text-slate-600 dark:text-slate-400 font-sans pt-3 relative z-10">
               {salesChartData.map((data, index) => (
-                <span key={index} className="flex-1 text-center leading-tight">
-                  {data.label.replace(' ', '\n')}
+                <span key={index} className={`flex-1 text-center leading-tight transition-colors ${hoveredBarIndex === index ? 'text-red-600 dark:text-amber-400 font-black' : ''}`}>
+                  {data.label}
                 </span>
               ))}
             </div>
